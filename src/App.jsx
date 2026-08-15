@@ -1519,35 +1519,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
-
-  try {
-    const response = await fetch("https://fitmealai-production.up.railway.app/api/user", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: name,
-        weight: Number(weight),
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to save user");
-    }
-
-    console.log("User saved:", data);
-
-    localStorage.setItem("userId", data.userId);
-
-    alert("User data saved to MySQL successfully!");
-  } catch (error) {
-    console.error("Error saving user:", error);
-    alert("Could not save data to MySQL. Make sure backend is running.");
-  }
-
-
