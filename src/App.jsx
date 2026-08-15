@@ -305,7 +305,43 @@ function App() {
   };
 
   /* ================= SETUP ================= */
+  if (!token) {
+    return (
+      <div className={darkMode ? "setupScreen dark" : "setupScreen light"}>
+        <div className="setupCard">
+          <div className="logoBig">F</div>
+          <h1>FitMeal AI</h1>
+          <p>{authMode === "login" ? "Log in to your account." : "Create your account."}</p>
 
+          {authMode === "register" && (
+            <>
+              <input placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} />
+              <input type="number" placeholder="Weight in kg" value={weight} onChange={(e) => setWeight(e.target.value)} />
+              <input placeholder="Email" value={registerEmail} onChange={(e) => setRegisterEmail(e.target.value)} />
+              <input type="password" placeholder="Password" value={registerPassword} onChange={(e) => setRegisterPassword(e.target.value)} />
+              {authError && <p style={{ color: "red" }}>{authError}</p>}
+              <button className="mainButton" onClick={handleRegister}>Sign Up</button>
+              <p className="muted">Already have an account?{" "}
+                <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => { setAuthMode("login"); setAuthError(""); }}>Log In</span>
+              </p>
+            </>
+          )}
+
+          {authMode === "login" && (
+            <>
+              <input placeholder="Email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
+              <input type="password" placeholder="Password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
+              {authError && <p style={{ color: "red" }}>{authError}</p>}
+              <button className="mainButton" onClick={handleLogin}>Log In</button>
+              <p className="muted">New here?{" "}
+                <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => { setAuthMode("register"); setAuthError(""); }}>Sign Up</span>
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
   if (!setup) {
     return (
       <div
