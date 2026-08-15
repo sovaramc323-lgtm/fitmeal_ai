@@ -245,33 +245,6 @@ function App() {
     setPage("dashboard");
   };
 
-    try {
-      const response = await fetch("https://fitmealai-production.up.railway.app/api/user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: name,
-          weight: Number(weight),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to save user");
-      }
-
-      localStorage.setItem("userId", data.userId);
-      console.log("User saved:", data);
-    } catch (error) {
-      console.error("Error saving user:", error);
-      alert("Could not save data to MySQL. Make sure backend is running.");
-      return;
-    }
-
-    setSetup(true);
-    setPage("dashboard");
-  };
 
   const enableNotification = async () => {
     if (!("Notification" in window)) {
@@ -1545,15 +1518,9 @@ function App() {
 
     </div>
   );
-
+}
 
 export default App;
-
-const saveUser = async () => {
-  if (!name || !weight) {
-    alert("Please enter your name and weight");
-    return;
-  }
 
   try {
     const response = await fetch("https://fitmealai-production.up.railway.app/api/user", {
@@ -1582,5 +1549,5 @@ const saveUser = async () => {
     console.error("Error saving user:", error);
     alert("Could not save data to MySQL. Make sure backend is running.");
   }
-};
+
 
