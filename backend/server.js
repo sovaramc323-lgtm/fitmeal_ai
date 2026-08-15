@@ -52,5 +52,5 @@ app.get("/api/users", (req, res) => {
 });
 
 app.listen(5000, () => {
-  console.log("FitMeal AI Backend running at http://localhost:5000");
+  console.log("FitMeal AI Backend running at https://fitmealai-production.up.railway.app/api/user");
 });

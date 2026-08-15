@@ -43,6 +43,7 @@ const createSplit = () =>
     day: index + 1,
     workouts: [],
   }));
+  const API_URL = "https://fitmealai-production.up.railway.app";
 
 function App() {
   const [page, setPage] = useState("dashboard");
@@ -60,6 +61,59 @@ function App() {
 
   // DARK MODE BY DEFAULT
   const [darkMode, setDarkMode] = useState(true);
+  const [token, setToken] = useState(localStorage.getItem("token") || "");
+  const [authMode, setAuthMode] = useState("login");
+  const [authError, setAuthError] = useState("");
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+  const handleLogin = async () => {
+    setAuthError("");
+    try {
+      const response = await fetch(`${API_URL}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Login failed");
+      localStorage.setItem("token", data.token);
+      setToken(data.token);
+      setName(data.name);
+      setWeight(data.weight);
+      setSetup(true);
+    } catch (err) {
+      setAuthError(err.message);
+    }
+  };
+
+  const handleRegister = async () => {
+    setAuthError("");
+    if (!name || !registerEmail || !registerPassword || !weight) {
+      setAuthError("All fields are required.");
+      return;
+    }
+    try {
+      const response = await fetch(`${API_URL}/api/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email: registerEmail, password: registerPassword, weight: Number(weight) }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Registration failed");
+      localStorage.setItem("token", data.token);
+      setToken(data.token);
+    } catch (err) {
+      setAuthError(err.message);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setToken("");
+    setSetup(false);
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem("fitmealApp");
@@ -182,11 +236,14 @@ function App() {
     setMeals(meals.filter((item) => item.id !== id));
   };
 
-  const saveSetup = async () => {
+  const saveSetup = () => {
     if (!name || !weight) {
       alert("Please enter your name and weight.");
       return;
     }
+    setSetup(true);
+    setPage("dashboard");
+  };
 
     try {
       const response = await fetch("https://fitmealai-production.up.railway.app/api/user", {
@@ -1452,7 +1509,7 @@ function App() {
 
     </div>
   );
-}
+
 
 export default App;
 
