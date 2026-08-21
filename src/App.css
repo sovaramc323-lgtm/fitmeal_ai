@@ -978,3 +978,63 @@ button {
     flex-direction: column;
   }
 }
+/* =====================================================
+   EXERCISE LIBRARY
+===================================================== */
+
+.exerciseGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.exerciseCard {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.exerciseImage {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+  border-bottom: 1px solid var(--border);
+}
+
+.exerciseInfo {
+  padding: 18px;
+}
+
+.exerciseMuscle {
+  color: var(--red);
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.exerciseInfo h3 {
+  color: var(--text);
+  margin: 8px 0 10px;
+}
+
+.exerciseInfo p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (max-width: 1000px) {
+  .exerciseGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 750px) {
+  .exerciseGrid {
+    grid-template-columns: 1fr;
+  }
+}

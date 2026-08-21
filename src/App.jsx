@@ -37,6 +37,56 @@ const FOOD = {
   bread: { calories: 265, protein: 9, carbs: 49 },
   curd: { calories: 61, protein: 3.5, carbs: 4.7 },
 };
+const EXERCISES = [
+  {
+    name: "Bench Press",
+    muscle: "Chest",
+    image: "https://source.unsplash.com/400x300/?bench-press,gym",
+    instructions: "Lie flat on the bench, feet planted on the floor. Grip the bar slightly wider than shoulder-width. Lower it to your mid-chest, then press up until arms are fully extended.",
+  },
+  {
+    name: "Lat Pulldown",
+    muscle: "Back",
+    image: "https://source.unsplash.com/400x300/?lat-pulldown,gym",
+    instructions: "Sit with thighs locked under the pad. Grip the bar wide. Pull it down to your upper chest while squeezing your shoulder blades together, then control it back up.",
+  },
+  {
+    name: "Shoulder Press Machine",
+    muscle: "Shoulders",
+    image: "https://source.unsplash.com/400x300/?shoulder-press,gym",
+    instructions: "Sit upright with back against the pad. Press the handles straight up until arms are extended, then lower slowly to shoulder height.",
+  },
+  {
+    name: "Preacher Curl",
+    muscle: "Biceps",
+    image: "https://source.unsplash.com/400x300/?bicep-curl,gym",
+    instructions: "Rest your arms on the angled pad. Curl the bar up towards your shoulders, squeezing at the top, then lower slowly without locking out.",
+  },
+  {
+    name: "Tricep Pushdown",
+    muscle: "Triceps",
+    image: "https://source.unsplash.com/400x300/?tricep,gym",
+    instructions: "Stand facing the cable machine, elbows tucked to your sides. Push the bar down until arms are straight, then return slowly to start.",
+  },
+  {
+    name: "Leg Press",
+    muscle: "Legs",
+    image: "https://source.unsplash.com/400x300/?leg-press,gym",
+    instructions: "Sit in the machine, feet shoulder-width on the platform. Lower the platform until knees reach 90°, then press back up without locking your knees.",
+  },
+  {
+    name: "Cable Crunch",
+    muscle: "Abs",
+    image: "https://source.unsplash.com/400x300/?abs,gym",
+    instructions: "Kneel below the cable, rope behind your head. Crunch down, bringing elbows toward your knees, then return slowly with control.",
+  },
+  {
+    name: "Treadmill",
+    muscle: "Cardio",
+    image: "https://source.unsplash.com/400x300/?treadmill,gym",
+    instructions: "Start at a light walking pace to warm up, then increase speed gradually. Keep your posture upright and avoid holding the side rails.",
+  },
+];
 
 const createSplit = () =>
   DAYS.map((_, index) => ({
@@ -507,20 +557,12 @@ function App() {
             Progress
           </button>
 
-          <button
-            className={
-              page === "profile"
-                ? "selected"
-                : ""
-            }
-            onClick={() =>
-              setPage("profile")
-            }
-          >
-            <span>○</span>
-            Profile
+                   <button className={page === "profile" ? "selected" : ""} onClick={() => setPage("profile")}>
+            <span>○</span> Profile
           </button>
-
+          <button className={page === "exercises" ? "selected" : ""} onClick={() => setPage("exercises")}>
+            <span>▲</span> Exercises
+          </button>
         </nav>
 
         <div className="sidebarBottom">
@@ -1511,6 +1553,28 @@ function App() {
 
             </section>
 
+          </>
+        )}
+                {page === "exercises" && (
+          <>
+            <section className="pageIntro">
+              <p>EXERCISE LIBRARY</p>
+              <h2>Machines & Form Guide</h2>
+              <span>See how to use each machine correctly, with proper form tips.</span>
+            </section>
+
+            <div className="exerciseGrid">
+              {EXERCISES.map((ex) => (
+                <div className="exerciseCard" key={ex.name}>
+                  <img src={ex.image} alt={ex.name} className="exerciseImage" />
+                  <div className="exerciseInfo">
+                    <span className="exerciseMuscle">{ex.muscle.toUpperCase()}</span>
+                    <h3>{ex.name}</h3>
+                    <p>{ex.instructions}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </>
         )}
 
