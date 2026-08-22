@@ -996,13 +996,66 @@ button {
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
 }
 
-.exerciseImage {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  display: block;
+.exerciseFigureWrap {
+  background: var(--card2);
   border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+  padding: 15px 0;
 }
+
+.stickFigure {
+  width: 100px;
+  height: 130px;
+}
+
+.stickFigure line { stroke: var(--red); stroke-width: 6; stroke-linecap: round; }
+.stickFigure .sfHead { fill: var(--red); }
+.stickFigure .sfSpine, .stickFigure .sfLegL, .stickFigure .sfLegR { stroke: var(--muted); }
+.sfArmLGroup, .sfArmRGroup { transform-origin: 50px 38px; }
+
+.motion-press .sfArmLGroup { animation: pressL 1.3s ease-in-out infinite; }
+.motion-press .sfArmRGroup { animation: pressR 1.3s ease-in-out infinite; }
+@keyframes pressL { 0%,100% { transform: rotate(35deg);} 50% { transform: rotate(-15deg);} }
+@keyframes pressR { 0%,100% { transform: rotate(-35deg);} 50% { transform: rotate(15deg);} }
+
+.motion-fly .sfArmLGroup, .motion-reverseFly .sfArmLGroup { animation: flyL 1.4s ease-in-out infinite; }
+.motion-fly .sfArmRGroup, .motion-reverseFly .sfArmRGroup { animation: flyR 1.4s ease-in-out infinite; }
+@keyframes flyL { 0%,100% { transform: rotate(70deg);} 50% { transform: rotate(10deg);} }
+@keyframes flyR { 0%,100% { transform: rotate(-70deg);} 50% { transform: rotate(-10deg);} }
+
+.motion-raise .sfArmLGroup { animation: raiseL 1.3s ease-in-out infinite; }
+.motion-raise .sfArmRGroup { animation: raiseR 1.3s ease-in-out infinite; }
+@keyframes raiseL { 0%,100% { transform: rotate(15deg);} 50% { transform: rotate(80deg);} }
+@keyframes raiseR { 0%,100% { transform: rotate(-15deg);} 50% { transform: rotate(-80deg);} }
+
+.motion-pulldown .sfArmLGroup, .motion-row .sfArmLGroup { animation: pullL 1.3s ease-in-out infinite; }
+.motion-pulldown .sfArmRGroup, .motion-row .sfArmRGroup { animation: pullR 1.3s ease-in-out infinite; }
+@keyframes pullL { 0%,100% { transform: rotate(80deg);} 50% { transform: rotate(20deg);} }
+@keyframes pullR { 0%,100% { transform: rotate(-80deg);} 50% { transform: rotate(-20deg);} }
+
+.motion-curl .sfArmLGroup, .motion-pushdown .sfArmLGroup { animation: curlL 1.2s ease-in-out infinite; }
+.motion-curl .sfArmRGroup, .motion-pushdown .sfArmRGroup { animation: curlR 1.2s ease-in-out infinite; }
+@keyframes curlL { 0%,100% { transform: rotate(50deg);} 50% { transform: rotate(0deg);} }
+@keyframes curlR { 0%,100% { transform: rotate(-50deg);} 50% { transform: rotate(0deg);} }
+
+.motion-legPress .sfLegL, .motion-extend .sfLegL, .motion-legCurl .sfLegL { animation: legL 1.3s ease-in-out infinite; transform-origin: 50px 80px; }
+.motion-legPress .sfLegR, .motion-extend .sfLegR, .motion-legCurl .sfLegR { animation: legR 1.3s ease-in-out infinite; transform-origin: 50px 80px; }
+@keyframes legL { 0%,100% { transform: rotate(20deg);} 50% { transform: rotate(-10deg);} }
+@keyframes legR { 0%,100% { transform: rotate(-20deg);} 50% { transform: rotate(10deg);} }
+
+.motion-calf .sfSpine, .motion-calf .sfHead, .motion-calf .sfArmLGroup, .motion-calf .sfArmRGroup {
+  animation: calfBob 1.1s ease-in-out infinite;
+}
+@keyframes calfBob { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-6px);} }
+
+.motion-crunch .sfSpine { animation: crunch 1.2s ease-in-out infinite; transform-origin: 50px 80px; }
+@keyframes crunch { 0%,100% { transform: rotate(0deg);} 50% { transform: rotate(15deg);} }
+
+.motion-walk .sfLegL { animation: walkL 0.8s ease-in-out infinite; transform-origin: 50px 80px; }
+.motion-walk .sfLegR { animation: walkR 0.8s ease-in-out infinite; transform-origin: 50px 80px; }
+@keyframes walkL { 0%,100% { transform: rotate(20deg);} 50% { transform: rotate(-20deg);} }
+@keyframes walkR { 0%,100% { transform: rotate(-20deg);} 50% { transform: rotate(20deg);} }
 
 .exerciseInfo {
   padding: 18px;

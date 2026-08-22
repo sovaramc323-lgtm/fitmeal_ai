@@ -37,56 +37,51 @@ const FOOD = {
   bread: { calories: 265, protein: 9, carbs: 49 },
   curd: { calories: 61, protein: 3.5, carbs: 4.7 },
 };
-const EXERCISES = [
-  {
-    name: "Bench Press",
-    muscle: "Chest",
-    image: "https://source.unsplash.com/400x300/?bench-press,gym",
-    instructions: "Lie flat on the bench, feet planted on the floor. Grip the bar slightly wider than shoulder-width. Lower it to your mid-chest, then press up until arms are fully extended.",
-  },
-  {
-    name: "Lat Pulldown",
-    muscle: "Back",
-    image: "https://source.unsplash.com/400x300/?lat-pulldown,gym",
-    instructions: "Sit with thighs locked under the pad. Grip the bar wide. Pull it down to your upper chest while squeezing your shoulder blades together, then control it back up.",
-  },
-  {
-    name: "Shoulder Press Machine",
-    muscle: "Shoulders",
-    image: "https://source.unsplash.com/400x300/?shoulder-press,gym",
-    instructions: "Sit upright with back against the pad. Press the handles straight up until arms are extended, then lower slowly to shoulder height.",
-  },
-  {
-    name: "Preacher Curl",
-    muscle: "Biceps",
-    image: "https://source.unsplash.com/400x300/?bicep-curl,gym",
-    instructions: "Rest your arms on the angled pad. Curl the bar up towards your shoulders, squeezing at the top, then lower slowly without locking out.",
-  },
-  {
-    name: "Tricep Pushdown",
-    muscle: "Triceps",
-    image: "https://source.unsplash.com/400x300/?tricep,gym",
-    instructions: "Stand facing the cable machine, elbows tucked to your sides. Push the bar down until arms are straight, then return slowly to start.",
-  },
-  {
-    name: "Leg Press",
-    muscle: "Legs",
-    image: "https://source.unsplash.com/400x300/?leg-press,gym",
-    instructions: "Sit in the machine, feet shoulder-width on the platform. Lower the platform until knees reach 90°, then press back up without locking your knees.",
-  },
-  {
-    name: "Cable Crunch",
-    muscle: "Abs",
-    image: "https://source.unsplash.com/400x300/?abs,gym",
-    instructions: "Kneel below the cable, rope behind your head. Crunch down, bringing elbows toward your knees, then return slowly with control.",
-  },
-  {
-    name: "Treadmill",
-    muscle: "Cardio",
-    image: "https://source.unsplash.com/400x300/?treadmill,gym",
-    instructions: "Start at a light walking pace to warm up, then increase speed gradually. Keep your posture upright and avoid holding the side rails.",
-  },
+const EXERCISE_CATEGORIES = [
+  { name: "Chest", exercises: [
+    { name: "Cable Flyes", motion: "fly", instructions: "Stand between the cables, slight forward lean. Bring handles together in front of your chest in a wide arc, then return slowly with control." },
+    { name: "Chest Press", motion: "press", instructions: "Sit back against the pad, grip handles at chest height. Press forward until arms extend, then return slowly without locking elbows." },
+    { name: "Machine Fly", motion: "fly", instructions: "Sit tall, elbows slightly bent on the pads. Bring arms together in front of your chest, squeeze, then open back out slowly." },
+    { name: "Smith Bench", motion: "press", instructions: "Lie on the bench under the bar. Unrack, lower to mid-chest, then press up until arms are extended." },
+  ]},
+  { name: "Shoulders", exercises: [
+    { name: "Lateral Raises", motion: "raise", instructions: "Hold handles at your sides. Raise arms out to shoulder height with a slight elbow bend, then lower slowly." },
+    { name: "Shoulder Press", motion: "press", instructions: "Sit upright, handles at shoulder height. Press straight up until arms extend, then lower back to start." },
+    { name: "Reverse Pec Deck", motion: "reverseFly", instructions: "Face the pad, grip handles in front of you. Pull arms back and out, squeezing shoulder blades, then return slowly." },
+    { name: "Smith Press", motion: "press", instructions: "Sit under the bar, grip slightly wider than shoulders. Press up until arms extend, then lower to shoulder height." },
+  ]},
+  { name: "Back", exercises: [
+    { name: "Lat Pulldown", motion: "pulldown", instructions: "Sit with thighs locked under the pad. Pull the bar down to your upper chest, squeezing your shoulder blades, then control it back up." },
+    { name: "Seated Row", motion: "row", instructions: "Sit with knees slightly bent, grip the handle. Pull toward your torso, elbows close, then extend arms back out." },
+    { name: "Face Pulls", motion: "row", instructions: "Set the cable at face height. Pull the rope toward your face, elbows high, then return slowly." },
+    { name: "Close Grip Pulldown", motion: "pulldown", instructions: "Use a close, narrow grip. Pull the bar down to your chest, then extend back up under control." },
+  ]},
+  { name: "Legs", exercises: [
+    { name: "Leg Press", motion: "legPress", instructions: "Sit in the machine, feet shoulder-width on the platform. Lower until knees reach 90°, then press back up without locking knees." },
+    { name: "Quad Extensions", motion: "extend", instructions: "Sit with shin pad above your ankles. Extend legs until straight, squeeze, then lower slowly." },
+    { name: "Hammy Curls", motion: "legCurl", instructions: "Lie face down, pad behind your ankles. Curl legs up toward your glutes, then lower with control." },
+    { name: "Smith Calf Raises", motion: "calf", instructions: "Stand with the bar on your shoulders, balls of feet on a raised platform. Rise onto your toes, then lower slowly below level." },
+  ]},
+  { name: "Arms & Abs", exercises: [
+    { name: "Preacher Curl", motion: "curl", instructions: "Rest your arms on the angled pad. Curl the bar up towards your shoulders, squeezing at the top, then lower slowly without locking out." },
+    { name: "Tricep Pushdown", motion: "pushdown", instructions: "Stand facing the cable machine, elbows tucked to your sides. Push the bar down until arms are straight, then return slowly to start." },
+    { name: "Cable Crunch", motion: "crunch", instructions: "Kneel below the cable, rope behind your head. Crunch down, bringing elbows toward your knees, then return slowly with control." },
+    { name: "Treadmill", motion: "walk", instructions: "Start at a light walking pace to warm up, then increase speed gradually. Keep your posture upright." },
+  ]},
 ];
+
+function StickFigure({ motion }) {
+  return (
+    <svg viewBox="0 0 100 140" className={`stickFigure motion-${motion}`}>
+      <line className="sfLegL" x1="50" y1="80" x2="35" y2="125" />
+      <line className="sfLegR" x1="50" y1="80" x2="65" y2="125" />
+      <line className="sfSpine" x1="50" y1="30" x2="50" y2="80" />
+      <g className="sfArmLGroup"><line className="sfArmL" x1="50" y1="38" x2="25" y2="55" /></g>
+      <g className="sfArmRGroup"><line className="sfArmR" x1="50" y1="38" x2="75" y2="55" /></g>
+      <circle className="sfHead" cx="50" cy="18" r="11" />
+    </svg>
+  );
+}
 
 const createSplit = () =>
   DAYS.map((_, index) => ({
@@ -557,11 +552,11 @@ function App() {
             Progress
           </button>
 
-                   <button className={page === "profile" ? "selected" : ""} onClick={() => setPage("profile")}>
-            <span>○</span> Profile
-          </button>
-          <button className={page === "exercises" ? "selected" : ""} onClick={() => setPage("exercises")}>
+                          <button className={page === "exercises" ? "selected" : ""} onClick={() => setPage("exercises")}>
             <span>▲</span> Exercises
+          </button>
+          <button className={page === "profile" ? "selected" : ""} onClick={() => setPage("profile")}>
+            <span>○</span> Profile
           </button>
         </nav>
 
@@ -1560,24 +1555,30 @@ function App() {
             <section className="pageIntro">
               <p>EXERCISE LIBRARY</p>
               <h2>Machines & Form Guide</h2>
-              <span>See how to use each machine correctly, with proper form tips.</span>
+              <span>See how to use each machine correctly, with an animated form guide.</span>
             </section>
 
-            <div className="exerciseGrid">
-              {EXERCISES.map((ex) => (
-                <div className="exerciseCard" key={ex.name}>
-                  <img src={ex.image} alt={ex.name} className="exerciseImage" />
-                  <div className="exerciseInfo">
-                    <span className="exerciseMuscle">{ex.muscle.toUpperCase()}</span>
-                    <h3>{ex.name}</h3>
-                    <p>{ex.instructions}</p>
-                  </div>
+            {EXERCISE_CATEGORIES.map((cat) => (
+              <section className="panel" key={cat.name}>
+                <h2>{cat.name}</h2>
+                <div className="exerciseGrid">
+                  {cat.exercises.map((ex) => (
+                    <div className="exerciseCard" key={ex.name}>
+                      <div className="exerciseFigureWrap">
+                        <StickFigure motion={ex.motion} />
+                      </div>
+                      <div className="exerciseInfo">
+                        <span className="exerciseMuscle">{cat.name.toUpperCase()}</span>
+                        <h3>{ex.name}</h3>
+                        <p>{ex.instructions}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </section>
+            ))}
           </>
         )}
-
       </main>
 
     </div>
