@@ -70,15 +70,74 @@ const EXERCISE_CATEGORIES = [
   ]},
 ];
 
+const MOTION_CONFIG = {
+  press:      { armL: [35, -15], armR: [-35, 15], dur: 1.3 },
+  fly:        { armL: [70, 10],  armR: [-70, -10], dur: 1.4 },
+  reverseFly: { armL: [70, 10],  armR: [-70, -10], dur: 1.4 },
+  raise:      { armL: [15, 80],  armR: [-15, -80], dur: 1.3 },
+  pulldown:   { armL: [80, 20],  armR: [-80, -20], dur: 1.3 },
+  row:        { armL: [80, 20],  armR: [-80, -20], dur: 1.3 },
+  curl:       { armL: [50, 0],   armR: [-50, 0],   dur: 1.2 },
+  pushdown:   { armL: [50, 0],   armR: [-50, 0],   dur: 1.2 },
+  legPress:   { legL: [20, -10], legR: [-20, 10],  dur: 1.3 },
+  extend:     { legL: [20, -10], legR: [-20, 10],  dur: 1.3 },
+  legCurl:    { legL: [20, -10], legR: [-20, 10],  dur: 1.3 },
+  calf:       { bob: true, dur: 1.1 },
+  crunch:     { spine: [0, 15], dur: 1.2 },
+  walk:       { legL: [20, -20], legR: [-20, 20], dur: 0.8 },
+};
+
 function StickFigure({ motion }) {
+  const cfg = MOTION_CONFIG[motion] || {};
+  const dur = `${cfg.dur || 1.3}s`;
+  const armVals = (r) => `${r[0]} 50 38; ${r[1]} 50 38; ${r[0]} 50 38`;
+  const legVals = (r) => `${r[0]} 50 80; ${r[1]} 50 80; ${r[0]} 50 80`;
+
   return (
-    <svg viewBox="0 0 100 140" className={`stickFigure motion-${motion}`}>
-      <line className="sfLegL" x1="50" y1="80" x2="35" y2="125" />
-      <line className="sfLegR" x1="50" y1="80" x2="65" y2="125" />
-      <line className="sfSpine" x1="50" y1="30" x2="50" y2="80" />
-      <g className="sfArmLGroup"><line className="sfArmL" x1="50" y1="38" x2="25" y2="55" /></g>
-      <g className="sfArmRGroup"><line className="sfArmR" x1="50" y1="38" x2="75" y2="55" /></g>
-      <circle className="sfHead" cx="50" cy="18" r="11" />
+    <svg viewBox="0 0 100 140" className="stickFigure">
+      <g>
+        {cfg.bob && (
+          <animateTransform attributeName="transform" type="translate"
+            values="0 0;0 -6;0 0" dur={dur} repeatCount="indefinite" />
+        )}
+        <g>
+          {cfg.spine && (
+            <animateTransform attributeName="transform" type="rotate"
+              values={`${cfg.spine[0]} 50 80;${cfg.spine[1]} 50 80;${cfg.spine[0]} 50 80`}
+              dur={dur} repeatCount="indefinite" />
+          )}
+          <line className="sfSpine" x1="50" y1="30" x2="50" y2="80" />
+        </g>
+        <g>
+          {cfg.legL && (
+            <animateTransform attributeName="transform" type="rotate"
+              values={legVals(cfg.legL)} dur={dur} repeatCount="indefinite" />
+          )}
+          <line className="sfLegL" x1="50" y1="80" x2="35" y2="125" />
+        </g>
+        <g>
+          {cfg.legR && (
+            <animateTransform attributeName="transform" type="rotate"
+              values={legVals(cfg.legR)} dur={dur} repeatCount="indefinite" />
+          )}
+          <line className="sfLegR" x1="50" y1="80" x2="65" y2="125" />
+        </g>
+        <g>
+          {cfg.armL && (
+            <animateTransform attributeName="transform" type="rotate"
+              values={armVals(cfg.armL)} dur={dur} repeatCount="indefinite" />
+          )}
+          <line className="sfArmL" x1="50" y1="38" x2="25" y2="55" />
+        </g>
+        <g>
+          {cfg.armR && (
+            <animateTransform attributeName="transform" type="rotate"
+              values={armVals(cfg.armR)} dur={dur} repeatCount="indefinite" />
+          )}
+          <line className="sfArmR" x1="50" y1="38" x2="75" y2="55" />
+        </g>
+        <circle className="sfHead" cx="50" cy="18" r="11" />
+      </g>
     </svg>
   );
 }
@@ -597,19 +656,21 @@ function App() {
               FITNESS DASHBOARD
             </p>
 
-            <h1>
-              {page === "dashboard"
-                ? `Welcome back, ${name}`
-                : page === "workout"
-                ? "Workout"
-                : page === "nutrition"
-                ? "Nutrition"
-                : page === "planner"
-                ? "Meal Planner"
-                : page === "progress"
-                ? "Progress"
-                : "Profile"}
-            </h1>
+           <h1>
+  {page === "dashboard"
+    ? `Welcome back, ${name}`
+    : page === "workout"
+    ? "Workout"
+    : page === "nutrition"
+    ? "Nutrition"
+    : page === "planner"
+    ? "Meal Planner"
+    : page === "progress"
+    ? "Progress"
+    : page === "exercises"
+    ? "Exercises"
+    : "Profile"}
+</h1>
 
           </div>
 
