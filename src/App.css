@@ -1076,3 +1076,70 @@ button {
     grid-template-columns: 1fr;
   }
 }
+.exerciseCard {
+  cursor: pointer;
+}
+
+.tapHint {
+  display: block;
+  color: var(--red);
+  font-size: 12px;
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+.exerciseCardOpen {
+  grid-column: 1 / -1;
+}
+
+.exerciseSteps {
+  border-top: 1px solid var(--border);
+  padding: 15px 18px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.stepItem {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.stepArtWrap {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+  background: var(--bg);
+}
+
+.stepArtWrap .exerciseArt {
+  width: 70px;
+  height: 90px;
+}
+
+.stepText {
+  padding: 10px 12px;
+}
+
+.stepNumber {
+  display: block;
+  color: var(--red);
+  font-size: 11px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.stepText p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+@media (max-width: 750px) {
+  .exerciseSteps {
+    grid-template-columns: 1fr;
+  }
+}

@@ -39,37 +39,116 @@ const FOOD = {
 };
 const EXERCISE_CATEGORIES = [
   { name: "Chest", exercises: [
-    { name: "Cable Flyes", motion: "fly", instructions: "Stand between the cables, slight forward lean. Bring handles together in front of your chest in a wide arc, then return slowly with control." },
-    { name: "Chest Press", motion: "press", instructions: "Sit back against the pad, grip handles at chest height. Press forward until arms extend, then return slowly without locking elbows." },
-    { name: "Machine Fly", motion: "fly", instructions: "Sit tall, elbows slightly bent on the pads. Bring arms together in front of your chest, squeeze, then open back out slowly." },
-    { name: "Smith Bench", motion: "press", instructions: "Lie on the bench under the bar. Unrack, lower to mid-chest, then press up until arms are extended." },
+    { name: "Cable Flyes", motion: "fly", steps: [
+      { label: "Setup", text: "Stand between the cables, slight forward lean." },
+      { label: "Execution", text: "Bring handles together in front of your chest in a wide arc." },
+      { label: "Return", text: "Return slowly to the start position with control." },
+    ]},
+    { name: "Chest Press", motion: "press", steps: [
+      { label: "Setup", text: "Sit back against the pad, grip handles at chest height." },
+      { label: "Execution", text: "Press forward until arms extend." },
+      { label: "Return", text: "Return slowly without locking elbows." },
+    ]},
+    { name: "Machine Fly", motion: "fly", steps: [
+      { label: "Setup", text: "Sit tall, elbows slightly bent on the pads." },
+      { label: "Execution", text: "Bring arms together in front of your chest, squeeze." },
+      { label: "Return", text: "Open back out slowly." },
+    ]},
+    { name: "Smith Bench", motion: "press", steps: [
+      { label: "Setup", text: "Lie on the bench under the bar and unrack it." },
+      { label: "Execution", text: "Lower to mid-chest." },
+      { label: "Return", text: "Press up until arms are extended." },
+    ]},
   ]},
   { name: "Shoulders", exercises: [
-    { name: "Lateral Raises", motion: "raise", instructions: "Hold handles at your sides. Raise arms out to shoulder height with a slight elbow bend, then lower slowly." },
-    { name: "Shoulder Press", motion: "press", instructions: "Sit upright, handles at shoulder height. Press straight up until arms extend, then lower back to start." },
-    { name: "Reverse Pec Deck", motion: "reverseFly", instructions: "Face the pad, grip handles in front of you. Pull arms back and out, squeezing shoulder blades, then return slowly." },
-    { name: "Smith Press", motion: "press", instructions: "Sit under the bar, grip slightly wider than shoulders. Press up until arms extend, then lower to shoulder height." },
+    { name: "Lateral Raises", motion: "raise", steps: [
+      { label: "Setup", text: "Hold handles at your sides." },
+      { label: "Execution", text: "Raise arms out to shoulder height with a slight elbow bend." },
+      { label: "Return", text: "Lower slowly back to your sides." },
+    ]},
+    { name: "Shoulder Press", motion: "press", steps: [
+      { label: "Setup", text: "Sit upright, handles at shoulder height." },
+      { label: "Execution", text: "Press straight up until arms extend." },
+      { label: "Return", text: "Lower back to start." },
+    ]},
+    { name: "Reverse Pec Deck", motion: "reverseFly", steps: [
+      { label: "Setup", text: "Face the pad, grip handles in front of you." },
+      { label: "Execution", text: "Pull arms back and out, squeezing shoulder blades." },
+      { label: "Return", text: "Return slowly to start." },
+    ]},
+    { name: "Smith Press", motion: "press", steps: [
+      { label: "Setup", text: "Sit under the bar, grip slightly wider than shoulders." },
+      { label: "Execution", text: "Press up until arms extend." },
+      { label: "Return", text: "Lower to shoulder height." },
+    ]},
   ]},
   { name: "Back", exercises: [
-    { name: "Lat Pulldown", motion: "pulldown", instructions: "Sit with thighs locked under the pad. Pull the bar down to your upper chest, squeezing your shoulder blades, then control it back up." },
-    { name: "Seated Row", motion: "row", instructions: "Sit with knees slightly bent, grip the handle. Pull toward your torso, elbows close, then extend arms back out." },
-    { name: "Face Pulls", motion: "row", instructions: "Set the cable at face height. Pull the rope toward your face, elbows high, then return slowly." },
-    { name: "Close Grip Pulldown", motion: "pulldown", instructions: "Use a close, narrow grip. Pull the bar down to your chest, then extend back up under control." },
+    { name: "Lat Pulldown", motion: "pulldown", steps: [
+      { label: "Setup", text: "Sit with thighs locked under the pad." },
+      { label: "Execution", text: "Pull the bar down to your upper chest, squeezing your shoulder blades." },
+      { label: "Return", text: "Control it back up." },
+    ]},
+    { name: "Seated Row", motion: "row", steps: [
+      { label: "Setup", text: "Sit with knees slightly bent, grip the handle." },
+      { label: "Execution", text: "Pull toward your torso, elbows close." },
+      { label: "Return", text: "Extend arms back out." },
+    ]},
+    { name: "Face Pulls", motion: "row", steps: [
+      { label: "Setup", text: "Set the cable at face height." },
+      { label: "Execution", text: "Pull the rope toward your face, elbows high." },
+      { label: "Return", text: "Return slowly." },
+    ]},
+    { name: "Close Grip Pulldown", motion: "pulldown", steps: [
+      { label: "Setup", text: "Use a close, narrow grip on the bar." },
+      { label: "Execution", text: "Pull the bar down to your chest." },
+      { label: "Return", text: "Extend back up under control." },
+    ]},
   ]},
   { name: "Legs", exercises: [
-    { name: "Leg Press", motion: "legPress", instructions: "Sit in the machine, feet shoulder-width on the platform. Lower until knees reach 90°, then press back up without locking knees." },
-    { name: "Quad Extensions", motion: "extend", instructions: "Sit with shin pad above your ankles. Extend legs until straight, squeeze, then lower slowly." },
-    { name: "Hammy Curls", motion: "legCurl", instructions: "Lie face down, pad behind your ankles. Curl legs up toward your glutes, then lower with control." },
-    { name: "Smith Calf Raises", motion: "calf", instructions: "Stand with the bar on your shoulders, balls of feet on a raised platform. Rise onto your toes, then lower slowly below level." },
+    { name: "Leg Press", motion: "legPress", steps: [
+      { label: "Setup", text: "Sit in the machine, feet shoulder-width on the platform." },
+      { label: "Execution", text: "Lower until knees reach 90°." },
+      { label: "Return", text: "Press back up without locking knees." },
+    ]},
+    { name: "Quad Extensions", motion: "extend", steps: [
+      { label: "Setup", text: "Sit with shin pad above your ankles." },
+      { label: "Execution", text: "Extend legs until straight, squeeze." },
+      { label: "Return", text: "Lower slowly." },
+    ]},
+    { name: "Hammy Curls", motion: "legCurl", steps: [
+      { label: "Setup", text: "Lie face down, pad behind your ankles." },
+      { label: "Execution", text: "Curl legs up toward your glutes." },
+      { label: "Return", text: "Lower with control." },
+    ]},
+    { name: "Smith Calf Raises", motion: "calf", steps: [
+      { label: "Setup", text: "Stand with the bar on your shoulders, balls of feet on a raised platform." },
+      { label: "Execution", text: "Rise onto your toes." },
+      { label: "Return", text: "Lower slowly below level." },
+    ]},
   ]},
   { name: "Arms & Abs", exercises: [
-    { name: "Preacher Curl", motion: "curl", instructions: "Rest your arms on the angled pad. Curl the bar up towards your shoulders, squeezing at the top, then lower slowly without locking out." },
-    { name: "Tricep Pushdown", motion: "pushdown", instructions: "Stand facing the cable machine, elbows tucked to your sides. Push the bar down until arms are straight, then return slowly to start." },
-    { name: "Cable Crunch", motion: "crunch", instructions: "Kneel below the cable, rope behind your head. Crunch down, bringing elbows toward your knees, then return slowly with control." },
-    { name: "Treadmill", motion: "walk", instructions: "Start at a light walking pace to warm up, then increase speed gradually. Keep your posture upright." },
+    { name: "Preacher Curl", motion: "curl", steps: [
+      { label: "Setup", text: "Rest your arms on the angled pad." },
+      { label: "Execution", text: "Curl the bar up towards your shoulders, squeezing at the top." },
+      { label: "Return", text: "Lower slowly without locking out." },
+    ]},
+    { name: "Tricep Pushdown", motion: "pushdown", steps: [
+      { label: "Setup", text: "Stand facing the cable machine, elbows tucked to your sides." },
+      { label: "Execution", text: "Push the bar down until arms are straight." },
+      { label: "Return", text: "Return slowly to start." },
+    ]},
+    { name: "Cable Crunch", motion: "crunch", steps: [
+      { label: "Setup", text: "Kneel below the cable, rope behind your head." },
+      { label: "Execution", text: "Crunch down, bringing elbows toward your knees." },
+      { label: "Return", text: "Return slowly with control." },
+    ]},
+    { name: "Treadmill", motion: "walk", steps: [
+      { label: "Setup", text: "Start at a light walking pace to warm up." },
+      { label: "Execution", text: "Increase speed gradually." },
+      { label: "Return", text: "Keep posture upright, cool down at the end." },
+    ]},
   ]},
 ];
-
 const MACHINE_ART = {
   press: (
     <>
@@ -267,6 +346,7 @@ function App() {
   const [meals, setMeals] = useState([]);
 
   const [reminders, setReminders] = useState(true);
+    const [expandedExercise, setExpandedExercise] = useState(null);
 
   // DARK MODE BY DEFAULT
   const [darkMode, setDarkMode] = useState(true);
@@ -1724,25 +1804,55 @@ function App() {
               <span>See how to use each machine correctly, with an animated form guide.</span>
             </section>
 
-            {EXERCISE_CATEGORIES.map((cat) => (
+                       {EXERCISE_CATEGORIES.map((cat) => (
               <section className="panel" key={cat.name}>
                 <h2>{cat.name}</h2>
                 <div className="exerciseGrid">
-                  {cat.exercises.map((ex) => (
-                    <div className="exerciseCard" key={ex.name}>
-                      <div className="exerciseFigureWrap">
-                        <StickFigure motion={ex.motion} />
+                  {cat.exercises.map((ex) => {
+                    const isOpen = expandedExercise === ex.name;
+                    return (
+                      <div
+                        className={`exerciseCard ${isOpen ? "exerciseCardOpen" : ""}`}
+                        key={ex.name}
+                        onClick={() =>
+                          setExpandedExercise(isOpen ? null : ex.name)
+                        }
+                      >
+                        <div className="exerciseFigureWrap">
+                          <StickFigure motion={ex.motion} />
+                        </div>
+                        <div className="exerciseInfo">
+                          <span className="exerciseMuscle">{cat.name.toUpperCase()}</span>
+                          <h3>{ex.name}</h3>
+                          <span className="tapHint">
+                            {isOpen ? "Tap to close ▲" : "Tap for steps ▼"}
+                          </span>
+                        </div>
+
+                        {isOpen && (
+                          <div className="exerciseSteps">
+                            {ex.steps.map((step, i) => (
+                              <div className="stepItem" key={step.label}>
+                                <div className="stepArtWrap">
+                                  <StickFigure motion={ex.motion} />
+                                </div>
+                                <div className="stepText">
+                                  <span className="stepNumber">
+                                    {i + 1}. {step.label}
+                                  </span>
+                                  <p>{step.text}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <div className="exerciseInfo">
-                        <span className="exerciseMuscle">{cat.name.toUpperCase()}</span>
-                        <h3>{ex.name}</h3>
-                        <p>{ex.instructions}</p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             ))}
+            ))
           </>
         )}
       </main>
