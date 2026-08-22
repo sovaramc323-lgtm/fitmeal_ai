@@ -70,78 +70,183 @@ const EXERCISE_CATEGORIES = [
   ]},
 ];
 
-const MOTION_CONFIG = {
-  press:      { armL: [35, -15], armR: [-35, 15], dur: 1.3 },
-  fly:        { armL: [70, 10],  armR: [-70, -10], dur: 1.4 },
-  reverseFly: { armL: [70, 10],  armR: [-70, -10], dur: 1.4 },
-  raise:      { armL: [15, 80],  armR: [-15, -80], dur: 1.3 },
-  pulldown:   { armL: [80, 20],  armR: [-80, -20], dur: 1.3 },
-  row:        { armL: [80, 20],  armR: [-80, -20], dur: 1.3 },
-  curl:       { armL: [50, 0],   armR: [-50, 0],   dur: 1.2 },
-  pushdown:   { armL: [50, 0],   armR: [-50, 0],   dur: 1.2 },
-  legPress:   { legL: [20, -10], legR: [-20, 10],  dur: 1.3 },
-  extend:     { legL: [20, -10], legR: [-20, 10],  dur: 1.3 },
-  legCurl:    { legL: [20, -10], legR: [-20, 10],  dur: 1.3 },
-  calf:       { bob: true, dur: 1.1 },
-  crunch:     { spine: [0, 15], dur: 1.2 },
-  walk:       { legL: [20, -20], legR: [-20, 20], dur: 0.8 },
+const MACHINE_ART = {
+  press: (
+    <>
+      <rect x="95" y="20" width="8" height="110" className="mFrame" />
+      <line x1="20" y1="70" x2="95" y2="70" className="mFrame" />
+      <circle cx="50" cy="45" r="12" className="pHead" />
+      <path d="M50 57 L50 100" className="pBody" />
+      <path d="M50 65 L25 55" className="pBody" />
+      <path d="M50 65 L75 55" className="pBody" />
+      <path d="M50 100 L35 135" className="pBody" />
+      <path d="M50 100 L65 135" className="pBody" />
+      <rect x="98" y="35" width="10" height="14" className="mWeight" />
+      <rect x="98" y="52" width="10" height="14" className="mWeight" />
+    </>
+  ),
+  fly: (
+    <>
+      <path d="M18 70 Q50 40 82 70" className="mFrame" fill="none" />
+      <circle cx="50" cy="45" r="12" className="pHead" />
+      <path d="M50 57 L50 100" className="pBody" />
+      <path d="M50 62 Q30 68 22 68" className="pBody" fill="none" />
+      <path d="M50 62 Q70 68 78 68" className="pBody" fill="none" />
+      <path d="M50 100 L35 135" className="pBody" />
+      <path d="M50 100 L65 135" className="pBody" />
+      <rect x="8" y="60" width="10" height="16" className="mWeight" />
+      <rect x="82" y="60" width="10" height="16" className="mWeight" />
+    </>
+  ),
+  reverseFly: (
+    <>
+      <path d="M18 55 Q50 85 82 55" className="mFrame" fill="none" />
+      <circle cx="50" cy="45" r="12" className="pHead" />
+      <path d="M50 57 L50 100" className="pBody" />
+      <path d="M50 60 Q30 50 22 48" className="pBody" fill="none" />
+      <path d="M50 60 Q70 50 78 48" className="pBody" fill="none" />
+      <path d="M50 100 L35 135" className="pBody" />
+      <path d="M50 100 L65 135" className="pBody" />
+      <rect x="8" y="42" width="10" height="16" className="mWeight" />
+      <rect x="82" y="42" width="10" height="16" className="mWeight" />
+    </>
+  ),
+  raise: (
+    <>
+      <line x1="50" y1="130" x2="50" y2="30" className="mFrame" />
+      <circle cx="50" cy="45" r="12" className="pHead" />
+      <path d="M50 57 L50 100" className="pBody" />
+      <path d="M50 65 L20 55" className="pBody" />
+      <path d="M50 65 L80 55" className="pBody" />
+      <path d="M50 100 L38 135" className="pBody" />
+      <path d="M50 100 L62 135" className="pBody" />
+      <rect x="15" y="48" width="8" height="12" className="mWeight" />
+      <rect x="77" y="48" width="8" height="12" className="mWeight" />
+    </>
+  ),
+  pulldown: (
+    <>
+      <line x1="50" y1="15" x2="50" y2="130" className="mFrame" />
+      <circle cx="50" cy="15" r="4" className="mFrame" fill="none" />
+      <path d="M25 25 L75 25" className="mFrame" />
+      <circle cx="50" cy="55" r="12" className="pHead" />
+      <path d="M50 67 L50 105" className="pBody" />
+      <path d="M50 72 L25 28" className="pBody" />
+      <path d="M50 72 L75 28" className="pBody" />
+      <path d="M50 105 L38 135" className="pBody" />
+      <path d="M50 105 L62 135" className="pBody" />
+      <rect x="95" y="20" width="8" height="90" className="mWeight" />
+    </>
+  ),
+  row: (
+    <>
+      <rect x="20" y="70" width="65" height="6" className="mFrame" />
+      <circle cx="65" cy="45" r="12" className="pHead" />
+      <path d="M65 57 L60 100" className="pBody" />
+      <path d="M60 68 L30 72" className="pBody" />
+      <path d="M60 100 L48 135" className="pBody" />
+      <path d="M60 100 L72 135" className="pBody" />
+      <rect x="8" y="65" width="10" height="14" className="mWeight" />
+    </>
+  ),
+  curl: (
+    <>
+      <path d="M25 100 L75 100" className="mFrame" />
+      <path d="M40 100 L40 65" className="mFrame" />
+      <circle cx="50" cy="45" r="12" className="pHead" />
+      <path d="M50 57 L50 95" className="pBody" />
+      <path d="M50 70 L38 68" className="pBody" />
+      <path d="M50 70 L62 68" className="pBody" />
+      <path d="M50 95 L40 135" className="pBody" />
+      <path d="M50 95 L60 135" className="pBody" />
+      <rect x="35" y="60" width="10" height="10" className="mWeight" />
+    </>
+  ),
+  pushdown: (
+    <>
+      <line x1="50" y1="10" x2="50" y2="60" className="mFrame" />
+      <circle cx="50" cy="10" r="4" className="mFrame" fill="none" />
+      <circle cx="50" cy="45" r="12" className="pHead" />
+      <path d="M50 57 L50 100" className="pBody" />
+      <path d="M50 62 L38 80" className="pBody" />
+      <path d="M50 62 L62 80" className="pBody" />
+      <path d="M50 100 L38 135" className="pBody" />
+      <path d="M50 100 L62 135" className="pBody" />
+      <rect x="95" y="20" width="8" height="60" className="mWeight" />
+    </>
+  ),
+  legPress: (
+    <>
+      <path d="M20 130 L85 90" className="mFrame" />
+      <circle cx="35" cy="105" r="12" className="pHead" />
+      <path d="M40 113 L55 118" className="pBody" />
+      <path d="M55 118 L75 100" className="pBody" />
+      <path d="M55 118 L60 130" className="pBody" />
+      <rect x="80" y="70" width="10" height="20" className="mWeight" />
+    </>
+  ),
+  extend: (
+    <>
+      <path d="M25 60 L25 130" className="mFrame" />
+      <circle cx="30" cy="45" r="12" className="pHead" />
+      <path d="M30 57 L32 95" className="pBody" />
+      <path d="M32 95 L28 130" className="pBody" />
+      <path d="M32 95 L70 105" className="pBody" />
+      <rect x="70" y="98" width="10" height="12" className="mWeight" />
+    </>
+  ),
+  legCurl: (
+    <>
+      <path d="M20 90 L90 90" className="mFrame" />
+      <circle cx="35" cy="80" r="12" className="pHead" />
+      <path d="M40 88 L75 90" className="pBody" />
+      <path d="M75 90 L60 65" className="pBody" />
+      <rect x="8" y="83" width="10" height="12" className="mWeight" />
+    </>
+  ),
+  calf: (
+    <>
+      <rect x="30" y="120" width="45" height="10" className="mFrame" />
+      <line x1="45" y1="30" x2="45" y2="120" className="mFrame" />
+      <circle cx="50" cy="45" r="12" className="pHead" />
+      <path d="M50 57 L50 100" className="pBody" />
+      <path d="M50 62 L30 55" className="pBody" />
+      <path d="M50 62 L70 55" className="pBody" />
+      <path d="M50 100 L42 122" className="pBody" />
+      <path d="M50 100 L58 122" className="pBody" />
+    </>
+  ),
+  crunch: (
+    <>
+      <line x1="50" y1="15" x2="50" y2="55" className="mFrame" />
+      <circle cx="50" cy="70" r="12" className="pHead" />
+      <path d="M55 80 Q65 100 55 115" className="pBody" fill="none" />
+      <path d="M55 82 L48 55" className="pBody" />
+      <path d="M55 115 L40 125" className="pBody" />
+      <path d="M55 115 L70 130" className="pBody" />
+    </>
+  ),
+  walk: (
+    <>
+      <rect x="15" y="120" width="90" height="8" className="mFrame" />
+      <line x1="60" y1="120" x2="80" y2="60" className="mFrame" />
+      <circle cx="55" cy="45" r="12" className="pHead" />
+      <path d="M55 57 L55 95" className="pBody" />
+      <path d="M55 65 L40 75" className="pBody" />
+      <path d="M55 65 L70 55" className="pBody" />
+      <path d="M55 95 L40 120" className="pBody" />
+      <path d="M55 95 L68 118" className="pBody" />
+    </>
+  ),
 };
 
 function StickFigure({ motion }) {
-  const cfg = MOTION_CONFIG[motion] || {};
-  const dur = `${cfg.dur || 1.3}s`;
-  const armVals = (r) => `${r[0]} 50 38; ${r[1]} 50 38; ${r[0]} 50 38`;
-  const legVals = (r) => `${r[0]} 50 80; ${r[1]} 50 80; ${r[0]} 50 80`;
-
   return (
-    <svg viewBox="0 0 100 140" className="stickFigure">
-      <g>
-        {cfg.bob && (
-          <animateTransform attributeName="transform" type="translate"
-            values="0 0;0 -6;0 0" dur={dur} repeatCount="indefinite" />
-        )}
-        <g>
-          {cfg.spine && (
-            <animateTransform attributeName="transform" type="rotate"
-              values={`${cfg.spine[0]} 50 80;${cfg.spine[1]} 50 80;${cfg.spine[0]} 50 80`}
-              dur={dur} repeatCount="indefinite" />
-          )}
-          <line className="sfSpine" x1="50" y1="30" x2="50" y2="80" />
-        </g>
-        <g>
-          {cfg.legL && (
-            <animateTransform attributeName="transform" type="rotate"
-              values={legVals(cfg.legL)} dur={dur} repeatCount="indefinite" />
-          )}
-          <line className="sfLegL" x1="50" y1="80" x2="35" y2="125" />
-        </g>
-        <g>
-          {cfg.legR && (
-            <animateTransform attributeName="transform" type="rotate"
-              values={legVals(cfg.legR)} dur={dur} repeatCount="indefinite" />
-          )}
-          <line className="sfLegR" x1="50" y1="80" x2="65" y2="125" />
-        </g>
-        <g>
-          {cfg.armL && (
-            <animateTransform attributeName="transform" type="rotate"
-              values={armVals(cfg.armL)} dur={dur} repeatCount="indefinite" />
-          )}
-          <line className="sfArmL" x1="50" y1="38" x2="25" y2="55" />
-        </g>
-        <g>
-          {cfg.armR && (
-            <animateTransform attributeName="transform" type="rotate"
-              values={armVals(cfg.armR)} dur={dur} repeatCount="indefinite" />
-          )}
-          <line className="sfArmR" x1="50" y1="38" x2="75" y2="55" />
-        </g>
-        <circle className="sfHead" cx="50" cy="18" r="11" />
-      </g>
+    <svg viewBox="0 0 110 140" className="exerciseArt">
+      {MACHINE_ART[motion] || MACHINE_ART.press}
     </svg>
   );
 }
-
 const createSplit = () =>
   DAYS.map((_, index) => ({
     day: index + 1,
