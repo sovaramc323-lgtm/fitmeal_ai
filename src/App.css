@@ -1811,3 +1811,658 @@ select:focus-visible {
     transition-duration: .01ms !important;
   }
 }
+/* =========================================================
+   FITMEAL AI — AI COACH EXPERIENCE
+   ========================================================= */
+
+.aiCoach {
+  position: relative;
+  overflow: hidden;
+  margin: 26px 0;
+  padding: 28px;
+  border-radius: 24px;
+
+  background:
+    radial-gradient(
+      circle at 90% 10%,
+      rgba(255, 30, 30, 0.20),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 5% 100%,
+      rgba(255, 0, 0, 0.08),
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(45, 5, 5, 0.96),
+      rgba(16, 16, 16, 0.98)
+    );
+
+  border: 1px solid rgba(255, 40, 40, 0.30);
+
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.aiCoachGlow {
+  position: absolute;
+
+  width: 260px;
+  height: 260px;
+
+  right: -100px;
+  top: -130px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 0, 0, 0.12);
+
+  filter: blur(30px);
+
+  animation: aiGlow 4s ease-in-out infinite;
+}
+
+@keyframes aiGlow {
+
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+
+}
+
+
+/* ---------- AI HEADER ---------- */
+
+.aiCoachTop {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+
+  gap: 18px;
+
+  margin-bottom: 25px;
+}
+
+.aiCoachTop h2 {
+  margin: 5px 0;
+
+  font-size: 25px;
+
+  font-weight: 850;
+
+  letter-spacing: -0.7px;
+}
+
+.aiCoachTop p {
+  margin: 0;
+
+  color: var(--muted);
+
+  font-size: 13px;
+}
+
+
+/* ---------- AI ORB ---------- */
+
+.aiOrb {
+  position: relative;
+
+  width: 62px;
+  height: 62px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255, 50, 50, 0.9),
+      rgba(140, 0, 0, 0.9)
+    );
+
+  box-shadow:
+    0 0 0 5px rgba(255, 0, 0, 0.08),
+    0 0 30px rgba(255, 0, 0, 0.35),
+    inset 0 0 20px rgba(255, 255, 255, 0.08);
+
+  animation: aiPulse 2.8s ease-in-out infinite;
+}
+
+.aiOrb::before {
+  content: "";
+
+  position: absolute;
+
+  inset: -9px;
+
+  border-radius: 50%;
+
+  border: 1px solid rgba(255, 60, 60, 0.28);
+
+  animation: aiRing 3s linear infinite;
+}
+
+.aiOrb::after {
+  content: "";
+
+  position: absolute;
+
+  inset: -17px;
+
+  border-radius: 50%;
+
+  border: 1px solid rgba(255, 60, 60, 0.08);
+
+  animation: aiRing 4s linear infinite reverse;
+}
+
+.aiOrbCore {
+  color: white;
+
+  font-size: 25px;
+
+  text-shadow:
+    0 0 12px rgba(255, 255, 255, 0.7);
+
+  animation: aiStar 2s ease-in-out infinite;
+}
+
+@keyframes aiPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+
+    box-shadow:
+      0 0 0 5px rgba(255, 0, 0, 0.08),
+      0 0 30px rgba(255, 0, 0, 0.35);
+  }
+
+  50% {
+    transform: scale(1.06);
+
+    box-shadow:
+      0 0 0 8px rgba(255, 0, 0, 0.05),
+      0 0 48px rgba(255, 0, 0, 0.55);
+  }
+
+}
+
+@keyframes aiRing {
+
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+
+}
+
+@keyframes aiStar {
+
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  50% {
+    transform: rotate(12deg) scale(1.15);
+  }
+
+}
+
+
+/* ---------- STATUS ---------- */
+
+.aiStatus {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  color: #ff4a4a;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: 1.8px;
+}
+
+.aiStatusDot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  background: #ff2c2c;
+
+  box-shadow:
+    0 0 8px #ff2c2c;
+
+  animation: aiStatusPulse 1.5s infinite;
+}
+
+@keyframes aiStatusPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
+
+}
+
+
+/* ---------- AI BRIEF ---------- */
+
+.aiBrief {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+
+  gap: 16px;
+
+  padding: 20px;
+
+  margin-bottom: 18px;
+
+  border-radius: 17px;
+
+  background: rgba(255, 255, 255, 0.035);
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+}
+
+.aiBrief:hover {
+  transform: translateY(-2px);
+
+  border-color: rgba(255, 45, 45, 0.30);
+
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.aiBriefIcon {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ff2929,
+      #a80000
+    );
+
+  box-shadow:
+    0 8px 20px rgba(255, 0, 0, 0.22);
+}
+
+.aiLabel {
+  color: #ff4646;
+
+  font-size: 9px;
+
+  font-weight: 850;
+
+  letter-spacing: 1.5px;
+}
+
+.aiBrief h3 {
+  margin: 5px 0 6px;
+
+  font-size: 18px;
+
+  letter-spacing: -0.3px;
+}
+
+.aiBrief p {
+  margin: 0;
+
+  color: var(--muted);
+
+  line-height: 1.6;
+
+  font-size: 13px;
+}
+
+
+/* ---------- RECOMMENDATIONS ---------- */
+
+.aiRecommendations {
+  position: relative;
+  z-index: 2;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.aiRecommendation {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 16px;
+
+  border-radius: 15px;
+
+  background: rgba(0, 0, 0, 0.20);
+
+  border: 1px solid rgba(255, 255, 255, 0.055);
+
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease;
+}
+
+.aiRecommendation:hover {
+  transform: translateY(-3px);
+
+  border-color: rgba(255, 40, 40, 0.28);
+
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.aiRecommendationIcon {
+  width: 39px;
+  height: 39px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background: rgba(255, 0, 0, 0.09);
+
+  font-size: 18px;
+}
+
+.aiRecommendation div {
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.aiRecommendation small {
+  color: #ff4444;
+
+  font-size: 8px;
+
+  font-weight: 850;
+
+  letter-spacing: 1.3px;
+}
+
+.aiRecommendation strong {
+  font-size: 13px;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+.aiRecommendation span {
+  color: var(--muted);
+
+  font-size: 10px;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+}
+
+
+/* ---------- AI FOOTER ---------- */
+
+.aiFooter {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 15px;
+
+  margin-top: 18px;
+
+  padding-top: 15px;
+
+  border-top:
+    1px solid rgba(255, 255, 255, 0.055);
+
+  color: var(--muted);
+
+  font-size: 9px;
+
+  letter-spacing: 0.8px;
+}
+
+.aiFooter span:first-child {
+  color: #ff3b3b;
+
+  font-weight: 800;
+
+  letter-spacing: 1.5px;
+}
+
+
+/* =========================================================
+   AI QUICK COMMAND PANEL
+   ========================================================= */
+
+.aiCommand {
+  margin-top: 20px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 13px 16px;
+
+  border-radius: 15px;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.07),
+      rgba(255, 255, 255, 0.025)
+    );
+
+  border:
+    1px solid rgba(255, 0, 0, 0.14);
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.aiCommand:hover {
+  transform: translateY(-2px);
+
+  border-color:
+    rgba(255, 0, 0, 0.35);
+}
+
+.aiCommandIcon {
+  color: #ff3636;
+
+  font-size: 16px;
+}
+
+.aiCommandText {
+  flex: 1;
+
+  color: var(--muted);
+
+  font-size: 12px;
+}
+
+.aiCommandText strong {
+  color: var(--text);
+}
+
+.aiCommandArrow {
+  color: #ff3c3c;
+
+  font-size: 18px;
+}
+
+
+/* =========================================================
+   AI SCANNING LINE
+   ========================================================= */
+
+.aiCoach::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+
+  top: 0;
+
+  width: 100%;
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 50, 50, 0.8),
+      transparent
+    );
+
+  animation: aiScan 4s ease-in-out infinite;
+}
+
+@keyframes aiScan {
+
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  50% {
+    transform: translateX(100%);
+    opacity: 1;
+  }
+
+  65%,
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 850px) {
+
+  .aiRecommendations {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .aiCoach {
+    padding: 20px;
+  }
+
+  .aiCoachTop {
+    align-items: flex-start;
+  }
+
+  .aiOrb {
+    width: 52px;
+    height: 52px;
+  }
+
+  .aiCoachTop h2 {
+    font-size: 21px;
+  }
+
+  .aiBrief {
+    padding: 16px;
+  }
+
+  .aiFooter {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+}

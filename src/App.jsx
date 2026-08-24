@@ -886,7 +886,155 @@ function App() {
                 <p>
                   Today • {todayName}
                 </p>
+{/* ================= AI COACH ================= */}
 
+<section className="aiCoach">
+
+  <div className="aiCoachGlow"></div>
+
+  <div className="aiCoachTop">
+
+    <div className="aiOrb">
+      <div className="aiOrbCore">✦</div>
+    </div>
+
+    <div>
+      <div className="aiStatus">
+        <span className="aiStatusDot"></span>
+        AI COACH ONLINE
+      </div>
+
+      <h2>FitMeal Intelligence</h2>
+
+      <p>
+        Your AI-powered daily fitness and nutrition briefing.
+      </p>
+    </div>
+
+  </div>
+
+
+  <div className="aiBrief">
+
+    <div className="aiBriefIcon">
+      ✦
+    </div>
+
+    <div>
+
+      <span className="aiLabel">
+        TODAY'S AI INSIGHT
+      </span>
+
+      <h3>
+        {totals.protein < 50
+          ? "Your protein intake is still low."
+          : totals.calories < 1200
+          ? "You may need more fuel today."
+          : "You're building a solid nutrition day."}
+      </h3>
+
+      <p>
+        {totals.protein < 50
+          ? "Consider adding a high-protein meal such as chicken, eggs, paneer or dal."
+          : totals.calories < 1200
+          ? "A balanced meal with protein and complex carbohydrates could help support your training."
+          : "Keep your meals balanced and stay consistent with your workout plan."}
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <div className="aiRecommendations">
+
+    <div className="aiRecommendation">
+
+      <span className="aiRecommendationIcon">
+        🍗
+      </span>
+
+      <div>
+        <small>AI NUTRITION</small>
+
+        <strong>
+          {totals.protein < 50
+            ? "Increase protein"
+            : "Protein on track"}
+        </strong>
+
+        <span>
+          {totals.protein.toFixed(1)}g logged today
+        </span>
+      </div>
+
+    </div>
+
+
+    <div className="aiRecommendation">
+
+      <span className="aiRecommendationIcon">
+        🔥
+      </span>
+
+      <div>
+        <small>AI ENERGY</small>
+
+        <strong>
+          {totals.calories < 1200
+            ? "Fuel your body"
+            : "Energy looking good"}
+        </strong>
+
+        <span>
+          {Math.round(totals.calories)} kcal logged
+        </span>
+      </div>
+
+    </div>
+
+
+    <div className="aiRecommendation">
+
+      <span className="aiRecommendationIcon">
+        🏋️
+      </span>
+
+      <div>
+        <small>AI WORKOUT</small>
+
+        <strong>
+          {today?.workouts?.length
+            ? `${today.workouts.length} workout focus`
+            : "Rest / recovery"}
+        </strong>
+
+        <span>
+          {today?.workouts?.length
+            ? today.workouts.join(" • ")
+            : "Recovery is part of progress"}
+        </span>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div className="aiFooter">
+
+    <span>
+      ✦ FITMEAL AI ENGINE
+    </span>
+
+    <span>
+      Personalized from today's activity
+    </span>
+
+  </div>
+
+</section>
                 <h2>
                   {today?.workouts.length
                     ? today.workouts.join(" + ")
