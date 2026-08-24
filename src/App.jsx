@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
 
+const API_URL = "https://fitmealai-production.up.railway.app";
+
 const DAYS = [
   "Sunday",
   "Monday",
@@ -37,301 +39,27 @@ const FOOD = {
   bread: { calories: 265, protein: 9, carbs: 49 },
   curd: { calories: 61, protein: 3.5, carbs: 4.7 },
 };
-const EXERCISE_CATEGORIES = [
-  { name: "Chest", exercises: [
-    { name: "Cable Flyes", motion: "fly", steps: [
-      { label: "Setup", text: "Stand between the cables, slight forward lean." },
-      { label: "Execution", text: "Bring handles together in front of your chest in a wide arc." },
-      { label: "Return", text: "Return slowly to the start position with control." },
-    ]},
-    { name: "Chest Press", motion: "press", steps: [
-      { label: "Setup", text: "Sit back against the pad, grip handles at chest height." },
-      { label: "Execution", text: "Press forward until arms extend." },
-      { label: "Return", text: "Return slowly without locking elbows." },
-    ]},
-    { name: "Machine Fly", motion: "fly", steps: [
-      { label: "Setup", text: "Sit tall, elbows slightly bent on the pads." },
-      { label: "Execution", text: "Bring arms together in front of your chest, squeeze." },
-      { label: "Return", text: "Open back out slowly." },
-    ]},
-    { name: "Smith Bench", motion: "press", steps: [
-      { label: "Setup", text: "Lie on the bench under the bar and unrack it." },
-      { label: "Execution", text: "Lower to mid-chest." },
-      { label: "Return", text: "Press up until arms are extended." },
-    ]},
-  ]},
-  { name: "Shoulders", exercises: [
-    { name: "Lateral Raises", motion: "raise", steps: [
-      { label: "Setup", text: "Hold handles at your sides." },
-      { label: "Execution", text: "Raise arms out to shoulder height with a slight elbow bend." },
-      { label: "Return", text: "Lower slowly back to your sides." },
-    ]},
-    { name: "Shoulder Press", motion: "press", steps: [
-      { label: "Setup", text: "Sit upright, handles at shoulder height." },
-      { label: "Execution", text: "Press straight up until arms extend." },
-      { label: "Return", text: "Lower back to start." },
-    ]},
-    { name: "Reverse Pec Deck", motion: "reverseFly", steps: [
-      { label: "Setup", text: "Face the pad, grip handles in front of you." },
-      { label: "Execution", text: "Pull arms back and out, squeezing shoulder blades." },
-      { label: "Return", text: "Return slowly to start." },
-    ]},
-    { name: "Smith Press", motion: "press", steps: [
-      { label: "Setup", text: "Sit under the bar, grip slightly wider than shoulders." },
-      { label: "Execution", text: "Press up until arms extend." },
-      { label: "Return", text: "Lower to shoulder height." },
-    ]},
-  ]},
-  { name: "Back", exercises: [
-    { name: "Lat Pulldown", motion: "pulldown", steps: [
-      { label: "Setup", text: "Sit with thighs locked under the pad." },
-      { label: "Execution", text: "Pull the bar down to your upper chest, squeezing your shoulder blades." },
-      { label: "Return", text: "Control it back up." },
-    ]},
-    { name: "Seated Row", motion: "row", steps: [
-      { label: "Setup", text: "Sit with knees slightly bent, grip the handle." },
-      { label: "Execution", text: "Pull toward your torso, elbows close." },
-      { label: "Return", text: "Extend arms back out." },
-    ]},
-    { name: "Face Pulls", motion: "row", steps: [
-      { label: "Setup", text: "Set the cable at face height." },
-      { label: "Execution", text: "Pull the rope toward your face, elbows high." },
-      { label: "Return", text: "Return slowly." },
-    ]},
-    { name: "Close Grip Pulldown", motion: "pulldown", steps: [
-      { label: "Setup", text: "Use a close, narrow grip on the bar." },
-      { label: "Execution", text: "Pull the bar down to your chest." },
-      { label: "Return", text: "Extend back up under control." },
-    ]},
-  ]},
-  { name: "Legs", exercises: [
-    { name: "Leg Press", motion: "legPress", steps: [
-      { label: "Setup", text: "Sit in the machine, feet shoulder-width on the platform." },
-      { label: "Execution", text: "Lower until knees reach 90°." },
-      { label: "Return", text: "Press back up without locking knees." },
-    ]},
-    { name: "Quad Extensions", motion: "extend", steps: [
-      { label: "Setup", text: "Sit with shin pad above your ankles." },
-      { label: "Execution", text: "Extend legs until straight, squeeze." },
-      { label: "Return", text: "Lower slowly." },
-    ]},
-    { name: "Hammy Curls", motion: "legCurl", steps: [
-      { label: "Setup", text: "Lie face down, pad behind your ankles." },
-      { label: "Execution", text: "Curl legs up toward your glutes." },
-      { label: "Return", text: "Lower with control." },
-    ]},
-    { name: "Smith Calf Raises", motion: "calf", steps: [
-      { label: "Setup", text: "Stand with the bar on your shoulders, balls of feet on a raised platform." },
-      { label: "Execution", text: "Rise onto your toes." },
-      { label: "Return", text: "Lower slowly below level." },
-    ]},
-  ]},
-  { name: "Arms & Abs", exercises: [
-    { name: "Preacher Curl", motion: "curl", steps: [
-      { label: "Setup", text: "Rest your arms on the angled pad." },
-      { label: "Execution", text: "Curl the bar up towards your shoulders, squeezing at the top." },
-      { label: "Return", text: "Lower slowly without locking out." },
-    ]},
-    { name: "Tricep Pushdown", motion: "pushdown", steps: [
-      { label: "Setup", text: "Stand facing the cable machine, elbows tucked to your sides." },
-      { label: "Execution", text: "Push the bar down until arms are straight." },
-      { label: "Return", text: "Return slowly to start." },
-    ]},
-    { name: "Cable Crunch", motion: "crunch", steps: [
-      { label: "Setup", text: "Kneel below the cable, rope behind your head." },
-      { label: "Execution", text: "Crunch down, bringing elbows toward your knees." },
-      { label: "Return", text: "Return slowly with control." },
-    ]},
-    { name: "Treadmill", motion: "walk", steps: [
-      { label: "Setup", text: "Start at a light walking pace to warm up." },
-      { label: "Execution", text: "Increase speed gradually." },
-      { label: "Return", text: "Keep posture upright, cool down at the end." },
-    ]},
-  ]},
-];
-const MACHINE_ART = {
-  press: (
-    <>
-      <rect x="95" y="20" width="8" height="110" className="mFrame" />
-      <line x1="20" y1="70" x2="95" y2="70" className="mFrame" />
-      <circle cx="50" cy="45" r="12" className="pHead" />
-      <path d="M50 57 L50 100" className="pBody" />
-      <path d="M50 65 L25 55" className="pBody" />
-      <path d="M50 65 L75 55" className="pBody" />
-      <path d="M50 100 L35 135" className="pBody" />
-      <path d="M50 100 L65 135" className="pBody" />
-      <rect x="98" y="35" width="10" height="14" className="mWeight" />
-      <rect x="98" y="52" width="10" height="14" className="mWeight" />
-    </>
-  ),
-  fly: (
-    <>
-      <path d="M18 70 Q50 40 82 70" className="mFrame" fill="none" />
-      <circle cx="50" cy="45" r="12" className="pHead" />
-      <path d="M50 57 L50 100" className="pBody" />
-      <path d="M50 62 Q30 68 22 68" className="pBody" fill="none" />
-      <path d="M50 62 Q70 68 78 68" className="pBody" fill="none" />
-      <path d="M50 100 L35 135" className="pBody" />
-      <path d="M50 100 L65 135" className="pBody" />
-      <rect x="8" y="60" width="10" height="16" className="mWeight" />
-      <rect x="82" y="60" width="10" height="16" className="mWeight" />
-    </>
-  ),
-  reverseFly: (
-    <>
-      <path d="M18 55 Q50 85 82 55" className="mFrame" fill="none" />
-      <circle cx="50" cy="45" r="12" className="pHead" />
-      <path d="M50 57 L50 100" className="pBody" />
-      <path d="M50 60 Q30 50 22 48" className="pBody" fill="none" />
-      <path d="M50 60 Q70 50 78 48" className="pBody" fill="none" />
-      <path d="M50 100 L35 135" className="pBody" />
-      <path d="M50 100 L65 135" className="pBody" />
-      <rect x="8" y="42" width="10" height="16" className="mWeight" />
-      <rect x="82" y="42" width="10" height="16" className="mWeight" />
-    </>
-  ),
-  raise: (
-    <>
-      <line x1="50" y1="130" x2="50" y2="30" className="mFrame" />
-      <circle cx="50" cy="45" r="12" className="pHead" />
-      <path d="M50 57 L50 100" className="pBody" />
-      <path d="M50 65 L20 55" className="pBody" />
-      <path d="M50 65 L80 55" className="pBody" />
-      <path d="M50 100 L38 135" className="pBody" />
-      <path d="M50 100 L62 135" className="pBody" />
-      <rect x="15" y="48" width="8" height="12" className="mWeight" />
-      <rect x="77" y="48" width="8" height="12" className="mWeight" />
-    </>
-  ),
-  pulldown: (
-    <>
-      <line x1="50" y1="15" x2="50" y2="130" className="mFrame" />
-      <circle cx="50" cy="15" r="4" className="mFrame" fill="none" />
-      <path d="M25 25 L75 25" className="mFrame" />
-      <circle cx="50" cy="55" r="12" className="pHead" />
-      <path d="M50 67 L50 105" className="pBody" />
-      <path d="M50 72 L25 28" className="pBody" />
-      <path d="M50 72 L75 28" className="pBody" />
-      <path d="M50 105 L38 135" className="pBody" />
-      <path d="M50 105 L62 135" className="pBody" />
-      <rect x="95" y="20" width="8" height="90" className="mWeight" />
-    </>
-  ),
-  row: (
-    <>
-      <rect x="20" y="70" width="65" height="6" className="mFrame" />
-      <circle cx="65" cy="45" r="12" className="pHead" />
-      <path d="M65 57 L60 100" className="pBody" />
-      <path d="M60 68 L30 72" className="pBody" />
-      <path d="M60 100 L48 135" className="pBody" />
-      <path d="M60 100 L72 135" className="pBody" />
-      <rect x="8" y="65" width="10" height="14" className="mWeight" />
-    </>
-  ),
-  curl: (
-    <>
-      <path d="M25 100 L75 100" className="mFrame" />
-      <path d="M40 100 L40 65" className="mFrame" />
-      <circle cx="50" cy="45" r="12" className="pHead" />
-      <path d="M50 57 L50 95" className="pBody" />
-      <path d="M50 70 L38 68" className="pBody" />
-      <path d="M50 70 L62 68" className="pBody" />
-      <path d="M50 95 L40 135" className="pBody" />
-      <path d="M50 95 L60 135" className="pBody" />
-      <rect x="35" y="60" width="10" height="10" className="mWeight" />
-    </>
-  ),
-  pushdown: (
-    <>
-      <line x1="50" y1="10" x2="50" y2="60" className="mFrame" />
-      <circle cx="50" cy="10" r="4" className="mFrame" fill="none" />
-      <circle cx="50" cy="45" r="12" className="pHead" />
-      <path d="M50 57 L50 100" className="pBody" />
-      <path d="M50 62 L38 80" className="pBody" />
-      <path d="M50 62 L62 80" className="pBody" />
-      <path d="M50 100 L38 135" className="pBody" />
-      <path d="M50 100 L62 135" className="pBody" />
-      <rect x="95" y="20" width="8" height="60" className="mWeight" />
-    </>
-  ),
-  legPress: (
-    <>
-      <path d="M20 130 L85 90" className="mFrame" />
-      <circle cx="35" cy="105" r="12" className="pHead" />
-      <path d="M40 113 L55 118" className="pBody" />
-      <path d="M55 118 L75 100" className="pBody" />
-      <path d="M55 118 L60 130" className="pBody" />
-      <rect x="80" y="70" width="10" height="20" className="mWeight" />
-    </>
-  ),
-  extend: (
-    <>
-      <path d="M25 60 L25 130" className="mFrame" />
-      <circle cx="30" cy="45" r="12" className="pHead" />
-      <path d="M30 57 L32 95" className="pBody" />
-      <path d="M32 95 L28 130" className="pBody" />
-      <path d="M32 95 L70 105" className="pBody" />
-      <rect x="70" y="98" width="10" height="12" className="mWeight" />
-    </>
-  ),
-  legCurl: (
-    <>
-      <path d="M20 90 L90 90" className="mFrame" />
-      <circle cx="35" cy="80" r="12" className="pHead" />
-      <path d="M40 88 L75 90" className="pBody" />
-      <path d="M75 90 L60 65" className="pBody" />
-      <rect x="8" y="83" width="10" height="12" className="mWeight" />
-    </>
-  ),
-  calf: (
-    <>
-      <rect x="30" y="120" width="45" height="10" className="mFrame" />
-      <line x1="45" y1="30" x2="45" y2="120" className="mFrame" />
-      <circle cx="50" cy="45" r="12" className="pHead" />
-      <path d="M50 57 L50 100" className="pBody" />
-      <path d="M50 62 L30 55" className="pBody" />
-      <path d="M50 62 L70 55" className="pBody" />
-      <path d="M50 100 L42 122" className="pBody" />
-      <path d="M50 100 L58 122" className="pBody" />
-    </>
-  ),
-  crunch: (
-    <>
-      <line x1="50" y1="15" x2="50" y2="55" className="mFrame" />
-      <circle cx="50" cy="70" r="12" className="pHead" />
-      <path d="M55 80 Q65 100 55 115" className="pBody" fill="none" />
-      <path d="M55 82 L48 55" className="pBody" />
-      <path d="M55 115 L40 125" className="pBody" />
-      <path d="M55 115 L70 130" className="pBody" />
-    </>
-  ),
-  walk: (
-    <>
-      <rect x="15" y="120" width="90" height="8" className="mFrame" />
-      <line x1="60" y1="120" x2="80" y2="60" className="mFrame" />
-      <circle cx="55" cy="45" r="12" className="pHead" />
-      <path d="M55 57 L55 95" className="pBody" />
-      <path d="M55 65 L40 75" className="pBody" />
-      <path d="M55 65 L70 55" className="pBody" />
-      <path d="M55 95 L40 120" className="pBody" />
-      <path d="M55 95 L68 118" className="pBody" />
-    </>
-  ),
-};
 
-function StickFigure({ motion }) {
-  return (
-    <svg viewBox="0 0 110 140" className="exerciseArt">
-      {MACHINE_ART[motion] || MACHINE_ART.press}
-    </svg>
-  );
-}
+const EXERCISES = [
+  ["Chest", "Bench Press", "🏋️", "Press the weight upward while keeping your shoulder blades stable."],
+  ["Chest", "Cable Fly", "💪", "Bring the handles together slowly and squeeze the chest."],
+  ["Back", "Lat Pulldown", "🔻", "Pull the bar toward your upper chest and control the return."],
+  ["Back", "Seated Row", "↔️", "Pull toward your torso while keeping your spine neutral."],
+  ["Shoulders", "Lateral Raise", "🪽", "Raise your arms to shoulder height with controlled movement."],
+  ["Shoulders", "Shoulder Press", "⬆️", "Press overhead without arching your lower back."],
+  ["Legs", "Leg Press", "🦵", "Lower the platform under control and drive through your feet."],
+  ["Legs", "Leg Extension", "⚡", "Extend your knees smoothly and squeeze your quads."],
+  ["Arms & Abs", "Bicep Curl", "💪", "Curl without swinging your elbows forward."],
+  ["Arms & Abs", "Tricep Pushdown", "⬇️", "Keep elbows tucked and push the cable downward."],
+  ["Arms & Abs", "Cable Crunch", "🔥", "Curl your torso down while keeping the movement controlled."],
+  ["Cardio", "Treadmill", "🏃", "Start easy, build pace gradually and finish with a cooldown."],
+];
+
 const createSplit = () =>
-  DAYS.map((_, index) => ({
-    day: index + 1,
+  DAYS.map((_, i) => ({
+    day: i + 1,
     workouts: [],
   }));
-  const API_URL = "https://fitmealai-production.up.railway.app";
 
 function App() {
   const [page, setPage] = useState("dashboard");
@@ -345,103 +73,24 @@ function App() {
   const [quantity, setQuantity] = useState(100);
   const [meals, setMeals] = useState([]);
 
-  const [reminders, setReminders] = useState(true);
-    const [expandedExercise, setExpandedExercise] = useState(null);
-
-  // DARK MODE BY DEFAULT
   const [darkMode, setDarkMode] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem("token") || "");
+  const [reminders, setReminders] = useState(true);
+
+  const [token, setToken] = useState(
+    localStorage.getItem("token") || ""
+  );
+
   const [authMode, setAuthMode] = useState("login");
   const [authError, setAuthError] = useState("");
+
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
-  const handleLogin = async () => {
-    setAuthError("");
-    try {
-      const response = await fetch(`${API_URL}/api/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: loginEmail, password: loginPassword }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Login failed");
-      localStorage.setItem("token", data.token);
-      setToken(data.token);
-      setName(data.name);
-      setWeight(data.weight);
-      setSetup(true);
-    } catch (err) {
-      setAuthError(err.message);
-    }
-  };
 
-  const handleRegister = async () => {
-    setAuthError("");
-    if (!name || !registerEmail || !registerPassword || !weight) {
-      setAuthError("All fields are required.");
-      return;
-    }
-    try {
-      const response = await fetch(`${API_URL}/api/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email: registerEmail, password: registerPassword, weight: Number(weight) }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Registration failed");
-      localStorage.setItem("token", data.token);
-      setToken(data.token);
-    } catch (err) {
-      setAuthError(err.message);
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setToken("");
-    setSetup(false);
-  };
-
-  useEffect(() => {
-    const saved = localStorage.getItem("fitmealApp");
-
-    if (saved) {
-      const data = JSON.parse(saved);
-
-      setName(data.name || "");
-      setWeight(data.weight || "");
-      setSplit(data.split || createSplit());
-      setMeals(data.meals || []);
-      setSetup(data.setup || false);
-      setReminders(data.reminders ?? true);
-      setDarkMode(data.darkMode ?? true);
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "fitmealApp",
-      JSON.stringify({
-        name,
-        weight,
-        split,
-        meals,
-        setup,
-        reminders,
-        darkMode,
-      })
-    );
-  }, [
-    name,
-    weight,
-    split,
-    meals,
-    setup,
-    reminders,
-    darkMode,
-  ]);
+  const [expandedExercise, setExpandedExercise] = useState(null);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiMessage, setAiMessage] = useState("");
 
   const todayIndex = new Date().getDay();
   const todayName = DAYS[todayIndex];
@@ -472,6 +121,154 @@ function App() {
       ),
     [meals]
   );
+
+  const aiScore = Math.min(
+    100,
+    Math.round(
+      Math.min(totals.protein * 1.3, 45) +
+      Math.min(totals.calories / 25, 35) +
+      Math.min(meals.length * 7, 20)
+    )
+  );
+
+  const aiInsight =
+    totals.protein < 40
+      ? "Protein is your biggest opportunity today."
+      : totals.calories < 1200
+      ? "Your energy intake looks light. Consider a balanced meal."
+      : meals.length < 3
+      ? "Your nutrition log needs another meal or snack."
+      : "Your nutrition pattern is looking strong today.";
+
+  useEffect(() => {
+    const saved = localStorage.getItem("fitmealApp");
+
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+
+        setName(data.name || "");
+        setWeight(data.weight || "");
+        setSplit(data.split || createSplit());
+        setMeals(data.meals || []);
+        setSetup(data.setup || false);
+        setReminders(data.reminders ?? true);
+        setDarkMode(data.darkMode ?? true);
+      } catch {
+        localStorage.removeItem("fitmealApp");
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "fitmealApp",
+      JSON.stringify({
+        name,
+        weight,
+        split,
+        meals,
+        setup,
+        reminders,
+        darkMode,
+      })
+    );
+  }, [
+    name,
+    weight,
+    split,
+    meals,
+    setup,
+    reminders,
+    darkMode,
+  ]);
+
+  const handleLogin = async () => {
+    setAuthError("");
+
+    if (!loginEmail || !loginPassword) {
+      setAuthError("Enter your email and password.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: loginEmail,
+          password: loginPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      localStorage.setItem("token", data.token);
+
+      setToken(data.token);
+      setName(data.name || "");
+      setWeight(data.weight || "");
+      setSetup(true);
+    } catch (error) {
+      setAuthError(error.message);
+    }
+  };
+
+  const handleRegister = async () => {
+    setAuthError("");
+
+    if (
+      !name ||
+      !weight ||
+      !registerEmail ||
+      !registerPassword
+    ) {
+      setAuthError("All fields are required.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email: registerEmail,
+          password: registerPassword,
+          weight: Number(weight),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Registration failed"
+        );
+      }
+
+      localStorage.setItem("token", data.token);
+
+      setToken(data.token);
+      setSetup(true);
+    } catch (error) {
+      setAuthError(error.message);
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    setToken("");
+    setSetup(false);
+  };
 
   const toggleWorkout = (day, workout) => {
     setSplit((old) =>
@@ -507,7 +304,9 @@ function App() {
       id: Date.now(),
       name: meal,
       quantity: Number(quantity),
-      calories: Math.round(data.calories * multiplier),
+      calories: Math.round(
+        data.calories * multiplier
+      ),
       protein: Number(
         (data.protein * multiplier).toFixed(1)
       ),
@@ -516,13 +315,15 @@ function App() {
       ),
     };
 
-    setMeals([...meals, newMeal]);
+    setMeals((old) => [...old, newMeal]);
     setMeal("");
     setQuantity(100);
   };
 
   const removeMeal = (id) => {
-    setMeals(meals.filter((item) => item.id !== id));
+    setMeals((old) =>
+      old.filter((item) => item.id !== id)
+    );
   };
 
   const saveSetup = () => {
@@ -530,10 +331,10 @@ function App() {
       alert("Please enter your name and weight.");
       return;
     }
+
     setSetup(true);
     setPage("dashboard");
   };
-
 
   const enableNotification = async () => {
     if (!("Notification" in window)) {
@@ -547,63 +348,219 @@ function App() {
     if (permission === "granted") {
       new Notification("FitMeal AI", {
         body:
-          "Check today's workout, meals and recovery plan.",
+          "Your AI coach is ready. Check today's workout and nutrition.",
       });
     }
   };
 
   const resetApp = () => {
-    if (confirm("Reset all FitMeal AI data?")) {
-      localStorage.removeItem("fitmealApp");
+    if (!confirm("Reset all FitMeal AI data?")) return;
 
-      setName("");
-      setWeight("");
-      setSplit(createSplit());
-      setMeals([]);
-      setSetup(false);
-      setPage("dashboard");
-      setDarkMode(true);
-    }
+    localStorage.removeItem("fitmealApp");
+
+    setName("");
+    setWeight("");
+    setSplit(createSplit());
+    setMeals([]);
+    setSetup(false);
+    setPage("dashboard");
+    setDarkMode(true);
   };
 
-  /* ================= SETUP ================= */
+  const askAI = () => {
+    const text = aiMessage.toLowerCase();
+
+    if (text.includes("protein")) {
+      return `You've logged ${totals.protein.toFixed(
+        1
+      )}g protein today. Consider chicken, eggs, paneer, dal or curd.`;
+    }
+
+    if (text.includes("calorie")) {
+      return `You've logged ${Math.round(
+        totals.calories
+      )} kcal today. Keep your meals balanced around your activity.`;
+    }
+
+    if (text.includes("workout")) {
+      return today?.workouts?.length
+        ? `Today's focus is ${today.workouts.join(
+            " + "
+          )}. Stay controlled and prioritize good form.`
+        : "Today is currently a recovery day. Recovery is part of progress.";
+    }
+
+    if (text.includes("meal")) {
+      return "Try oats + milk + banana for breakfast, rice + dal + chicken for lunch, and paneer + roti for dinner.";
+    }
+
+    return `AI analysis: ${aiInsight} Your current FitMeal score is ${aiScore}/100.`;
+  };
+
+  /* ================= AUTH ================= */
+
   if (!token) {
     return (
-      <div className={darkMode ? "setupScreen dark" : "setupScreen light"}>
-        <div className="setupCard">
-          <div className="logoBig">F</div>
+      <div
+        className={
+          darkMode
+            ? "setupScreen dark"
+            : "setupScreen light"
+        }
+      >
+        <div className="authGlow glowOne" />
+        <div className="authGlow glowTwo" />
+
+        <div className="setupCard authCard">
+          <div className="aiLogoLarge">
+            <span>F</span>
+            <i>✦</i>
+          </div>
+
+          <div className="authEyebrow">
+            AI FITNESS SYSTEM
+          </div>
+
           <h1>FitMeal AI</h1>
-          <p>{authMode === "login" ? "Log in to your account." : "Create your account."}</p>
+
+          <p className="authSubtitle">
+            Your intelligent nutrition and workout
+            command center.
+          </p>
+
+          <div className="authTabs">
+            <button
+              className={
+                authMode === "login"
+                  ? "authTab active"
+                  : "authTab"
+              }
+              onClick={() => {
+                setAuthMode("login");
+                setAuthError("");
+              }}
+            >
+              Log In
+            </button>
+
+            <button
+              className={
+                authMode === "register"
+                  ? "authTab active"
+                  : "authTab"
+              }
+              onClick={() => {
+                setAuthMode("register");
+                setAuthError("");
+              }}
+            >
+              Create Account
+            </button>
+          </div>
 
           {authMode === "register" && (
             <>
-              <input placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} />
-              <input type="number" placeholder="Weight in kg" value={weight} onChange={(e) => setWeight(e.target.value)} />
-              <input placeholder="Email" value={registerEmail} onChange={(e) => setRegisterEmail(e.target.value)} />
-              <input type="password" placeholder="Password" value={registerPassword} onChange={(e) => setRegisterPassword(e.target.value)} />
-              {authError && <p style={{ color: "red" }}>{authError}</p>}
-              <button className="mainButton" onClick={handleRegister}>Sign Up</button>
-              <p className="muted">Already have an account?{" "}
-                <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => { setAuthMode("login"); setAuthError(""); }}>Log In</span>
-              </p>
+              <label>Your name</label>
+              <input
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) =>
+                  setName(e.target.value)
+                }
+              />
+
+              <label>Body weight</label>
+              <input
+                type="number"
+                placeholder="Weight in kg"
+                value={weight}
+                onChange={(e) =>
+                  setWeight(e.target.value)
+                }
+              />
+
+              <label>Email</label>
+              <input
+                placeholder="you@example.com"
+                value={registerEmail}
+                onChange={(e) =>
+                  setRegisterEmail(e.target.value)
+                }
+              />
+
+              <label>Password</label>
+              <input
+                type="password"
+                placeholder="Create a password"
+                value={registerPassword}
+                onChange={(e) =>
+                  setRegisterPassword(e.target.value)
+                }
+              />
+
+              {authError && (
+                <div className="authError">
+                  ⚠ {authError}
+                </div>
+              )}
+
+              <button
+                className="mainButton"
+                onClick={handleRegister}
+              >
+                Create My AI Profile →
+              </button>
             </>
           )}
 
           {authMode === "login" && (
             <>
-              <input placeholder="Email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} />
-              <input type="password" placeholder="Password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} />
-              {authError && <p style={{ color: "red" }}>{authError}</p>}
-              <button className="mainButton" onClick={handleLogin}>Log In</button>
-              <p className="muted">New here?{" "}
-                <span style={{ cursor: "pointer", textDecoration: "underline" }} onClick={() => { setAuthMode("register"); setAuthError(""); }}>Sign Up</span>
-              </p>
+              <label>Email</label>
+              <input
+                placeholder="you@example.com"
+                value={loginEmail}
+                onChange={(e) =>
+                  setLoginEmail(e.target.value)
+                }
+              />
+
+              <label>Password</label>
+              <input
+                type="password"
+                placeholder="Your password"
+                value={loginPassword}
+                onChange={(e) =>
+                  setLoginPassword(e.target.value)
+                }
+              />
+
+              {authError && (
+                <div className="authError">
+                  ⚠ {authError}
+                </div>
+              )}
+
+              <button
+                className="mainButton"
+                onClick={handleLogin}
+              >
+                Enter FitMeal AI →
+              </button>
             </>
           )}
+
+          <div className="authFeatures">
+            <span>✦ AI INSIGHTS</span>
+            <span>◈ NUTRITION</span>
+            <span>▲ WORKOUTS</span>
+          </div>
         </div>
       </div>
     );
   }
+
+  /* ================= SETUP ================= */
+
   if (!setup) {
     return (
       <div
@@ -613,53 +570,84 @@ function App() {
             : "setupScreen light"
         }
       >
-        <div className="setupCard">
+        <div className="setupCard setupWizard">
+          <div className="setupWizardHeader">
+            <div className="aiLogoLarge small">
+              <span>F</span>
+              <i>✦</i>
+            </div>
 
-          <div className="logoBig">F</div>
+            <div>
+              <div className="authEyebrow">
+                INITIALIZE YOUR SYSTEM
+              </div>
 
-          <h1>FitMeal AI</h1>
+              <h1>Build Your Plan</h1>
 
-          <p>
-            Your personalized fitness and meal
-            planning assistant.
-          </p>
+              <p>
+                Tell FitMeal AI what your week looks
+                like.
+              </p>
+            </div>
+          </div>
 
-          <input
-            placeholder="Enter your name"
-            value={name}
-            onChange={(e) =>
-              setName(e.target.value)
-            }
-          />
+          <div className="setupInputs">
+            <div>
+              <label>Name</label>
+              <input
+                placeholder="Your name"
+                value={name}
+                onChange={(e) =>
+                  setName(e.target.value)
+                }
+              />
+            </div>
 
-          <input
-            type="number"
-            placeholder="Weight in kg"
-            value={weight}
-            onChange={(e) =>
-              setWeight(e.target.value)
-            }
-          />
+            <div>
+              <label>Weight</label>
+              <input
+                type="number"
+                placeholder="kg"
+                value={weight}
+                onChange={(e) =>
+                  setWeight(e.target.value)
+                }
+              />
+            </div>
+          </div>
 
-          <h2>Set Your Weekly Workout Split</h2>
-
-          <p className="muted">
-            Select multiple workouts for each day.
-          </p>
+          <div className="setupSectionTitle">
+            <span>01</span>
+            WEEKLY WORKOUT INTENT
+          </div>
 
           {split.map((day) => (
-            <div className="setupDay" key={day.day}>
+            <div
+              className="setupDay"
+              key={day.day}
+            >
+              <div className="setupDayTitle">
+                <strong>
+                  {DAYS[day.day - 1]}
+                </strong>
 
-              <strong>
-                {DAYS[day.day - 1]}
-              </strong>
+                <span>
+                  {day.workouts.length
+                    ? `${day.workouts.length} selected`
+                    : "No focus selected"}
+                </span>
+              </div>
 
               <div className="checkGrid">
-
                 {WORKOUTS.map((workout) => (
-
-                  <label key={workout}>
-
+                  <label
+                    key={workout}
+                    className={
+                      day.workouts.includes(workout)
+                        ? "checked"
+                        : ""
+                    }
+                  >
                     <input
                       type="checkbox"
                       checked={day.workouts.includes(
@@ -673,14 +661,10 @@ function App() {
                       }
                     />
 
-                    {workout}
-
+                    <span>{workout}</span>
                   </label>
-
                 ))}
-
               </div>
-
             </div>
           ))}
 
@@ -688,9 +672,8 @@ function App() {
             className="mainButton"
             onClick={saveSetup}
           >
-            Create My Plan
+            Launch My Dashboard ✦
           </button>
-
         </div>
       </div>
     );
@@ -706,116 +689,74 @@ function App() {
           : "appShell light"
       }
     >
-
-      {/* SIDEBAR */}
+      <div className="ambient ambientOne" />
+      <div className="ambient ambientTwo" />
 
       <aside className="sidebar">
-
         <div className="brand">
-
           <div className="logo">
             F
           </div>
 
           <div>
             <h2>FitMeal</h2>
-            <span>AI Planner</span>
+            <span>AI Intelligence</span>
           </div>
+        </div>
 
+        <div className="aiSideStatus">
+          <span />
+          AI SYSTEM ONLINE
         </div>
 
         <nav>
+          {[
+            ["dashboard", "⌂", "Dashboard"],
+            ["workout", "●", "Workout"],
+            ["nutrition", "◈", "Nutrition"],
+            ["planner", "□", "Meal Planner"],
+            ["progress", "↗", "Progress"],
+            ["exercises", "▲", "Exercises"],
+            ["profile", "○", "Profile"],
+          ].map(([key, icon, label]) => (
+            <button
+              key={key}
+              className={
+                page === key ? "selected" : ""
+              }
+              onClick={() => setPage(key)}
+            >
+              <span>{icon}</span>
+              {label}
 
-          <button
-            className={
-              page === "dashboard"
-                ? "selected"
-                : ""
-            }
-            onClick={() =>
-              setPage("dashboard")
-            }
-          >
-            <span>⌂</span>
-            Dashboard
-          </button>
-
-          <button
-            className={
-              page === "workout"
-                ? "selected"
-                : ""
-            }
-            onClick={() =>
-              setPage("workout")
-            }
-          >
-            <span>●</span>
-            Workout
-          </button>
-
-          <button
-            className={
-              page === "nutrition"
-                ? "selected"
-                : ""
-            }
-            onClick={() =>
-              setPage("nutrition")
-            }
-          >
-            <span>◈</span>
-            Nutrition
-          </button>
-
-          <button
-            className={
-              page === "planner"
-                ? "selected"
-                : ""
-            }
-            onClick={() =>
-              setPage("planner")
-            }
-          >
-            <span>□</span>
-            Meal Planner
-          </button>
-
-          <button
-            className={
-              page === "progress"
-                ? "selected"
-                : ""
-            }
-            onClick={() =>
-              setPage("progress")
-            }
-          >
-            <span>↗</span>
-            Progress
-          </button>
-
-                          <button className={page === "exercises" ? "selected" : ""} onClick={() => setPage("exercises")}>
-            <span>▲</span> Exercises
-          </button>
-          <button className={page === "profile" ? "selected" : ""} onClick={() => setPage("profile")}>
-            <span>○</span> Profile
-          </button>
+              {key === "dashboard" && (
+                <small>AI</small>
+              )}
+            </button>
+          ))}
         </nav>
 
         <div className="sidebarBottom">
+          <div className="sidebarScore">
+            <div>
+              <span>AI SCORE</span>
+              <strong>{aiScore}</strong>
+            </div>
 
-          <button
-            onClick={enableNotification}
-          >
+            <div className="miniRing">
+              <i
+                style={{
+                  "--score": `${aiScore * 3.6}deg`,
+                }}
+              />
+            </div>
+          </div>
+
+          <button onClick={enableNotification}>
             🔔 Notifications
           </button>
 
-          {/* THEME TOGGLE */}
-
           <button
-            className="themeButton"
             onClick={() =>
               setDarkMode(!darkMode)
             }
@@ -825,298 +766,369 @@ function App() {
               : "☾ Dark Mode"}
           </button>
 
+          <button
+            className="logoutButton"
+            onClick={logout}
+          >
+            ⇥ Log Out
+          </button>
         </div>
-
       </aside>
 
-      {/* MAIN */}
-
       <main className="main">
-
         <header className="topbar">
-
           <div>
-
-            <p className="smallTitle">
-              FITNESS DASHBOARD
-            </p>
-
-           <h1>
-  {page === "dashboard"
-    ? `Welcome back, ${name}`
-    : page === "workout"
-    ? "Workout"
-    : page === "nutrition"
-    ? "Nutrition"
-    : page === "planner"
-    ? "Meal Planner"
-    : page === "progress"
-    ? "Progress"
-    : page === "exercises"
-    ? "Exercises"
-    : "Profile"}
-</h1>
-
-          </div>
-
-          <div className="profileMini">
-
-            <div className="avatar">
-              {name.charAt(0).toUpperCase()}
+            <div className="smallTitle">
+              FITMEAL AI / COMMAND CENTER
             </div>
 
-            <div>
-              <strong>{name}</strong>
-              <span>{weight} kg</span>
-            </div>
-
+            <h1>
+              {page === "dashboard"
+                ? `Welcome back, ${name}`
+                : page === "workout"
+                ? "Workout Intelligence"
+                : page === "nutrition"
+                ? "Nutrition Intelligence"
+                : page === "planner"
+                ? "AI Meal Planner"
+                : page === "progress"
+                ? "Progress Analytics"
+                : page === "exercises"
+                ? "Exercise Intelligence"
+                : "Profile & Settings"}
+            </h1>
           </div>
 
+          <div className="topbarRight">
+            <div className="systemBadge">
+              <span />
+              AI ONLINE
+            </div>
+
+            <div className="profileMini">
+              <div className="avatar">
+                {name
+                  .charAt(0)
+                  .toUpperCase()}
+              </div>
+
+              <div>
+                <strong>{name}</strong>
+                <span>{weight} kg</span>
+              </div>
+            </div>
+          </div>
         </header>
 
         {/* ================= DASHBOARD ================= */}
 
         {page === "dashboard" && (
           <>
+            <section className="hero">
+              <div className="heroContent">
+                <div className="heroEyebrow">
+                  <span />
+                  TODAY / {todayName.toUpperCase()}
+                </div>
 
-            <div className="hero">
-
-              <div>
-
-                <p>
-                  Today • {todayName}
-                </p>
-{/* ================= AI COACH ================= */}
-
-<section className="aiCoach">
-
-  <div className="aiCoachGlow"></div>
-
-  <div className="aiCoachTop">
-
-    <div className="aiOrb">
-      <div className="aiOrbCore">✦</div>
-    </div>
-
-    <div>
-      <div className="aiStatus">
-        <span className="aiStatusDot"></span>
-        AI COACH ONLINE
-      </div>
-
-      <h2>FitMeal Intelligence</h2>
-
-      <p>
-        Your AI-powered daily fitness and nutrition briefing.
-      </p>
-    </div>
-
-  </div>
-
-
-  <div className="aiBrief">
-
-    <div className="aiBriefIcon">
-      ✦
-    </div>
-
-    <div>
-
-      <span className="aiLabel">
-        TODAY'S AI INSIGHT
-      </span>
-
-      <h3>
-        {totals.protein < 50
-          ? "Your protein intake is still low."
-          : totals.calories < 1200
-          ? "You may need more fuel today."
-          : "You're building a solid nutrition day."}
-      </h3>
-
-      <p>
-        {totals.protein < 50
-          ? "Consider adding a high-protein meal such as chicken, eggs, paneer or dal."
-          : totals.calories < 1200
-          ? "A balanced meal with protein and complex carbohydrates could help support your training."
-          : "Keep your meals balanced and stay consistent with your workout plan."}
-      </p>
-
-    </div>
-
-  </div>
-
-
-  <div className="aiRecommendations">
-
-    <div className="aiRecommendation">
-
-      <span className="aiRecommendationIcon">
-        🍗
-      </span>
-
-      <div>
-        <small>AI NUTRITION</small>
-
-        <strong>
-          {totals.protein < 50
-            ? "Increase protein"
-            : "Protein on track"}
-        </strong>
-
-        <span>
-          {totals.protein.toFixed(1)}g logged today
-        </span>
-      </div>
-
-    </div>
-
-
-    <div className="aiRecommendation">
-
-      <span className="aiRecommendationIcon">
-        🔥
-      </span>
-
-      <div>
-        <small>AI ENERGY</small>
-
-        <strong>
-          {totals.calories < 1200
-            ? "Fuel your body"
-            : "Energy looking good"}
-        </strong>
-
-        <span>
-          {Math.round(totals.calories)} kcal logged
-        </span>
-      </div>
-
-    </div>
-
-
-    <div className="aiRecommendation">
-
-      <span className="aiRecommendationIcon">
-        🏋️
-      </span>
-
-      <div>
-        <small>AI WORKOUT</small>
-
-        <strong>
-          {today?.workouts?.length
-            ? `${today.workouts.length} workout focus`
-            : "Rest / recovery"}
-        </strong>
-
-        <span>
-          {today?.workouts?.length
-            ? today.workouts.join(" • ")
-            : "Recovery is part of progress"}
-        </span>
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <div className="aiFooter">
-
-    <span>
-      ✦ FITMEAL AI ENGINE
-    </span>
-
-    <span>
-      Personalized from today's activity
-    </span>
-
-  </div>
-
-</section>
                 <h2>
-                  {today?.workouts.length
+                  {today?.workouts?.length
                     ? today.workouts.join(" + ")
-                    : "Rest Day"}
+                    : "Recovery Day"}
                 </h2>
 
                 <p>
-                  Follow your saved workout split
-                  and stay consistent today.
+                  Your AI coach has analyzed your
+                  current nutrition and workout
+                  activity.
                 </p>
 
+                <div className="heroActions">
+                  <button
+                    onClick={() =>
+                      setPage("workout")
+                    }
+                  >
+                    View Workout
+                  </button>
+
+                  <button
+                    className="secondary"
+                    onClick={() =>
+                      setPage("nutrition")
+                    }
+                  >
+                    Log Nutrition
+                  </button>
+                </div>
               </div>
 
-              <div className="heroDay">
+              <div className="heroCore">
+                <div
+                  className="heroRing"
+                  style={{
+                    "--progress": `${aiScore * 3.6}deg`,
+                  }}
+                >
+                  <div>
+                    <strong>
+                      {aiScore}
+                    </strong>
+                    <span>AI SCORE</span>
+                  </div>
+                </div>
 
-                DAY
+                <small>
+                  DAILY READINESS
+                </small>
+              </div>
+            </section>
 
-                <strong>
-                  {todayIndex + 1}
-                </strong>
+            <section className="aiCoach">
+              <div className="aiCoachGlow" />
 
-                OF 7
+              <div className="aiCoachHeader">
+                <div className="aiOrb">
+                  <span>✦</span>
+                </div>
 
+                <div>
+                  <div className="aiStatus">
+                    <span />
+                    AI COACH ONLINE
+                  </div>
+
+                  <h2>
+                    FitMeal Intelligence
+                  </h2>
+
+                  <p>
+                    Live analysis of today's
+                    fitness behavior.
+                  </p>
+                </div>
+
+                <button
+                  className="aiExpand"
+                  onClick={() =>
+                    setAiOpen(!aiOpen)
+                  }
+                >
+                  {aiOpen
+                    ? "Close AI"
+                    : "Ask AI →"}
+                </button>
               </div>
 
-            </div>
+              <div className="aiBrief">
+                <div className="aiBriefIcon">
+                  ✦
+                </div>
 
-            <div className="stats">
+                <div>
+                  <span>
+                    TODAY'S AI INSIGHT
+                  </span>
 
+                  <h3>{aiInsight}</h3>
+
+                  <p>
+                    {totals.protein < 40
+                      ? "Add a protein-rich food to move your daily score upward."
+                      : "Keep your meals consistent and match your nutrition with today's activity."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="aiRecommendations">
+                <div className="aiRecommendation">
+                  <b>🍗</b>
+                  <div>
+                    <small>
+                      NUTRITION
+                    </small>
+                    <strong>
+                      {totals.protein.toFixed(
+                        1
+                      )}
+                      g protein
+                    </strong>
+                    <span>
+                      {totals.protein < 40
+                        ? "Needs attention"
+                        : "On track"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="aiRecommendation">
+                  <b>🔥</b>
+                  <div>
+                    <small>
+                      ENERGY
+                    </small>
+                    <strong>
+                      {Math.round(
+                        totals.calories
+                      )}{" "}
+                      kcal
+                    </strong>
+                    <span>
+                      Today's intake
+                    </span>
+                  </div>
+                </div>
+
+                <div className="aiRecommendation">
+                  <b>🏋️</b>
+                  <div>
+                    <small>
+                      WORKOUT
+                    </small>
+                    <strong>
+                      {today?.workouts?.length
+                        ? `${today.workouts.length} focus`
+                        : "Recovery"}
+                    </strong>
+                    <span>
+                      {today?.workouts?.length
+                        ? today.workouts.join(
+                            " • "
+                          )
+                        : "Rest day"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {aiOpen && (
+                <div className="aiChat">
+                  <div className="aiChatMessages">
+                    <div className="aiChatBubble bot">
+                      <span>✦</span>
+                      Hi {name}. Ask me about
+                      protein, calories, meals or
+                      today's workout.
+                    </div>
+
+                    {aiMessage && (
+                      <div className="aiChatBubble user">
+                        {aiMessage}
+                      </div>
+                    )}
+
+                    {aiMessage && (
+                      <div className="aiChatBubble bot">
+                        <span>✦</span>
+                        {askAI()}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="aiChatInput">
+                    <input
+                      value={aiMessage}
+                      onChange={(e) =>
+                        setAiMessage(
+                          e.target.value
+                        )
+                      }
+                      onKeyDown={(e) => {
+                        if (
+                          e.key === "Enter"
+                        ) {
+                          setAiMessage(
+                            e.currentTarget.value
+                          );
+                        }
+                      }}
+                      placeholder="Ask FitMeal AI..."
+                    />
+
+                    <button
+                      onClick={() =>
+                        setAiMessage(
+                          aiMessage.trim()
+                        )
+                      }
+                    >
+                      ↑
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="aiFooter">
+                <span>
+                  ✦ FITMEAL AI ENGINE
+                </span>
+
+                <span>
+                  Analysis generated from
+                  today's activity
+                </span>
+              </div>
+            </section>
+
+            <section className="stats">
               <div className="stat">
-                <span>Calories</span>
+                <div className="statIcon">
+                  🔥
+                </div>
+                <span>CALORIES</span>
                 <strong>
                   {Math.round(
                     totals.calories
                   )}
                 </strong>
-                <small>
-                  kcal today
-                </small>
+                <small>kcal today</small>
               </div>
 
               <div className="stat">
-                <span>Protein</span>
+                <div className="statIcon">
+                  🥩
+                </div>
+                <span>PROTEIN</span>
                 <strong>
-                  {totals.protein.toFixed(1)}g
+                  {totals.protein.toFixed(1)}
+                  g
                 </strong>
-                <small>
-                  consumed
-                </small>
+                <small>consumed</small>
               </div>
 
               <div className="stat">
-                <span>Carbs</span>
+                <div className="statIcon">
+                  ⚡
+                </div>
+                <span>CARBS</span>
                 <strong>
-                  {totals.carbs.toFixed(1)}g
+                  {totals.carbs.toFixed(1)}
+                  g
                 </strong>
-                <small>
-                  consumed
-                </small>
+                <small>consumed</small>
               </div>
 
               <div className="stat">
-                <span>Body Weight</span>
-                <strong>
-                  {weight}
-                </strong>
-                <small>
-                  kg
-                </small>
+                <div className="statIcon">
+                  ⚖
+                </div>
+                <span>BODY WEIGHT</span>
+                <strong>{weight}</strong>
+                <small>kg</small>
               </div>
+            </section>
 
-            </div>
-
-            <div className="twoColumn">
-
+            <div className="dashboardGrid">
               <section className="panel">
-
                 <div className="panelHeader">
-
-                  <h2>
-                    Today's Workout
-                  </h2>
+                  <div>
+                    <span className="panelEyebrow">
+                      TODAY
+                    </span>
+                    <h2>
+                      Workout Focus
+                    </h2>
+                  </div>
 
                   <button
                     className="textButton"
@@ -1124,117 +1136,129 @@ function App() {
                       setPage("workout")
                     }
                   >
-                    View Plan →
+                    Open Plan →
                   </button>
-
                 </div>
 
                 <div className="todayWorkout">
-
-                  {today?.workouts.length ? (
+                  {today?.workouts?.length ? (
                     today.workouts.map(
                       (workout) => (
                         <div
                           className="workoutChip"
                           key={workout}
                         >
+                          <span>●</span>
                           {workout}
                         </div>
                       )
                     )
                   ) : (
-                    <p>
-                      Rest and recovery today.
-                    </p>
+                    <div className="emptyState">
+                      <strong>
+                        Recovery mode
+                      </strong>
+                      <span>
+                        No workout selected
+                        for today.
+                      </span>
+                    </div>
                   )}
-
                 </div>
-
               </section>
 
               <section className="panel">
-
                 <div className="panelHeader">
-
-                  <h2>
-                    Tomorrow
-                  </h2>
+                  <div>
+                    <span className="panelEyebrow">
+                      NEXT UP
+                    </span>
+                    <h2>
+                      Tomorrow
+                    </h2>
+                  </div>
 
                   <span className="badge">
-                    NEXT
+                    DAY{" "}
+                    {tomorrowIndex + 1}
                   </span>
-
                 </div>
 
                 <div className="tomorrowCard">
+                  <div className="tomorrowIcon">
+                    {tomorrow?.workouts?.length
+                      ? "🏋️"
+                      : "☾"}
+                  </div>
 
-                  <strong>
-                    Day {tomorrowIndex + 1}
-                  </strong>
+                  <div>
+                    <strong>
+                      {tomorrow?.workouts
+                        ?.length
+                        ? tomorrow.workouts.join(
+                            " + "
+                          )
+                        : "Rest Day"}
+                    </strong>
 
-                  <h3>
-                    {tomorrow?.workouts.length
-                      ? tomorrow.workouts.join(
-                          " + "
-                        )
-                      : "Rest Day"}
-                  </h3>
-
-                  <select
-                    value={
-                      tomorrow?.workouts[0] ||
-                      "Rest"
-                    }
-                    onChange={(e) => {
-
-                      const selected =
-                        e.target.value;
-
-                      setSplit((old) =>
-                        old.map((item) =>
-                          item.day ===
-                          tomorrowIndex + 1
-                            ? {
-                                ...item,
-                                workouts:
-                                  selected ===
-                                  "Rest"
-                                    ? ["Rest"]
-                                    : [selected],
-                              }
-                            : item
-                        )
-                      );
-
-                    }}
-                  >
-
-                    {WORKOUTS.map(
-                      (workout) => (
-                        <option
-                          key={workout}
-                          value={workout}
-                        >
-                          {workout}
-                        </option>
-                      )
-                    )}
-
-                  </select>
-
+                    <span>
+                      {DAYS[
+                        tomorrowIndex
+                      ]}
+                    </span>
+                  </div>
                 </div>
 
-              </section>
+                <select
+                  value={
+                    tomorrow?.workouts?.[0] ||
+                    "Rest"
+                  }
+                  onChange={(e) => {
+                    const selected =
+                      e.target.value;
 
+                    setSplit((old) =>
+                      old.map((item) =>
+                        item.day ===
+                        tomorrowIndex + 1
+                          ? {
+                              ...item,
+                              workouts:
+                                selected ===
+                                "Rest"
+                                  ? []
+                                  : [selected],
+                            }
+                          : item
+                      )
+                    );
+                  }}
+                >
+                  {WORKOUTS.map(
+                    (workout) => (
+                      <option
+                        key={workout}
+                        value={workout}
+                      >
+                        {workout}
+                      </option>
+                    )
+                  )}
+                </select>
+              </section>
             </div>
 
-            <section className="panel">
-
+            <section className="panel quickMealPanel">
               <div className="panelHeader">
-
-                <h2>
-                  Quick Meal Entry
-                </h2>
+                <div>
+                  <span className="panelEyebrow">
+                    AI FOOD TRACKER
+                  </span>
+                  <h2>
+                    Quick Meal Entry
+                  </h2>
+                </div>
 
                 <button
                   className="textButton"
@@ -1244,11 +1268,9 @@ function App() {
                 >
                   Full Nutrition →
                 </button>
-
               </div>
 
               <div className="quickMeal">
-
                 <input
                   value={meal}
                   onChange={(e) =>
@@ -1261,21 +1283,18 @@ function App() {
                   type="number"
                   value={quantity}
                   onChange={(e) =>
-                    setQuantity(e.target.value)
+                    setQuantity(
+                      e.target.value
+                    )
                   }
                   placeholder="grams"
                 />
 
-                <button
-                  onClick={addMeal}
-                >
-                  Add Meal
+                <button onClick={addMeal}>
+                  + Add Meal
                 </button>
-
               </div>
-
             </section>
-
           </>
         )}
 
@@ -1283,28 +1302,16 @@ function App() {
 
         {page === "workout" && (
           <>
-
             <section className="pageIntro">
-
-              <p>
-                YOUR WEEKLY ROUTINE
-              </p>
-
-              <h2>
-                Workout Schedule
-              </h2>
-
+              <p>AI TRAINING SYSTEM</p>
+              <h2>Workout Schedule</h2>
               <span>
-                Select multiple muscle groups
-                for each day.
+                Build your weekly training split.
               </span>
-
             </section>
 
             <div className="workoutSchedule">
-
               {split.map((day) => (
-
                 <div
                   className={`workoutDay ${
                     day.day ===
@@ -1314,36 +1321,27 @@ function App() {
                   }`}
                   key={day.day}
                 >
-
                   <div className="dayTitle">
-
                     <div>
-
                       <span>
                         DAY {day.day}
                       </span>
-
                       <h3>
                         {DAYS[day.day - 1]}
                       </h3>
-
                     </div>
 
                     {day.day ===
                       todayIndex + 1 && (
-                      <b>
-                        TODAY
-                      </b>
+                      <b>TODAY</b>
                     )}
-
                   </div>
 
                   <div className="workoutOptions">
-
                     {WORKOUTS.map(
                       (workout) => (
-
                         <label
+                          key={workout}
                           className={
                             day.workouts.includes(
                               workout
@@ -1351,9 +1349,7 @@ function App() {
                               ? "workoutSelected"
                               : ""
                           }
-                          key={workout}
                         >
-
                           <input
                             type="checkbox"
                             checked={day.workouts.includes(
@@ -1367,21 +1363,16 @@ function App() {
                             }
                           />
 
-                          {workout}
-
+                          <span>
+                            {workout}
+                          </span>
                         </label>
-
                       )
                     )}
-
                   </div>
-
                 </div>
-
               ))}
-
             </div>
-
           </>
         )}
 
@@ -1389,74 +1380,54 @@ function App() {
 
         {page === "nutrition" && (
           <>
-
             <section className="pageIntro">
-
-              <p>
-                DAILY NUTRITION
-              </p>
-
-              <h2>
-                Track What You Eat
-              </h2>
-
+              <p>AI NUTRITION ENGINE</p>
+              <h2>Nutrition Dashboard</h2>
               <span>
-                Enter your food and the app
-                calculates nutrition automatically.
+                Track food and monitor your daily
+                nutrition profile.
               </span>
-
             </section>
 
             <div className="nutritionLarge">
-
-              <div>
+              <div className="nutritionCard calories">
                 <span>CALORIES</span>
-
                 <strong>
                   {Math.round(
                     totals.calories
                   )}
                 </strong>
-
-                <small>
-                  kcal
-                </small>
+                <small>kcal</small>
               </div>
 
-              <div>
+              <div className="nutritionCard protein">
                 <span>PROTEIN</span>
-
                 <strong>
                   {totals.protein.toFixed(1)}
                 </strong>
-
-                <small>
-                  grams
-                </small>
+                <small>grams</small>
               </div>
 
-              <div>
+              <div className="nutritionCard carbs">
                 <span>CARBS</span>
-
                 <strong>
                   {totals.carbs.toFixed(1)}
                 </strong>
-
-                <small>
-                  grams
-                </small>
+                <small>grams</small>
               </div>
-
             </div>
 
             <section className="panel">
-
-              <h2>
-                Add Food
-              </h2>
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">
+                    FOOD DATABASE
+                  </span>
+                  <h2>Add Food</h2>
+                </div>
+              </div>
 
               <div className="foodForm">
-
                 <input
                   value={meal}
                   onChange={(e) =>
@@ -1469,84 +1440,111 @@ function App() {
                   type="number"
                   value={quantity}
                   onChange={(e) =>
-                    setQuantity(e.target.value)
+                    setQuantity(
+                      e.target.value
+                    )
                   }
-                  placeholder="Quantity in grams"
+                  placeholder="grams"
                 />
 
-                <button
-                  onClick={addMeal}
-                >
+                <button onClick={addMeal}>
                   Add Food
                 </button>
-
               </div>
 
-              <p className="muted">
-                Available demo foods: rice,
-                roti, chicken, egg, paneer,
-                milk, oats, banana, dal,
-                potato, bread, curd.
-              </p>
-
+              <div className="foodHints">
+                {Object.keys(FOOD).map(
+                  (food) => (
+                    <button
+                      key={food}
+                      onClick={() =>
+                        setMeal(food)
+                      }
+                    >
+                      {food}
+                    </button>
+                  )
+                )}
+              </div>
             </section>
 
             <section className="panel">
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">
+                    TODAY
+                  </span>
+                  <h2>Food Log</h2>
+                </div>
 
-              <h2>
-                Today's Food Log
-              </h2>
+                <span className="badge">
+                  {meals.length} MEALS
+                </span>
+              </div>
 
               {meals.length === 0 ? (
-                <div className="empty">
-                  No meals logged today.
+                <div className="emptyState large">
+                  <span>◈</span>
+                  <strong>
+                    No meals logged
+                  </strong>
+                  <p>
+                    Add your first meal above
+                    and let FitMeal AI analyze
+                    your day.
+                  </p>
                 </div>
               ) : (
-                meals.map((item) => (
+                <div className="foodList">
+                  {meals.map((item) => (
+                    <div
+                      className="foodRow"
+                      key={item.id}
+                    >
+                      <div className="foodAvatar">
+                        {item.name
+                          .charAt(0)
+                          .toUpperCase()}
+                      </div>
 
-                  <div
-                    className="foodRow"
-                    key={item.id}
-                  >
+                      <div>
+                        <strong>
+                          {item.name}
+                        </strong>
+                        <span>
+                          {item.quantity}g
+                        </span>
+                      </div>
 
-                    <div>
-                      <strong>
-                        {item.name}
-                      </strong>
+                      <b>
+                        {item.calories} kcal
+                      </b>
 
                       <span>
-                        {item.quantity}g
+                        P{" "}
+                        {item.protein}g
                       </span>
+
+                      <span>
+                        C{" "}
+                        {item.carbs}g
+                      </span>
+
+                      <button
+                        className="deleteBtn"
+                        onClick={() =>
+                          removeMeal(
+                            item.id
+                          )
+                        }
+                      >
+                        ×
+                      </button>
                     </div>
-
-                    <div>
-                      {item.calories} kcal
-                    </div>
-
-                    <div>
-                      P {item.protein}g
-                    </div>
-
-                    <div>
-                      C {item.carbs}g
-                    </div>
-
-                    <button
-                      className="deleteBtn"
-                      onClick={() =>
-                        removeMeal(item.id)
-                      }
-                    >
-                      Remove
-                    </button>
-
-                  </div>
-
-                ))
+                  ))}
+                </div>
               )}
-
             </section>
-
           </>
         )}
 
@@ -1554,134 +1552,161 @@ function App() {
 
         {page === "planner" && (
           <>
-
             <section className="pageIntro">
-
-              <p>
-                PERSONALIZED MEALS
-              </p>
-
-              <h2>
-                Meal Planner
-              </h2>
-
+              <p>AI MEAL INTELLIGENCE</p>
+              <h2>Meal Planner</h2>
               <span>
-                Simple meal ideas around
-                your workout schedule.
+                Simple meal ideas matched to your
+                training day.
               </span>
-
             </section>
 
+            <div className="plannerHero">
+              <div className="plannerOrb">
+                ✦
+              </div>
+
+              <div>
+                <span>
+                  AI RECOMMENDATION
+                </span>
+
+                <h2>
+                  {totals.protein < 40
+                    ? "Prioritize protein today."
+                    : "Keep your nutrition consistent."}
+                </h2>
+
+                <p>
+                  FitMeal AI recommends
+                  nutrient-dense meals around
+                  your activity.
+                </p>
+              </div>
+            </div>
+
             <div className="mealCards">
+              {[
+                [
+                  "BREAKFAST",
+                  "Oats + Milk + Banana",
+                  "Carbs + protein to start the day.",
+                  "08:00",
+                ],
+                [
+                  "LUNCH",
+                  "Rice + Dal + Chicken",
+                  "Balanced meal for recovery and energy.",
+                  "13:30",
+                ],
+                [
+                  "PRE-WORKOUT",
+                  "Banana + Oats",
+                  "Simple fuel before training.",
+                  "16:30",
+                ],
+                [
+                  "POST-WORKOUT",
+                  "Chicken + Rice",
+                  "Protein and carbs after training.",
+                  "19:00",
+                ],
+                [
+                  "SNACK",
+                  "Curd + Banana",
+                  "Light and convenient snack.",
+                  "11:00",
+                ],
+                [
+                  "DINNER",
+                  "Paneer + Roti",
+                  "Balanced evening meal.",
+                  "21:00",
+                ],
+              ].map(
+                ([type, title, text, time]) => (
+                  <div
+                    className="mealCard"
+                    key={type}
+                  >
+                    <div className="mealCardTop">
+                      <span>{type}</span>
+                      <b>{time}</b>
+                    </div>
 
-              <div>
-                <span>BREAKFAST</span>
-                <h3>
-                  Oats + Milk + Banana
-                </h3>
-                <p>
-                  A simple carbohydrate and
-                  protein-containing breakfast.
-                </p>
-              </div>
+                    <div className="mealEmoji">
+                      {type ===
+                      "BREAKFAST"
+                        ? "🥣"
+                        : type ===
+                          "LUNCH"
+                        ? "🍛"
+                        : type ===
+                          "PRE-WORKOUT"
+                        ? "🍌"
+                        : type ===
+                          "POST-WORKOUT"
+                        ? "🍗"
+                        : type ===
+                          "SNACK"
+                        ? "🥛"
+                        : "🫓"}
+                    </div>
 
-              <div>
-                <span>LUNCH</span>
-                <h3>
-                  Rice + Dal + Chicken
-                </h3>
-                <p>
-                  Balanced meal for the
-                  middle of the day.
-                </p>
-              </div>
+                    <h3>{title}</h3>
+                    <p>{text}</p>
 
-              <div>
-                <span>PRE-WORKOUT</span>
-                <h3>
-                  Banana + Oats
-                </h3>
-                <p>
-                  Convenient food before
-                  training.
-                </p>
-              </div>
+                    <button
+                      onClick={() => {
+                        const first =
+                          title
+                            .split("+")[0]
+                            .trim()
+                            .toLowerCase();
 
-              <div>
-                <span>POST-WORKOUT</span>
-                <h3>
-                  Chicken + Rice
-                </h3>
-                <p>
-                  Protein and carbohydrates
-                  after training.
-                </p>
-              </div>
-
-              <div>
-                <span>SNACK</span>
-                <h3>
-                  Curd + Banana
-                </h3>
-                <p>
-                  Simple snack option.
-                </p>
-              </div>
-
-              <div>
-                <span>DINNER</span>
-                <h3>
-                  Paneer + Roti
-                </h3>
-                <p>
-                  Easy dinner combination.
-                </p>
-              </div>
-
+                        if (FOOD[first]) {
+                          setMeal(first);
+                          setPage(
+                            "nutrition"
+                          );
+                        }
+                      }}
+                    >
+                      Log Ingredient →
+                    </button>
+                  </div>
+                )
+              )}
             </div>
 
             <section className="panel">
-
-              <h2>
-                Meal Timing
-              </h2>
-
-              <div className="timeline">
-
+              <div className="panelHeader">
                 <div>
-                  <b>08:00 AM</b>
-                  <span>Breakfast</span>
+                  <span className="panelEyebrow">
+                    DAILY FLOW
+                  </span>
+                  <h2>Meal Timing</h2>
                 </div>
-
-                <div>
-                  <b>11:00 AM</b>
-                  <span>Snack</span>
-                </div>
-
-                <div>
-                  <b>01:30 PM</b>
-                  <span>Lunch</span>
-                </div>
-
-                <div>
-                  <b>04:30 PM</b>
-                  <span>Pre-Workout</span>
-                </div>
-
-                <div>
-                  <b>07:00 PM</b>
-                  <span>Post-Workout</span>
-                </div>
-
-                <div>
-                  <b>09:00 PM</b>
-                  <span>Dinner</span>
-                </div>
-
               </div>
 
+              <div className="timeline">
+                {[
+                  ["08:00", "Breakfast"],
+                  ["11:00", "Snack"],
+                  ["13:30", "Lunch"],
+                  ["16:30", "Pre-Workout"],
+                  ["19:00", "Post-Workout"],
+                  ["21:00", "Dinner"],
+                ].map(
+                  ([time, label]) => (
+                    <div key={time}>
+                      <b>{time}</b>
+                      <span>{label}</span>
+                    </div>
+                  )
+                )}
+              </div>
             </section>
-
           </>
         )}
 
@@ -1689,34 +1714,55 @@ function App() {
 
         {page === "progress" && (
           <>
-
             <section className="pageIntro">
-
-              <p>
-                YOUR ACTIVITY
-              </p>
-
-              <h2>
-                Progress
-              </h2>
-
+              <p>AI ANALYTICS</p>
+              <h2>Progress Center</h2>
               <span>
-                A simple overview of your
-                current activity and nutrition.
+                A live overview of your current
+                activity.
               </span>
-
             </section>
 
-            <div className="progressGrid">
+            <div className="progressHero">
+              <div className="progressBigRing">
+                <div>
+                  <strong>
+                    {aiScore}
+                  </strong>
+                  <span>
+                    AI SCORE
+                  </span>
+                </div>
+              </div>
 
+              <div>
+                <span>
+                  PERFORMANCE STATUS
+                </span>
+
+                <h2>
+                  {aiScore >= 75
+                    ? "Excellent momentum"
+                    : aiScore >= 45
+                    ? "Building momentum"
+                    : "Time to activate"}
+                </h2>
+
+                <p>
+                  Your score combines today's
+                  nutrition logging, protein
+                  intake and meal consistency.
+                </p>
+              </div>
+            </div>
+
+            <div className="progressGrid">
               <div>
                 <span>
                   WORKOUT DAYS
                 </span>
 
-                <strong>
-                  5 / 7
-                </strong>
+                <strong>5 / 7</strong>
 
                 <div className="progressBar">
                   <i
@@ -1726,6 +1772,9 @@ function App() {
                   />
                 </div>
 
+                <small>
+                  Weekly target
+                </small>
               </div>
 
               <div>
@@ -1741,13 +1790,17 @@ function App() {
                   <i
                     style={{
                       width: `${Math.min(
-                        meals.length * 15,
+                        meals.length *
+                          15,
                         100
                       )}%`,
                     }}
                   />
                 </div>
 
+                <small>
+                  Daily consistency
+                </small>
               </div>
 
               <div>
@@ -1756,20 +1809,27 @@ function App() {
                 </span>
 
                 <strong>
-                  {totals.protein.toFixed(1)}g
+                  {totals.protein.toFixed(
+                    1
+                  )}
+                  g
                 </strong>
 
                 <div className="progressBar">
                   <i
                     style={{
                       width: `${Math.min(
-                        totals.protein,
+                        totals.protein *
+                          1.25,
                         100
                       )}%`,
                     }}
                   />
                 </div>
 
+                <small>
+                  AI target tracking
+                </small>
               </div>
 
               <div>
@@ -1787,17 +1847,225 @@ function App() {
                   <i
                     style={{
                       width: `${Math.min(
-                        totals.calories / 20,
+                        totals.calories /
+                          20,
                         100
                       )}%`,
                     }}
                   />
                 </div>
 
+                <small>
+                  Daily energy
+                </small>
               </div>
-
             </div>
 
+            <section className="panel">
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">
+                    AI FEEDBACK
+                  </span>
+
+                  <h2>
+                    Today's Analysis
+                  </h2>
+                </div>
+              </div>
+
+              <div className="analysisGrid">
+                <div>
+                  <span>✦</span>
+                  <strong>
+                    Nutrition
+                  </strong>
+                  <p>
+                    {aiInsight}
+                  </p>
+                </div>
+
+                <div>
+                  <span>⚡</span>
+                  <strong>
+                    Consistency
+                  </strong>
+                  <p>
+                    {meals.length >= 3
+                      ? "Good logging consistency today."
+                      : "Log more meals to improve your data quality."}
+                  </p>
+                </div>
+
+                <div>
+                  <span>🏋️</span>
+                  <strong>
+                    Training
+                  </strong>
+                  <p>
+                    {today?.workouts
+                      ?.length
+                      ? "Your training focus is ready."
+                      : "Recovery day detected."}
+                  </p>
+                </div>
+              </div>
+            </section>
+          </>
+        )}
+
+        {/* ================= EXERCISES ================= */}
+
+        {page === "exercises" && (
+          <>
+            <section className="pageIntro">
+              <p>AI EXERCISE INTELLIGENCE</p>
+              <h2>Exercise Library</h2>
+              <span>
+                Explore movement cues and training
+                guidance.
+              </span>
+            </section>
+
+            <div className="exerciseAIBar">
+              <div className="exerciseAIIcon">
+                ✦
+              </div>
+
+              <div>
+                <span>
+                  FORM ASSISTANT ONLINE
+                </span>
+
+                <strong>
+                  Select an exercise to view
+                  technique cues.
+                </strong>
+              </div>
+
+              <button
+                onClick={() =>
+                  setPage("workout")
+                }
+              >
+                View Workout →
+              </button>
+            </div>
+
+            <div className="exerciseGrid">
+              {EXERCISES.map(
+                (
+                  [
+                    muscle,
+                    title,
+                    icon,
+                    description,
+                  ],
+                  index
+                ) => {
+                  const open =
+                    expandedExercise ===
+                    title;
+
+                  return (
+                    <div
+                      className={`exerciseCard ${
+                        open
+                          ? "exerciseCardOpen"
+                          : ""
+                      }`}
+                      key={title}
+                      onClick={() =>
+                        setExpandedExercise(
+                          open
+                            ? null
+                            : title
+                        )
+                      }
+                    >
+                      <div className="exerciseVisual">
+                        <div className="exerciseNumber">
+                          {String(
+                            index + 1
+                          ).padStart(2, "0")}
+                        </div>
+
+                        <div className="exerciseIcon">
+                          {icon}
+                        </div>
+
+                        <div className="exerciseGridGlow" />
+                      </div>
+
+                      <div className="exerciseInfo">
+                        <span>
+                          {muscle.toUpperCase()}
+                        </span>
+
+                        <h3>{title}</h3>
+
+                        <p>
+                          {description}
+                        </p>
+
+                        <b>
+                          {open
+                            ? "CLOSE GUIDE ↑"
+                            : "OPEN FORM GUIDE ↓"}
+                        </b>
+                      </div>
+
+                      {open && (
+                        <div className="exerciseSteps">
+                          {[
+                            [
+                              "01",
+                              "SETUP",
+                              "Position yourself correctly and brace your body.",
+                            ],
+                            [
+                              "02",
+                              "EXECUTE",
+                              description,
+                            ],
+                            [
+                              "03",
+                              "CONTROL",
+                              "Return slowly and keep the movement controlled.",
+                            ],
+                          ].map(
+                            ([
+                              number,
+                              label,
+                              text,
+                            ]) => (
+                              <div
+                                className="stepItem"
+                                key={number}
+                              >
+                                <span>
+                                  {number}
+                                </span>
+
+                                <div>
+                                  <b>
+                                    {label}
+                                  </b>
+
+                                  <p>
+                                    {text}
+                                  </p>
+                                </div>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+              )}
+            </div>
           </>
         )}
 
@@ -1805,64 +2073,58 @@ function App() {
 
         {page === "profile" && (
           <>
-
             <section className="pageIntro">
-
-              <p>
-                ACCOUNT
-              </p>
-
-              <h2>
-                Profile & Settings
-              </h2>
-
+              <p>ACCOUNT CONTROL</p>
+              <h2>Profile & Settings</h2>
               <span>
-                Manage your personal information,
-                preferences and appearance.
+                Manage your FitMeal AI experience.
               </span>
-
             </section>
 
-            <section className="profileCard">
-
-              <div className="bigAvatar">
-                {name.charAt(0).toUpperCase()}
+            <section className="profileHero">
+              <div className="profileBigAvatar">
+                {name
+                  .charAt(0)
+                  .toUpperCase()}
               </div>
 
-              <h2>
-                {name}
-              </h2>
+              <div>
+                <span>FITMEAL MEMBER</span>
+                <h2>{name}</h2>
+                <p>
+                  Current weight:{" "}
+                  <strong>
+                    {weight} kg
+                  </strong>
+                </p>
+              </div>
 
-              <p>
-                Current weight:{" "}
-                <strong>
-                  {weight} kg
-                </strong>
-              </p>
-
+              <div className="profileScore">
+                <span>AI SCORE</span>
+                <strong>{aiScore}</strong>
+              </div>
             </section>
 
-            {/* THEME SETTINGS */}
-
             <section className="panel">
-
-              <h2>
-                Appearance
-              </h2>
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">
+                    INTERFACE
+                  </span>
+                  <h2>Appearance</h2>
+                </div>
+              </div>
 
               <div className="appearanceSetting">
-
                 <div>
-
                   <strong>
-                    Theme
+                    Interface theme
                   </strong>
 
                   <p>
-                    Choose how FitMeal AI
-                    looks on your screen.
+                    Switch between dark and light
+                    FitMeal AI.
                   </p>
-
                 </div>
 
                 <button
@@ -1871,7 +2133,6 @@ function App() {
                     setDarkMode(!darkMode)
                   }
                 >
-
                   <span
                     className={
                       darkMode
@@ -1891,47 +2152,75 @@ function App() {
                   >
                     ☀ Light
                   </span>
-
                 </button>
-
               </div>
-
             </section>
 
             <section className="panel">
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">
+                    PREFERENCES
+                  </span>
+                  <h2>
+                    Notifications
+                  </h2>
+                </div>
+              </div>
 
-              <h2>
-                Workout Settings
-              </h2>
+              <div className="settingRow">
+                <div>
+                  <strong>
+                    AI reminders
+                  </strong>
+
+                  <p>
+                    Receive reminders about your
+                    daily plan.
+                  </p>
+                </div>
+
+                <button
+                  className={
+                    reminders
+                      ? "toggle active"
+                      : "toggle"
+                  }
+                  onClick={() =>
+                    setReminders(
+                      !reminders
+                    )
+                  }
+                >
+                  <i />
+                </button>
+              </div>
 
               <button
-                onClick={() =>
-                  setPage("workout")
+                className="outlineButton"
+                onClick={
+                  enableNotification
                 }
               >
-                Edit Workout Split
+                Enable Browser Notifications
               </button>
-
-              <button
-                className="notificationBtn"
-                onClick={enableNotification}
-              >
-                Enable Notifications
-              </button>
-
             </section>
 
             <section className="panel dangerPanel">
+              <div>
+                <span className="panelEyebrow">
+                  DANGER ZONE
+                </span>
 
-              <h2>
-                Reset Application
-              </h2>
+                <h2>
+                  Reset Application
+                </h2>
 
-              <p>
-                This will remove your saved
-                profile, workout split and
-                meal history.
-              </p>
+                <p>
+                  Remove your saved profile,
+                  workout split and meal history.
+                </p>
+              </div>
 
               <button
                 className="danger"
@@ -1939,72 +2228,12 @@ function App() {
               >
                 Reset All Data
               </button>
-
             </section>
-
-          </>
-        )}
-                {page === "exercises" && (
-          <>
-            <section className="pageIntro">
-              <p>EXERCISE LIBRARY</p>
-              <h2>Machines & Form Guide</h2>
-              <span>See how to use each machine correctly, with an animated form guide.</span>
-            </section>
-
-                       {EXERCISE_CATEGORIES.map((cat) => (
-              <section className="panel" key={cat.name}>
-                <h2>{cat.name}</h2>
-                <div className="exerciseGrid">
-                  {cat.exercises.map((ex) => {
-                    const isOpen = expandedExercise === ex.name;
-                    return (
-                      <div
-                        className={`exerciseCard ${isOpen ? "exerciseCardOpen" : ""}`}
-                        key={ex.name}
-                        onClick={() =>
-                          setExpandedExercise(isOpen ? null : ex.name)
-                        }
-                      >
-                        <div className="exerciseFigureWrap">
-                          <StickFigure motion={ex.motion} />
-                        </div>
-                        <div className="exerciseInfo">
-                          <span className="exerciseMuscle">{cat.name.toUpperCase()}</span>
-                          <h3>{ex.name}</h3>
-                          <span className="tapHint">
-                            {isOpen ? "Tap to close ▲" : "Tap for steps ▼"}
-                          </span>
-                        </div>
-
-                        {isOpen && (
-                          <div className="exerciseSteps">
-                            {ex.steps.map((step, i) => (
-                              <div className="stepItem" key={step.label}>
-                                <div className="stepArtWrap">
-                                  <StickFigure motion={ex.motion} />
-                                </div>
-                                <div className="stepText">
-                                  <span className="stepNumber">
-                                    {i + 1}. {step.label}
-                                  </span>
-                                  <p>{step.text}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-            ))}
           </>
         )}
       </main>
-
     </div>
   );
 }
+
 export default App;
