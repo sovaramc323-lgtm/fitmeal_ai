@@ -17,7 +17,7 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  background: #07090a;
+  background: #0a0607;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -34,7 +34,7 @@ button {
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 2px solid #16a34a;
+  outline: 2px solid #9f1239;
   outline-offset: 3px;
 }
 
@@ -44,19 +44,19 @@ select:focus-visible {
 
 .appShell.dark,
 .setupScreen.dark {
-  --bg: #07090a;
-  --bg2: #090c0b;
-  --sidebar: rgba(6, 10, 8, .97);
-  --card: rgba(10, 14, 12, .90);
-  --card2: rgba(13, 18, 15, .94);
-  --border: rgba(22,163,74,.08);
-  --borderStrong: rgba(22,163,74,.30);
-  --text: #e5e9e6;
-  --muted: #7c8a80;
-  --red: #166534;
-  --redBright: #16a34a;
-  --redSoft: rgba(22,163,74,.12);
-  --input: #07090a;
+  --bg: #0a0607;
+  --bg2: #0c0708;
+  --sidebar: rgba(9, 5, 6, .97);
+  --card: rgba(13, 8, 9, .90);
+  --card2: rgba(16, 10, 11, .94);
+  --border: rgba(159,18,57,.08);
+  --borderStrong: rgba(159,18,57,.30);
+  --text: #ece5e6;
+  --muted: #8a7a7c;
+  --red: #4c0519;
+  --redBright: #9f1239;
+  --redSoft: rgba(159,18,57,.12);
+  --input: #0a0607;
 }
 
 .appShell.light,
@@ -88,7 +88,7 @@ select:focus-visible {
   background:
     radial-gradient(
       circle at 80% 0%,
-      rgba(22,163,74,.07),
+      rgba(159,18,57,.07),
       transparent 28%
     ),
     var(--bg);
@@ -103,8 +103,8 @@ select:focus-visible {
   opacity: .04;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(22,163,74,.9) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(22,163,74,.9) 1px, transparent 1px);
+    linear-gradient(rgba(159,18,57,.9) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(159,18,57,.9) 1px, transparent 1px);
   background-size: 42px 42px;
   mask-image: radial-gradient(circle at 50% 0%, black, transparent 75%);
 }
@@ -121,13 +121,13 @@ select:focus-visible {
 }
 
 .ambientOne {
-  background: #16a34a;
+  background: #9f1239;
   right: -180px;
   top: 80px;
 }
 
 .ambientTwo {
-  background: #166534;
+  background: #4c0519;
   left: 240px;
   bottom: -240px;
 }
@@ -147,12 +147,12 @@ select:focus-visible {
   background:
     radial-gradient(
       circle at 10% 15%,
-      rgba(22,163,74,.12),
+      rgba(159,18,57,.12),
       transparent 28%
     ),
     radial-gradient(
       circle at 90% 85%,
-      rgba(22,163,74,.08),
+      rgba(159,18,57,.08),
       transparent 28%
     ),
     var(--bg);
@@ -190,7 +190,7 @@ select:focus-visible {
   height: 320px;
   border-radius: 50%;
   filter: blur(70px);
-  background: #166534;
+  background: #4c0519;
   opacity: .12;
   pointer-events: none;
 }
@@ -243,11 +243,11 @@ select:focus-visible {
   background:
     linear-gradient(
       145deg,
-      #16a34a,
-      #166534
+      #9f1239,
+      #4c0519
     );
   box-shadow:
-    0 15px 40px rgba(22,163,74,.30);
+    0 15px 40px rgba(159,18,57,.30);
   overflow: hidden;
 }
 
@@ -313,7 +313,7 @@ select:focus-visible {
 .authTab.active {
   background: var(--red);
   color: #fff;
-  box-shadow: 0 8px 22px rgba(22,163,74,.22);
+  box-shadow: 0 8px 22px rgba(159,18,57,.22);
 }
 
 .setupCard label {
@@ -340,7 +340,7 @@ select:focus-visible {
 
 .setupCard input:focus {
   border-color: var(--red);
-  box-shadow: 0 0 0 4px rgba(22,163,74,.10);
+  box-shadow: 0 0 0 4px rgba(159,18,57,.10);
 }
 
 .authError {
@@ -369,7 +369,7 @@ select:focus-visible {
       var(--red)
     );
   box-shadow:
-    0 12px 28px rgba(22,163,74,.24);
+    0 12px 28px rgba(159,18,57,.24);
   transition: .2s ease;
 }
 
@@ -377,7 +377,7 @@ select:focus-visible {
   transform: translateY(-2px);
   filter: brightness(1.07);
   box-shadow:
-    0 17px 35px rgba(22,163,74,.32);
+    0 17px 35px rgba(159,18,57,.32);
 }
 
 .authFeatures {
@@ -540,7 +540,7 @@ select:focus-visible {
       var(--red)
     );
   box-shadow:
-    0 10px 28px rgba(22,163,74,.26);
+    0 10px 28px rgba(159,18,57,.26);
 }
 
 .brand h2 {
@@ -559,10 +559,10 @@ select:focus-visible {
   gap: 7px;
   margin: 0 9px 18px;
   padding: 8px 10px;
-  border: 1px solid rgba(22,163,74,.20);
+  border: 1px solid rgba(159,18,57,.20);
   border-radius: 8px;
-  color: #16a34a;
-  background: rgba(22,163,74,.10);
+  color: #9f1239;
+  background: rgba(159,18,57,.10);
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 1.3px;
@@ -573,8 +573,8 @@ select:focus-visible {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #16a34a;
-  box-shadow: 0 0 9px #16a34a;
+  background: #9f1239;
+  box-shadow: 0 0 9px #9f1239;
 }
 
 .sidebar nav {
@@ -608,7 +608,7 @@ select:focus-visible {
   padding: 3px 5px;
   border-radius: 5px;
   color: var(--redBright);
-  background: rgba(22,163,74,.10);
+  background: rgba(159,18,57,.10);
   font-size: 7px;
 }
 
@@ -629,7 +629,7 @@ select:focus-visible {
     );
   border-color: rgba(255,255,255,.08);
   box-shadow:
-    0 10px 25px rgba(22,163,74,.26);
+    0 10px 25px rgba(159,18,57,.26);
 }
 
 .sidebar nav button.selected::after {
@@ -760,9 +760,9 @@ select:focus-visible {
   gap: 7px;
   padding: 8px 10px;
   border-radius: 8px;
-  color: #16a34a;
-  border: 1px solid rgba(22,163,74,.20);
-  background: rgba(22,163,74,.10);
+  color: #9f1239;
+  border: 1px solid rgba(159,18,57,.20);
+  background: rgba(159,18,57,.10);
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 1px;
@@ -804,7 +804,7 @@ select:focus-visible {
 .avatar {
   width: 40px;
   height: 40px;
-  box-shadow: 0 8px 20px rgba(22,163,74,.24);
+  box-shadow: 0 8px 20px rgba(159,18,57,.24);
 }
 
 /* =========================================================
@@ -821,18 +821,18 @@ select:focus-visible {
   overflow: hidden;
   padding: 35px;
   margin-bottom: 18px;
-  border: 1px solid rgba(22,163,74,.30);
+  border: 1px solid rgba(159,18,57,.30);
   border-radius: 22px;
   background:
     radial-gradient(
       circle at 90% 50%,
-      rgba(22,163,74,.18),
+      rgba(159,18,57,.18),
       transparent 28%
     ),
     linear-gradient(
       135deg,
-      rgba(4,20,10,.82),
-      rgba(6,8,6,.97) 68%
+      rgba(24,4,8,.82),
+      rgba(10,6,7,.97) 68%
     );
   box-shadow:
     0 25px 65px rgba(0,0,0,.20);
@@ -862,7 +862,7 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #16a34a;
+  color: #9f1239;
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 1.7px;
@@ -872,8 +872,8 @@ select:focus-visible {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #16a34a;
-  box-shadow: 0 0 10px #16a34a;
+  background: #9f1239;
+  box-shadow: 0 0 10px #9f1239;
 }
 
 .hero h2 {
@@ -941,7 +941,7 @@ select:focus-visible {
       rgba(255,255,255,.07) 0
     );
   box-shadow:
-    0 0 40px rgba(22,163,74,.20);
+    0 0 40px rgba(159,18,57,.20);
 }
 
 .heroRing > div,
@@ -953,7 +953,7 @@ select:focus-visible {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #03170c;
+  background: #170509;
 }
 
 .heroRing strong,
@@ -988,18 +988,18 @@ select:focus-visible {
   overflow: hidden;
   margin: 20px 0;
   padding: 25px;
-  border: 1px solid rgba(22,163,74,.22);
+  border: 1px solid rgba(159,18,57,.22);
   border-radius: 22px;
   background:
     radial-gradient(
       circle at 92% 8%,
-      rgba(22,163,74,.15),
+      rgba(159,18,57,.15),
       transparent 28%
     ),
     linear-gradient(
       135deg,
-      rgba(3,16,9,.95),
-      rgba(6,8,6,.98)
+      rgba(18,4,7,.95),
+      rgba(10,6,7,.98)
     );
   box-shadow:
     0 25px 70px rgba(0,0,0,.20);
@@ -1012,7 +1012,7 @@ select:focus-visible {
   right: -110px;
   top: -130px;
   border-radius: 50%;
-  background: rgba(22,163,74,.14);
+  background: rgba(159,18,57,.14);
   filter: blur(35px);
   animation: aiGlow 4s ease-in-out infinite;
 }
@@ -1050,12 +1050,12 @@ select:focus-visible {
   background:
     radial-gradient(
       circle,
-      #16a34a,
-      #052e16
+      #9f1239,
+      #1a0508
     );
   box-shadow:
-    0 0 0 5px rgba(22,163,74,.10),
-    0 0 35px rgba(22,163,74,.38);
+    0 0 0 5px rgba(159,18,57,.10),
+    0 0 35px rgba(159,18,57,.38);
   animation: aiPulse 2.7s ease-in-out infinite;
 }
 
@@ -1064,7 +1064,7 @@ select:focus-visible {
   content: "";
   position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(22,163,74,.26);
+  border: 1px solid rgba(159,18,57,.26);
 }
 
 .aiOrb::before {
@@ -1074,7 +1074,7 @@ select:focus-visible {
 
 .aiOrb::after {
   inset: -16px;
-  border-color: rgba(22,163,74,.12);
+  border-color: rgba(159,18,57,.12);
   animation: aiSpin 4s linear infinite reverse;
 }
 
@@ -1102,7 +1102,7 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #16a34a;
+  color: #9f1239;
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 1.6px;
@@ -1112,8 +1112,8 @@ select:focus-visible {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #16a34a;
-  box-shadow: 0 0 8px #16a34a;
+  background: #9f1239;
+  box-shadow: 0 0 8px #9f1239;
   animation: blink 1.5s infinite;
 }
 
@@ -1137,10 +1137,10 @@ select:focus-visible {
 .aiExpand {
   margin-left: auto;
   padding: 9px 13px;
-  border: 1px solid rgba(22,163,74,.22);
+  border: 1px solid rgba(159,18,57,.22);
   border-radius: 8px;
-  color: #16a34a;
-  background: rgba(22,163,74,.08);
+  color: #9f1239;
+  background: rgba(159,18,57,.08);
   font-size: 9px;
   font-weight: 800;
 }
@@ -1165,12 +1165,12 @@ select:focus-visible {
   justify-content: center;
   border-radius: 11px;
   color: #fff;
-  background: linear-gradient(135deg,#16a34a,#052e16);
-  box-shadow: 0 8px 22px rgba(22,163,74,.26);
+  background: linear-gradient(135deg,#9f1239,#1a0508);
+  box-shadow: 0 8px 22px rgba(159,18,57,.26);
 }
 
 .aiBrief span {
-  color: #16a34a;
+  color: #9f1239;
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 1.5px;
@@ -1210,7 +1210,7 @@ select:focus-visible {
 
 .aiRecommendation:hover {
   transform: translateY(-3px);
-  border-color: rgba(22,163,74,.24);
+  border-color: rgba(159,18,57,.24);
 }
 
 .aiRecommendation > b {
@@ -1220,7 +1220,7 @@ select:focus-visible {
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  background: rgba(22,163,74,.10);
+  background: rgba(159,18,57,.10);
 }
 
 .aiRecommendation div {
@@ -1234,7 +1234,7 @@ select:focus-visible {
 }
 
 .aiRecommendation small {
-  color: #16a34a;
+  color: #9f1239;
   font-size: 7px;
   font-weight: 900;
   letter-spacing: 1.2px;
@@ -1268,7 +1268,7 @@ select:focus-visible {
 }
 
 .aiFooter span:first-child {
-  color: #16a34a;
+  color: #9f1239;
   font-weight: 900;
 }
 
@@ -1277,7 +1277,7 @@ select:focus-visible {
   z-index: 3;
   margin-top: 14px;
   padding: 14px;
-  border: 1px solid rgba(22,163,74,.14);
+  border: 1px solid rgba(159,18,57,.14);
   border-radius: 14px;
   background: rgba(0,0,0,.22);
 }
@@ -1301,13 +1301,13 @@ select:focus-visible {
 }
 
 .aiChatBubble.bot span {
-  color: #16a34a;
+  color: #9f1239;
 }
 
 .aiChatBubble.user {
   align-self: flex-end;
   color: #fff;
-  background: rgba(22,163,74,.20);
+  background: rgba(159,18,57,.20);
 }
 
 .aiChatInput {
@@ -1369,7 +1369,7 @@ select:focus-visible {
   right: -55px;
   bottom: -55px;
   border-radius: 50%;
-  background: rgba(22,163,74,.09);
+  background: rgba(159,18,57,.09);
 }
 
 .statIcon {
@@ -1421,7 +1421,7 @@ select:focus-visible {
   width: 14px;
   height: 14px;
   pointer-events: none;
-  border: 1.5px solid rgba(22,163,74,.50);
+  border: 1.5px solid rgba(159,18,57,.50);
 }
 
 .appShell.dark .panel::before {
@@ -1486,9 +1486,9 @@ select:focus-visible {
   align-items: center;
   gap: 7px;
   padding: 10px 13px;
-  border: 1px solid rgba(22,163,74,.26);
+  border: 1px solid rgba(159,18,57,.26);
   border-radius: 9px;
-  color: #16a34a;
+  color: #9f1239;
   background: var(--redSoft);
   font-size: 11px;
   font-weight: 800;
@@ -1500,7 +1500,7 @@ select:focus-visible {
 
 .badge {
   padding: 6px 8px;
-  border: 1px solid rgba(22,163,74,.20);
+  border: 1px solid rgba(159,18,57,.20);
   border-radius: 7px;
   color: var(--redBright);
   background: var(--redSoft);
@@ -1577,7 +1577,7 @@ select:focus-visible {
 .quickMeal input:focus,
 .foodForm input:focus {
   border-color: var(--red);
-  box-shadow: 0 0 0 4px rgba(22,163,74,.10);
+  box-shadow: 0 0 0 4px rgba(159,18,57,.10);
 }
 
 .quickMeal button,
@@ -1629,7 +1629,7 @@ select:focus-visible {
 
 .workoutDay:hover,
 .workoutDay.current {
-  border-color: rgba(22,163,74,.28);
+  border-color: rgba(159,18,57,.28);
 }
 
 .workoutDay.current {
@@ -1640,7 +1640,7 @@ select:focus-visible {
       transparent
     ),
     var(--card);
-  box-shadow: 0 15px 40px rgba(22,163,74,.10);
+  box-shadow: 0 15px 40px rgba(159,18,57,.10);
 }
 
 .dayTitle {
@@ -1729,7 +1729,7 @@ select:focus-visible {
   right: -70px;
   bottom: -70px;
   border-radius: 50%;
-  background: rgba(22,163,74,.10);
+  background: rgba(159,18,57,.10);
 }
 
 .nutritionCard span,
@@ -1842,12 +1842,12 @@ select:focus-visible {
   gap: 16px;
   margin-bottom: 15px;
   padding: 22px;
-  border: 1px solid rgba(22,163,74,.20);
+  border: 1px solid rgba(159,18,57,.20);
   border-radius: 17px;
   background:
     linear-gradient(
       135deg,
-      rgba(4,20,10,.55),
+      rgba(24,4,8,.55),
       var(--card)
     );
 }
@@ -1861,8 +1861,8 @@ select:focus-visible {
   flex-shrink: 0;
   border-radius: 50%;
   color: #fff;
-  background: linear-gradient(145deg,#16a34a,#052e16);
-  box-shadow: 0 0 30px rgba(22,163,74,.26);
+  background: linear-gradient(145deg,#9f1239,#1a0508);
+  box-shadow: 0 0 30px rgba(159,18,57,.26);
 }
 
 .plannerHero span {
@@ -2067,7 +2067,7 @@ select:focus-visible {
       var(--red),
       var(--redBright)
     );
-  box-shadow: 0 0 13px rgba(22,163,74,.32);
+  box-shadow: 0 0 13px rgba(159,18,57,.32);
   transition: width .7s ease;
 }
 
@@ -2117,7 +2117,7 @@ select:focus-visible {
   gap: 12px;
   margin-bottom: 16px;
   padding: 15px;
-  border: 1px solid rgba(22,163,74,.20);
+  border: 1px solid rgba(159,18,57,.20);
   border-radius: 14px;
   background: var(--redSoft);
 }
@@ -2178,7 +2178,7 @@ select:focus-visible {
 
 .exerciseCard:hover {
   transform: translateY(-4px);
-  border-color: rgba(22,163,74,.28);
+  border-color: rgba(159,18,57,.28);
   box-shadow: 0 20px 50px rgba(0,0,0,.12);
 }
 
@@ -2196,7 +2196,7 @@ select:focus-visible {
   background:
     radial-gradient(
       circle,
-      rgba(22,163,74,.12),
+      rgba(159,18,57,.12),
       transparent 48%
     ),
     var(--card2);
@@ -2215,7 +2215,7 @@ select:focus-visible {
   width: 130px;
   height: 130px;
   border-radius: 50%;
-  background: rgba(22,163,74,.12);
+  background: rgba(159,18,57,.12);
   filter: blur(30px);
   animation: exerciseGlow 3s infinite;
 }
@@ -2241,7 +2241,7 @@ select:focus-visible {
   position: relative;
   z-index: 2;
   font-size: 52px;
-  filter: drop-shadow(0 8px 15px rgba(22,163,74,.24));
+  filter: drop-shadow(0 8px 15px rgba(159,18,57,.24));
 }
 
 .exerciseInfo {
@@ -2325,7 +2325,7 @@ select:focus-visible {
   background:
     radial-gradient(
       circle at 50% 0,
-      rgba(22,163,74,.10),
+      rgba(159,18,57,.10),
       transparent 35%
     ),
     var(--card);
@@ -2335,7 +2335,7 @@ select:focus-visible {
   width: 75px;
   height: 75px;
   font-size: 29px;
-  box-shadow: 0 13px 30px rgba(22,163,74,.26);
+  box-shadow: 0 13px 30px rgba(159,18,57,.26);
 }
 
 .profileHero > div:nth-child(2) {
