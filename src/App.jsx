@@ -2492,33 +2492,47 @@ function App() {
               </span>
             </section>
 
-            <section className="panel">
-              <div className="panelHeader">
-                <div>
-                  <span className="panelEyebrow">
-                    YOUR CODE
-                  </span>
-                  <h2>Add Friends</h2>
-                </div>
-              </div>
+           <section className="panel">
+  <div className="panelHeader">
+    <div>
+      <span className="panelEyebrow">
+        YOUR CODE
+      </span>
+      <h2>Add Friends</h2>
+    </div>
 
-              <div className="quickMeal">
-                <input
-                  value={friendCode}
-                  readOnly
-                  placeholder="Your friend code"
-                />
-                <input
-                  value={addFriendCode}
-                  onChange={(e) =>
-                    setAddFriendCode(e.target.value)
-                  }
-                  placeholder="Enter a friend's code"
-                />
-                <button onClick={sendFriendRequest}>
-                  + Add Friend
-                </button>
-              </div>
+    {friendCode && (
+      <span
+        className="badge"
+        style={{ cursor: "pointer", fontSize: "12px", padding: "9px 12px" }}
+        onClick={() => {
+          navigator.clipboard.writeText(friendCode);
+          alert("Friend code copied!");
+        }}
+        title="Click to copy"
+      >
+        {friendCode} ⧉
+      </span>
+    )}
+  </div>
+
+  <div className="quickMeal">
+    <input
+      value={friendCode}
+      readOnly
+      placeholder="Your friend code"
+    />
+    <input
+      value={addFriendCode}
+      onChange={(e) =>
+        setAddFriendCode(e.target.value)
+      }
+      placeholder="Enter a friend's code"
+    />
+    <button onClick={sendFriendRequest}>
+      + Add Friend
+    </button>
+  </div>
 
               {incomingRequests.length > 0 &&
                 incomingRequests.map((req) => (
