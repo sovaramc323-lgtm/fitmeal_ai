@@ -2874,3 +2874,77 @@ select:focus-visible {
     scroll-behavior: auto !important;
   }
 }
+/* =========================================================
+   LEADERBOARD
+   ========================================================= */
+
+.friendRow,
+.leaderboardRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 3px;
+  border-bottom: 1px solid var(--border);
+}
+
+.friendRow:last-child,
+.leaderboardRow:last-child {
+  border-bottom: none;
+}
+
+.friendRankBadge {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  color: var(--redBright);
+  background: var(--redSoft);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.friendRowInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.friendRowInfo strong {
+  display: block;
+  font-size: 12px;
+}
+
+.friendRowInfo span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.friendRowValue {
+  color: var(--redBright);
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.friendRowActions {
+  display: flex;
+  gap: 6px;
+}
+
+.acceptBtn {
+  padding: 7px 11px;
+  border: 0;
+  border-radius: 7px;
+  color: #fff;
+  background: var(--red);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.tabToggle span {
+  cursor: pointer;
+}

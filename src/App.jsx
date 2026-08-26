@@ -106,6 +106,16 @@ function App() {
   const [aiOpen, setAiOpen] = useState(false);
   const [aiMessage, setAiMessage] = useState("");
 
+  const [friends, setFriends] = useState([]);
+  const [incomingRequests, setIncomingRequests] = useState([]);
+  const [outgoingRequests, setOutgoingRequests] = useState([]);
+  const [friendCode, setFriendCode] = useState("");
+  const [addFriendCode, setAddFriendCode] = useState("");
+  const [leaderboard, setLeaderboard] = useState(null);
+  const [leaderboardTab, setLeaderboardTab] = useState("protein");
+  const [statWeight, setStatWeight] = useState("");
+  const [statBodyFat, setStatBodyFat] = useState("");
+
   const todayIndex = new Date().getDay();
   const todayName = DAYS[todayIndex];
 
@@ -231,6 +241,135 @@ function App() {
     darkMode,
     weekDates,
   ]);
+
+  useEffect(() => {
+    if (page === "leaderboard" && token) {
+      fetchFriendCode();
+      fetchFriends();
+      fetchLeaderboard();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, token]);
+
+  const authHeaders = () => ({
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  });
+
+  const fetchFriendCode = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/friends/code`, {
+        headers: authHeaders(),
+      });
+      const data = await res.json();
+      setFriendCode(data.friendCode || "");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchFriends = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/friends`, {
+        headers: authHeaders(),
+      });
+      const data = await res.json();
+      setFriends(data.friends || []);
+      setIncomingRequests(data.incoming || []);
+      setOutgoingRequests(data.outgoing || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchLeaderboard = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/leaderboard`, {
+        headers: authHeaders(),
+      });
+      const data = await res.json();
+      setLeaderboard(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const sendFriendRequest = async () => {
+    if (!addFriendCode.trim()) return;
+
+    try {
+      const res = await fetch(`${API_URL}/api/friends/request`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ code: addFriendCode.trim() }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Could not send request");
+        return;
+      }
+
+      setAddFriendCode("");
+      fetchFriends();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const respondToRequest = async (requestId, action) => {
+    try {
+      await fetch(`${API_URL}/api/friends/respond`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({ requestId, action }),
+      });
+      fetchFriends();
+      fetchLeaderboard();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const removeFriend = async (friendId) => {
+    if (!confirm("Remove this friend?")) return;
+
+    try {
+      await fetch(`${API_URL}/api/friends/${friendId}`, {
+        method: "DELETE",
+        headers: authHeaders(),
+      });
+      fetchFriends();
+      fetchLeaderboard();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const logStats = async () => {
+    if (!statWeight) {
+      alert("Enter your current weight.");
+      return;
+    }
+
+    try {
+      await fetch(`${API_URL}/api/weight-log`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: JSON.stringify({
+          weight: Number(statWeight),
+          bodyFat: statBodyFat ? Number(statBodyFat) : null,
+        }),
+      });
+
+      setWeight(String(statWeight));
+      setStatWeight("");
+      setStatBodyFat("");
+      fetchLeaderboard();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleLogin = async () => {
     setAuthError("");
@@ -768,6 +907,7 @@ function App() {
             ["progress", "↗", "Progress"],
             ["exercises", "▲", "Exercises"],
             ["profile", "○", "Profile"],
+            ["leaderboard", "★", "Leaderboard"],
           ].map(([key, icon, label]) => (
             <button
               key={key}
@@ -845,7 +985,9 @@ function App() {
                 ? "Progress Analytics"
                 : page === "exercises"
                 ? "Exercise Intelligence"
-                : "Profile & Settings"}
+                : page === "profile"
+                ? "Profile & Settings"
+                : "Friends Leaderboard"}
             </h1>
           </div>
 
@@ -2334,6 +2476,242 @@ function App() {
               >
                 Reset All Data
               </button>
+            </section>
+          </>
+        )}
+
+        {/* ================= LEADERBOARD ================= */}
+
+        {page === "leaderboard" && (
+          <>
+            <section className="pageIntro">
+              <p>AI SOCIAL COMPETITION</p>
+              <h2>Friends Leaderboard</h2>
+              <span>
+                Compete with friends on protein, weight loss and body fat loss.
+              </span>
+            </section>
+
+            <section className="panel">
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">
+                    YOUR CODE
+                  </span>
+                  <h2>Add Friends</h2>
+                </div>
+              </div>
+
+              <div className="quickMeal">
+                <input
+                  value={friendCode}
+                  readOnly
+                  placeholder="Your friend code"
+                />
+                <input
+                  value={addFriendCode}
+                  onChange={(e) =>
+                    setAddFriendCode(e.target.value)
+                  }
+                  placeholder="Enter a friend's code"
+                />
+                <button onClick={sendFriendRequest}>
+                  + Add Friend
+                </button>
+              </div>
+
+              {incomingRequests.length > 0 &&
+                incomingRequests.map((req) => (
+                  <div className="friendRow" key={req.requestId}>
+                    <div className="friendRankBadge">
+                      {req.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="friendRowInfo">
+                      <strong>{req.name}</strong>
+                      <span>wants to be friends</span>
+                    </div>
+                    <div className="friendRowActions">
+                      <button
+                        className="acceptBtn"
+                        onClick={() =>
+                          respondToRequest(req.requestId, "accept")
+                        }
+                      >
+                        Accept
+                      </button>
+                      <button
+                        className="deleteBtn"
+                        onClick={() =>
+                          respondToRequest(req.requestId, "decline")
+                        }
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+              {outgoingRequests.length > 0 &&
+                outgoingRequests.map((req) => (
+                  <div className="friendRow" key={req.requestId}>
+                    <div className="friendRankBadge">
+                      {req.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="friendRowInfo">
+                      <strong>{req.name}</strong>
+                      <span>request pending</span>
+                    </div>
+                  </div>
+                ))}
+
+              {friends.length === 0 ? (
+                <div className="emptyState" style={{ marginTop: 12 }}>
+                  <strong>No friends yet</strong>
+                  <span>Share your code above to start a leaderboard.</span>
+                </div>
+              ) : (
+                friends.map((f) => (
+                  <div className="friendRow" key={f.id}>
+                    <div className="friendRankBadge">
+                      {f.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="friendRowInfo">
+                      <strong>{f.name}</strong>
+                      <span>{f.points} pts all-time</span>
+                    </div>
+                    <button
+                      className="deleteBtn"
+                      onClick={() => removeFriend(f.id)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))
+              )}
+            </section>
+
+            <section className="panel quickMealPanel">
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">
+                    WEEKLY CHECK-IN
+                  </span>
+                  <h2>Log Today's Stats</h2>
+                </div>
+              </div>
+
+              <div className="quickMeal">
+                <input
+                  type="number"
+                  value={statWeight}
+                  onChange={(e) => setStatWeight(e.target.value)}
+                  placeholder="Weight (kg)"
+                />
+                <input
+                  type="number"
+                  value={statBodyFat}
+                  onChange={(e) => setStatBodyFat(e.target.value)}
+                  placeholder="Body fat % (optional)"
+                />
+                <button onClick={logStats}>Save</button>
+              </div>
+            </section>
+
+            <section className="panel">
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">
+                    {leaderboard
+                      ? `WEEK OF ${leaderboard.weekStart}`
+                      : "THIS WEEK"}
+                  </span>
+                  <h2>Leaderboard</h2>
+                </div>
+
+                <div className="themeToggle tabToggle">
+                  {[
+                    ["protein", "Protein"],
+                    ["weightLoss", "Weight Loss"],
+                    ["bodyFatLoss", "Body Fat"],
+                  ].map(([key, label]) => (
+                    <span
+                      key={key}
+                      className={
+                        leaderboardTab === key ? "activeTheme" : ""
+                      }
+                      onClick={() => setLeaderboardTab(key)}
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {!leaderboard ||
+              leaderboard.rankings[leaderboardTab].length === 0 ? (
+                <div className="emptyState large">
+                  <span>★</span>
+                  <strong>Not enough data yet</strong>
+                  <p>
+                    Add a friend and log a few days of stats to see
+                    rankings.
+                  </p>
+                </div>
+              ) : (
+                leaderboard.rankings[leaderboardTab].map(
+                  (row, index) => (
+                    <div className="leaderboardRow" key={row.id}>
+                      <div className="friendRankBadge">
+                        {index === 0
+                          ? "🥇"
+                          : index === 1
+                          ? "🥈"
+                          : index === 2
+                          ? "🥉"
+                          : index + 1}
+                      </div>
+                      <div className="friendRowInfo">
+                        <strong>{row.name}</strong>
+                        <span>
+                          {leaderboardTab === "protein"
+                            ? "this week"
+                            : leaderboardTab === "weightLoss"
+                            ? "lost this week"
+                            : "body fat lost this week"}
+                        </span>
+                      </div>
+                      <div className="friendRowValue">
+                        {leaderboardTab === "protein"
+                          ? `${row.value.toFixed(1)}g`
+                          : leaderboardTab === "weightLoss"
+                          ? `${row.value > 0 ? row.value.toFixed(1) : 0} kg`
+                          : `${row.value > 0 ? row.value.toFixed(1) : 0}%`}
+                      </div>
+                    </div>
+                  )
+                )
+              )}
+            </section>
+
+            <section className="panel">
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">ALL-TIME</span>
+                  <h2>Points Standings</h2>
+                </div>
+              </div>
+
+              {leaderboard &&
+                leaderboard.points.map((p, index) => (
+                  <div className="leaderboardRow" key={p.id}>
+                    <div className="friendRankBadge">{index + 1}</div>
+                    <div className="friendRowInfo">
+                      <strong>{p.name}</strong>
+                      <span>Earned by winning weekly challenges</span>
+                    </div>
+                    <div className="friendRowValue">{p.points} pts</div>
+                  </div>
+                ))}
             </section>
           </>
         )}
