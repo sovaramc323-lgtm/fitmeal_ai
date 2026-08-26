@@ -57,9 +57,9 @@ select:focus-visible {
   --redBright: #22d3ee;
   --redSoft: rgba(34,211,238,.12);
   --input: #060f12;
-  --accentGlow: #ff4fd8;
-  --accentGlowDeep: #6d1b8f;
-  --live: #ff4fd8;
+  --accentGlow: #fbbf24;
+  --accentGlowDeep: #92400e;
+  --live: #fbbf24;
 }
 
 .appShell.light,
@@ -130,7 +130,7 @@ select:focus-visible {
 }
 
 .ambientTwo {
-  background: #ff4fd8;
+  background: #fbbf24;
   left: 240px;
   bottom: -240px;
 }
@@ -350,9 +350,9 @@ select:focus-visible {
   margin-top: 12px;
   padding: 11px 13px;
   border-radius: 10px;
-  color: #ff8fe3;
-  background: rgba(255,79,216,.08);
-  border: 1px solid rgba(255,79,216,.22);
+  color: #ef4444;
+  background: rgba(239,68,68,.08);
+  border: 1px solid rgba(239,68,68,.24);
   font-size: 12px;
 }
 
@@ -562,10 +562,10 @@ select:focus-visible {
   gap: 7px;
   margin: 0 9px 18px;
   padding: 8px 10px;
-  border: 1px solid rgba(255,79,216,.20);
+  border: 1px solid rgba(245,158,11,.22);
   border-radius: 8px;
-  color: #ff8fe3;
-  background: rgba(255,79,216,.08);
+  color: #fbbf24;
+  background: rgba(245,158,11,.10);
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 1.3px;
@@ -576,8 +576,8 @@ select:focus-visible {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #ff4fd8;
-  box-shadow: 0 0 9px #ff4fd8;
+  background: #fbbf24;
+  box-shadow: 0 0 9px #fbbf24;
 }
 
 .sidebar nav {
@@ -704,7 +704,7 @@ select:focus-visible {
 }
 
 .logoutButton {
-  color: #ff8fe3 !important;
+  color: #ef4444 !important;
 }
 
 /* =========================================================
@@ -763,9 +763,9 @@ select:focus-visible {
   gap: 7px;
   padding: 8px 10px;
   border-radius: 8px;
-  color: #ff8fe3;
-  border: 1px solid rgba(255,79,216,.20);
-  background: rgba(255,79,216,.08);
+  color: #fbbf24;
+  border: 1px solid rgba(245,158,11,.22);
+  background: rgba(245,158,11,.10);
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 1px;
@@ -865,7 +865,7 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #67e8f9;
+  color: #22d3ee;
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 1.7px;
@@ -875,8 +875,8 @@ select:focus-visible {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #ff4fd8;
-  box-shadow: 0 0 10px #ff4fd8;
+  background: #fbbf24;
+  box-shadow: 0 0 10px #fbbf24;
 }
 
 .hero h2 {
@@ -1015,7 +1015,7 @@ select:focus-visible {
   right: -110px;
   top: -130px;
   border-radius: 50%;
-  background: rgba(255,79,216,.16);
+  background: rgba(245,158,11,.16);
   filter: blur(35px);
   animation: aiGlow 4s ease-in-out infinite;
 }
@@ -1053,12 +1053,12 @@ select:focus-visible {
   background:
     radial-gradient(
       circle,
-      #ff4fd8,
-      #6d1b8f
+      #fbbf24,
+      #92400e
     );
   box-shadow:
-    0 0 0 5px rgba(255,79,216,.10),
-    0 0 35px rgba(255,79,216,.38);
+    0 0 0 5px rgba(245,158,11,.10),
+    0 0 35px rgba(245,158,11,.40);
   animation: aiPulse 2.7s ease-in-out infinite;
 }
 
@@ -1067,7 +1067,7 @@ select:focus-visible {
   content: "";
   position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(255,79,216,.26);
+  border: 1px solid rgba(245,158,11,.28);
 }
 
 .aiOrb::before {
@@ -1077,7 +1077,7 @@ select:focus-visible {
 
 .aiOrb::after {
   inset: -16px;
-  border-color: rgba(255,79,216,.12);
+  border-color: rgba(245,158,11,.14);
   animation: aiSpin 4s linear infinite reverse;
 }
 
@@ -1105,7 +1105,7 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #ff8fe3;
+  color: #fbbf24;
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 1.6px;
@@ -1115,8 +1115,8 @@ select:focus-visible {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #ff4fd8;
-  box-shadow: 0 0 8px #ff4fd8;
+  background: #fbbf24;
+  box-shadow: 0 0 8px #fbbf24;
   animation: blink 1.5s infinite;
 }
 
@@ -1142,7 +1142,7 @@ select:focus-visible {
   padding: 9px 13px;
   border: 1px solid rgba(34,211,238,.22);
   border-radius: 8px;
-  color: #67e8f9;
+  color: #22d3ee;
   background: rgba(34,211,238,.08);
   font-size: 9px;
   font-weight: 800;
@@ -1168,12 +1168,12 @@ select:focus-visible {
   justify-content: center;
   border-radius: 11px;
   color: #fff;
-  background: linear-gradient(135deg,#ff4fd8,#6d1b8f);
-  box-shadow: 0 8px 22px rgba(255,79,216,.24);
+  background: linear-gradient(135deg,#fbbf24,#92400e);
+  box-shadow: 0 8px 22px rgba(245,158,11,.26);
 }
 
 .aiBrief span {
-  color: #ff8fe3;
+  color: #fbbf24;
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 1.5px;
@@ -1237,7 +1237,7 @@ select:focus-visible {
 }
 
 .aiRecommendation small {
-  color: #67e8f9;
+  color: #22d3ee;
   font-size: 7px;
   font-weight: 900;
   letter-spacing: 1.2px;
@@ -1271,7 +1271,7 @@ select:focus-visible {
 }
 
 .aiFooter span:first-child {
-  color: #ff8fe3;
+  color: #fbbf24;
   font-weight: 900;
 }
 
@@ -1304,7 +1304,7 @@ select:focus-visible {
 }
 
 .aiChatBubble.bot span {
-  color: #ff8fe3;
+  color: #fbbf24;
 }
 
 .aiChatBubble.user {
@@ -1491,7 +1491,7 @@ select:focus-visible {
   padding: 10px 13px;
   border: 1px solid rgba(34,211,238,.28);
   border-radius: 9px;
-  color: #67e8f9;
+  color: #22d3ee;
   background: var(--redSoft);
   font-size: 11px;
   font-weight: 800;
@@ -1830,8 +1830,8 @@ select:focus-visible {
   height: 30px;
   border: 0;
   border-radius: 8px;
-  color: #ff8fe3;
-  background: rgba(255,79,216,.10);
+  color: #ef4444;
+  background: rgba(239,68,68,.10);
   font-size: 18px;
 }
 
@@ -1864,8 +1864,8 @@ select:focus-visible {
   flex-shrink: 0;
   border-radius: 50%;
   color: #fff;
-  background: linear-gradient(145deg,#ff4fd8,#6d1b8f);
-  box-shadow: 0 0 30px rgba(255,79,216,.24);
+  background: linear-gradient(145deg,#fbbf24,#92400e);
+  box-shadow: 0 0 30px rgba(245,158,11,.26);
 }
 
 .plannerHero span {
@@ -2478,7 +2478,7 @@ select:focus-visible {
   border: 0;
   border-radius: 8px;
   color: #fff;
-  background: #86198f;
+  background: #991b1b;
   font-size: 9px;
   font-weight: 800;
 }
