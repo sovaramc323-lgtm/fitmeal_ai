@@ -61,6 +61,20 @@ const createSplit = () =>
     workouts: [],
   }));
 
+const toDateKey = (date) => date.toISOString().slice(0, 10);
+
+const getWeekDates = () => {
+  const now = new Date();
+  const start = new Date(now);
+  start.setDate(now.getDate() - now.getDay());
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    return toDateKey(d);
+  });
+};
+
 function App() {
   const [page, setPage] = useState("dashboard");
 
@@ -105,9 +119,17 @@ function App() {
     (item) => item.day === tomorrowIndex + 1
   );
 
+  const todayDate = useMemo(() => toDateKey(new Date()), []);
+  const weekDates = useMemo(() => getWeekDates(), []);
+
+  const todayMeals = useMemo(
+    () => meals.filter((item) => item.date === todayDate),
+    [meals, todayDate]
+  );
+
   const totals = useMemo(
     () =>
-      meals.reduce(
+      todayMeals.reduce(
         (total, item) => ({
           calories: total.calories + item.calories,
           protein: total.protein + item.protein,
@@ -119,7 +141,24 @@ function App() {
           carbs: 0,
         }
       ),
-    [meals]
+    [todayMeals]
+  );
+
+  const weeklyTotals = useMemo(
+    () =>
+      weekDates.map((date) =>
+        meals
+          .filter((item) => item.date === date)
+          .reduce(
+            (total, item) => ({
+              calories: total.calories + item.calories,
+              protein: total.protein + item.protein,
+              carbs: total.carbs + item.carbs,
+            }),
+            { calories: 0, protein: 0, carbs: 0 }
+          )
+      ),
+    [meals, weekDates]
   );
 
   const aiScore = Math.min(
@@ -127,7 +166,7 @@ function App() {
     Math.round(
       Math.min(totals.protein * 1.3, 45) +
       Math.min(totals.calories / 25, 35) +
-      Math.min(meals.length * 7, 20)
+      Math.min(todayMeals.length * 7, 20)
     )
   );
 
@@ -136,7 +175,7 @@ function App() {
       ? "Protein is your biggest opportunity today."
       : totals.calories < 1200
       ? "Your energy intake looks light. Consider a balanced meal."
-      : meals.length < 3
+      : todayMeals.length < 3
       ? "Your nutrition log needs another meal or snack."
       : "Your nutrition pattern is looking strong today.";
 
@@ -150,7 +189,12 @@ function App() {
         setName(data.name || "");
         setWeight(data.weight || "");
         setSplit(data.split || createSplit());
-        setMeals(data.meals || []);
+        setMeals(
+          (data.meals || []).map((item) => ({
+            ...item,
+            date: item.date || toDateKey(new Date()),
+          }))
+        );
         setSetup(data.setup || false);
         setReminders(data.reminders ?? true);
         setDarkMode(data.darkMode ?? true);
@@ -161,13 +205,17 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const currentWeekStart = weekDates[0];
+
     localStorage.setItem(
       "fitmealApp",
       JSON.stringify({
         name,
         weight,
         split,
-        meals,
+        meals: meals.filter(
+          (item) => item.date >= currentWeekStart
+        ),
         setup,
         reminders,
         darkMode,
@@ -181,6 +229,7 @@ function App() {
     setup,
     reminders,
     darkMode,
+    weekDates,
   ]);
 
   const handleLogin = async () => {
@@ -302,6 +351,7 @@ function App() {
 
     const newMeal = {
       id: Date.now(),
+      date: todayDate,
       name: meal,
       quantity: Number(quantity),
       calories: Math.round(
@@ -1417,6 +1467,62 @@ function App() {
               </div>
             </div>
 
+            <section className="panel weekPanel">
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">
+                    THIS WEEK
+                  </span>
+                  <h2>Weekly Breakdown</h2>
+                </div>
+
+                <span className="badge">
+                  RESETS SUNDAY
+                </span>
+              </div>
+
+              <div className="weekGrid">
+                {weekDates.map((date, i) => (
+                  <div
+                    className={
+                      date === todayDate
+                        ? "weekDayCard currentDay"
+                        : "weekDayCard"
+                    }
+                    key={date}
+                  >
+                    <span>
+                      {DAYS[i]
+                        .slice(0, 3)
+                        .toUpperCase()}
+                    </span>
+
+                    <strong>
+                      {Math.round(
+                        weeklyTotals[i].calories
+                      )}
+                    </strong>
+
+                    <small>kcal</small>
+                    <small>
+                      P{" "}
+                      {weeklyTotals[
+                        i
+                      ].protein.toFixed(1)}
+                      g
+                    </small>
+                    <small>
+                      C{" "}
+                      {weeklyTotals[
+                        i
+                      ].carbs.toFixed(1)}
+                      g
+                    </small>
+                  </div>
+                ))}
+              </div>
+            </section>
+
             <section className="panel">
               <div className="panelHeader">
                 <div>
@@ -1478,11 +1584,11 @@ function App() {
                 </div>
 
                 <span className="badge">
-                  {meals.length} MEALS
+                  {todayMeals.length} MEALS
                 </span>
               </div>
 
-              {meals.length === 0 ? (
+              {todayMeals.length === 0 ? (
                 <div className="emptyState large">
                   <span>◈</span>
                   <strong>
@@ -1496,7 +1602,7 @@ function App() {
                 </div>
               ) : (
                 <div className="foodList">
-                  {meals.map((item) => (
+                  {todayMeals.map((item) => (
                     <div
                       className="foodRow"
                       key={item.id}
@@ -1783,14 +1889,14 @@ function App() {
                 </span>
 
                 <strong>
-                  {meals.length}
+                  {todayMeals.length}
                 </strong>
 
                 <div className="progressBar">
                   <i
                     style={{
                       width: `${Math.min(
-                        meals.length *
+                        todayMeals.length *
                           15,
                         100
                       )}%`,
@@ -1891,7 +1997,7 @@ function App() {
                     Consistency
                   </strong>
                   <p>
-                    {meals.length >= 3
+                    {todayMeals.length >= 3
                       ? "Good logging consistency today."
                       : "Log more meals to improve your data quality."}
                   </p>
