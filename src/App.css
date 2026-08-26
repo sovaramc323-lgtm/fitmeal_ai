@@ -17,7 +17,7 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
-  background: #050a0c;
+  background: #07090a;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -34,7 +34,7 @@ button {
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 2px solid #22d3ee;
+  outline: 2px solid #16a34a;
   outline-offset: 3px;
 }
 
@@ -44,22 +44,19 @@ select:focus-visible {
 
 .appShell.dark,
 .setupScreen.dark {
-  --bg: #050a0c;
-  --bg2: #071012;
-  --sidebar: rgba(4, 10, 12, .97);
-  --card: rgba(7, 15, 18, .90);
-  --card2: rgba(9, 20, 24, .94);
-  --border: rgba(34,211,238,.08);
-  --borderStrong: rgba(34,211,238,.32);
-  --text: #e8f6fa;
-  --muted: #6f8a94;
-  --red: #0891b2;
-  --redBright: #22d3ee;
-  --redSoft: rgba(34,211,238,.12);
-  --input: #060f12;
-  --accentGlow: #fbbf24;
-  --accentGlowDeep: #92400e;
-  --live: #fbbf24;
+  --bg: #07090a;
+  --bg2: #090c0b;
+  --sidebar: rgba(6, 10, 8, .97);
+  --card: rgba(10, 14, 12, .90);
+  --card2: rgba(13, 18, 15, .94);
+  --border: rgba(22,163,74,.08);
+  --borderStrong: rgba(22,163,74,.30);
+  --text: #e5e9e6;
+  --muted: #7c8a80;
+  --red: #166534;
+  --redBright: #16a34a;
+  --redSoft: rgba(22,163,74,.12);
+  --input: #07090a;
 }
 
 .appShell.light,
@@ -91,7 +88,7 @@ select:focus-visible {
   background:
     radial-gradient(
       circle at 80% 0%,
-      rgba(34,211,238,.08),
+      rgba(22,163,74,.07),
       transparent 28%
     ),
     var(--bg);
@@ -106,8 +103,8 @@ select:focus-visible {
   opacity: .04;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(34,211,238,.9) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34,211,238,.9) 1px, transparent 1px);
+    linear-gradient(rgba(22,163,74,.9) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(22,163,74,.9) 1px, transparent 1px);
   background-size: 42px 42px;
   mask-image: radial-gradient(circle at 50% 0%, black, transparent 75%);
 }
@@ -124,13 +121,13 @@ select:focus-visible {
 }
 
 .ambientOne {
-  background: #22d3ee;
+  background: #16a34a;
   right: -180px;
   top: 80px;
 }
 
 .ambientTwo {
-  background: #fbbf24;
+  background: #166534;
   left: 240px;
   bottom: -240px;
 }
@@ -150,12 +147,12 @@ select:focus-visible {
   background:
     radial-gradient(
       circle at 10% 15%,
-      rgba(34,211,238,.14),
+      rgba(22,163,74,.12),
       transparent 28%
     ),
     radial-gradient(
       circle at 90% 85%,
-      rgba(34,211,238,.09),
+      rgba(22,163,74,.08),
       transparent 28%
     ),
     var(--bg);
@@ -193,7 +190,7 @@ select:focus-visible {
   height: 320px;
   border-radius: 50%;
   filter: blur(70px);
-  background: #0891b2;
+  background: #166534;
   opacity: .12;
   pointer-events: none;
 }
@@ -246,11 +243,11 @@ select:focus-visible {
   background:
     linear-gradient(
       145deg,
-      #22d3ee,
-      #0891b2
+      #16a34a,
+      #166534
     );
   box-shadow:
-    0 15px 40px rgba(34,211,238,.30);
+    0 15px 40px rgba(22,163,74,.30);
   overflow: hidden;
 }
 
@@ -316,7 +313,7 @@ select:focus-visible {
 .authTab.active {
   background: var(--red);
   color: #fff;
-  box-shadow: 0 8px 22px rgba(34,211,238,.22);
+  box-shadow: 0 8px 22px rgba(22,163,74,.22);
 }
 
 .setupCard label {
@@ -343,16 +340,16 @@ select:focus-visible {
 
 .setupCard input:focus {
   border-color: var(--red);
-  box-shadow: 0 0 0 4px rgba(34,211,238,.10);
+  box-shadow: 0 0 0 4px rgba(22,163,74,.10);
 }
 
 .authError {
   margin-top: 12px;
   padding: 11px 13px;
   border-radius: 10px;
-  color: #ef4444;
-  background: rgba(239,68,68,.08);
-  border: 1px solid rgba(239,68,68,.24);
+  color: #9ca3af;
+  background: rgba(107,114,128,.10);
+  border: 1px solid rgba(107,114,128,.26);
   font-size: 12px;
 }
 
@@ -372,7 +369,7 @@ select:focus-visible {
       var(--red)
     );
   box-shadow:
-    0 12px 28px rgba(34,211,238,.24);
+    0 12px 28px rgba(22,163,74,.24);
   transition: .2s ease;
 }
 
@@ -380,7 +377,7 @@ select:focus-visible {
   transform: translateY(-2px);
   filter: brightness(1.07);
   box-shadow:
-    0 17px 35px rgba(34,211,238,.32);
+    0 17px 35px rgba(22,163,74,.32);
 }
 
 .authFeatures {
@@ -543,7 +540,7 @@ select:focus-visible {
       var(--red)
     );
   box-shadow:
-    0 10px 28px rgba(34,211,238,.26);
+    0 10px 28px rgba(22,163,74,.26);
 }
 
 .brand h2 {
@@ -562,10 +559,10 @@ select:focus-visible {
   gap: 7px;
   margin: 0 9px 18px;
   padding: 8px 10px;
-  border: 1px solid rgba(245,158,11,.22);
+  border: 1px solid rgba(22,163,74,.20);
   border-radius: 8px;
-  color: #fbbf24;
-  background: rgba(245,158,11,.10);
+  color: #16a34a;
+  background: rgba(22,163,74,.10);
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 1.3px;
@@ -576,8 +573,8 @@ select:focus-visible {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #fbbf24;
-  box-shadow: 0 0 9px #fbbf24;
+  background: #16a34a;
+  box-shadow: 0 0 9px #16a34a;
 }
 
 .sidebar nav {
@@ -611,7 +608,7 @@ select:focus-visible {
   padding: 3px 5px;
   border-radius: 5px;
   color: var(--redBright);
-  background: rgba(34,211,238,.10);
+  background: rgba(22,163,74,.10);
   font-size: 7px;
 }
 
@@ -632,7 +629,7 @@ select:focus-visible {
     );
   border-color: rgba(255,255,255,.08);
   box-shadow:
-    0 10px 25px rgba(34,211,238,.26);
+    0 10px 25px rgba(22,163,74,.26);
 }
 
 .sidebar nav button.selected::after {
@@ -704,7 +701,7 @@ select:focus-visible {
 }
 
 .logoutButton {
-  color: #ef4444 !important;
+  color: #9ca3af !important;
 }
 
 /* =========================================================
@@ -763,9 +760,9 @@ select:focus-visible {
   gap: 7px;
   padding: 8px 10px;
   border-radius: 8px;
-  color: #fbbf24;
-  border: 1px solid rgba(245,158,11,.22);
-  background: rgba(245,158,11,.10);
+  color: #16a34a;
+  border: 1px solid rgba(22,163,74,.20);
+  background: rgba(22,163,74,.10);
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 1px;
@@ -807,7 +804,7 @@ select:focus-visible {
 .avatar {
   width: 40px;
   height: 40px;
-  box-shadow: 0 8px 20px rgba(34,211,238,.24);
+  box-shadow: 0 8px 20px rgba(22,163,74,.24);
 }
 
 /* =========================================================
@@ -824,18 +821,18 @@ select:focus-visible {
   overflow: hidden;
   padding: 35px;
   margin-bottom: 18px;
-  border: 1px solid rgba(34,211,238,.35);
+  border: 1px solid rgba(22,163,74,.30);
   border-radius: 22px;
   background:
     radial-gradient(
       circle at 90% 50%,
-      rgba(34,211,238,.20),
+      rgba(22,163,74,.18),
       transparent 28%
     ),
     linear-gradient(
       135deg,
-      rgba(4,26,32,.80),
-      rgba(6,10,12,.97) 68%
+      rgba(4,20,10,.82),
+      rgba(6,8,6,.97) 68%
     );
   box-shadow:
     0 25px 65px rgba(0,0,0,.20);
@@ -865,7 +862,7 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #22d3ee;
+  color: #16a34a;
   font-size: 9px;
   font-weight: 900;
   letter-spacing: 1.7px;
@@ -875,8 +872,8 @@ select:focus-visible {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #fbbf24;
-  box-shadow: 0 0 10px #fbbf24;
+  background: #16a34a;
+  box-shadow: 0 0 10px #16a34a;
 }
 
 .hero h2 {
@@ -944,7 +941,7 @@ select:focus-visible {
       rgba(255,255,255,.07) 0
     );
   box-shadow:
-    0 0 40px rgba(34,211,238,.20);
+    0 0 40px rgba(22,163,74,.20);
 }
 
 .heroRing > div,
@@ -956,7 +953,7 @@ select:focus-visible {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #04141a;
+  background: #03170c;
 }
 
 .heroRing strong,
@@ -991,18 +988,18 @@ select:focus-visible {
   overflow: hidden;
   margin: 20px 0;
   padding: 25px;
-  border: 1px solid rgba(34,211,238,.25);
+  border: 1px solid rgba(22,163,74,.22);
   border-radius: 22px;
   background:
     radial-gradient(
       circle at 92% 8%,
-      rgba(34,211,238,.17),
+      rgba(22,163,74,.15),
       transparent 28%
     ),
     linear-gradient(
       135deg,
-      rgba(3,20,26,.95),
-      rgba(6,10,12,.98)
+      rgba(3,16,9,.95),
+      rgba(6,8,6,.98)
     );
   box-shadow:
     0 25px 70px rgba(0,0,0,.20);
@@ -1015,7 +1012,7 @@ select:focus-visible {
   right: -110px;
   top: -130px;
   border-radius: 50%;
-  background: rgba(245,158,11,.16);
+  background: rgba(22,163,74,.14);
   filter: blur(35px);
   animation: aiGlow 4s ease-in-out infinite;
 }
@@ -1053,12 +1050,12 @@ select:focus-visible {
   background:
     radial-gradient(
       circle,
-      #fbbf24,
-      #92400e
+      #16a34a,
+      #052e16
     );
   box-shadow:
-    0 0 0 5px rgba(245,158,11,.10),
-    0 0 35px rgba(245,158,11,.40);
+    0 0 0 5px rgba(22,163,74,.10),
+    0 0 35px rgba(22,163,74,.38);
   animation: aiPulse 2.7s ease-in-out infinite;
 }
 
@@ -1067,7 +1064,7 @@ select:focus-visible {
   content: "";
   position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(245,158,11,.28);
+  border: 1px solid rgba(22,163,74,.26);
 }
 
 .aiOrb::before {
@@ -1077,7 +1074,7 @@ select:focus-visible {
 
 .aiOrb::after {
   inset: -16px;
-  border-color: rgba(245,158,11,.14);
+  border-color: rgba(22,163,74,.12);
   animation: aiSpin 4s linear infinite reverse;
 }
 
@@ -1105,7 +1102,7 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #fbbf24;
+  color: #16a34a;
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 1.6px;
@@ -1115,8 +1112,8 @@ select:focus-visible {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #fbbf24;
-  box-shadow: 0 0 8px #fbbf24;
+  background: #16a34a;
+  box-shadow: 0 0 8px #16a34a;
   animation: blink 1.5s infinite;
 }
 
@@ -1140,10 +1137,10 @@ select:focus-visible {
 .aiExpand {
   margin-left: auto;
   padding: 9px 13px;
-  border: 1px solid rgba(34,211,238,.22);
+  border: 1px solid rgba(22,163,74,.22);
   border-radius: 8px;
-  color: #22d3ee;
-  background: rgba(34,211,238,.08);
+  color: #16a34a;
+  background: rgba(22,163,74,.08);
   font-size: 9px;
   font-weight: 800;
 }
@@ -1168,12 +1165,12 @@ select:focus-visible {
   justify-content: center;
   border-radius: 11px;
   color: #fff;
-  background: linear-gradient(135deg,#fbbf24,#92400e);
-  box-shadow: 0 8px 22px rgba(245,158,11,.26);
+  background: linear-gradient(135deg,#16a34a,#052e16);
+  box-shadow: 0 8px 22px rgba(22,163,74,.26);
 }
 
 .aiBrief span {
-  color: #fbbf24;
+  color: #16a34a;
   font-size: 8px;
   font-weight: 900;
   letter-spacing: 1.5px;
@@ -1213,7 +1210,7 @@ select:focus-visible {
 
 .aiRecommendation:hover {
   transform: translateY(-3px);
-  border-color: rgba(34,211,238,.25);
+  border-color: rgba(22,163,74,.24);
 }
 
 .aiRecommendation > b {
@@ -1223,7 +1220,7 @@ select:focus-visible {
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  background: rgba(34,211,238,.10);
+  background: rgba(22,163,74,.10);
 }
 
 .aiRecommendation div {
@@ -1237,7 +1234,7 @@ select:focus-visible {
 }
 
 .aiRecommendation small {
-  color: #22d3ee;
+  color: #16a34a;
   font-size: 7px;
   font-weight: 900;
   letter-spacing: 1.2px;
@@ -1271,7 +1268,7 @@ select:focus-visible {
 }
 
 .aiFooter span:first-child {
-  color: #fbbf24;
+  color: #16a34a;
   font-weight: 900;
 }
 
@@ -1280,7 +1277,7 @@ select:focus-visible {
   z-index: 3;
   margin-top: 14px;
   padding: 14px;
-  border: 1px solid rgba(34,211,238,.15);
+  border: 1px solid rgba(22,163,74,.14);
   border-radius: 14px;
   background: rgba(0,0,0,.22);
 }
@@ -1304,13 +1301,13 @@ select:focus-visible {
 }
 
 .aiChatBubble.bot span {
-  color: #fbbf24;
+  color: #16a34a;
 }
 
 .aiChatBubble.user {
   align-self: flex-end;
   color: #fff;
-  background: rgba(34,211,238,.20);
+  background: rgba(22,163,74,.20);
 }
 
 .aiChatInput {
@@ -1372,7 +1369,7 @@ select:focus-visible {
   right: -55px;
   bottom: -55px;
   border-radius: 50%;
-  background: rgba(34,211,238,.09);
+  background: rgba(22,163,74,.09);
 }
 
 .statIcon {
@@ -1424,7 +1421,7 @@ select:focus-visible {
   width: 14px;
   height: 14px;
   pointer-events: none;
-  border: 1.5px solid rgba(34,211,238,.55);
+  border: 1.5px solid rgba(22,163,74,.50);
 }
 
 .appShell.dark .panel::before {
@@ -1489,9 +1486,9 @@ select:focus-visible {
   align-items: center;
   gap: 7px;
   padding: 10px 13px;
-  border: 1px solid rgba(34,211,238,.28);
+  border: 1px solid rgba(22,163,74,.26);
   border-radius: 9px;
-  color: #22d3ee;
+  color: #16a34a;
   background: var(--redSoft);
   font-size: 11px;
   font-weight: 800;
@@ -1503,7 +1500,7 @@ select:focus-visible {
 
 .badge {
   padding: 6px 8px;
-  border: 1px solid rgba(34,211,238,.20);
+  border: 1px solid rgba(22,163,74,.20);
   border-radius: 7px;
   color: var(--redBright);
   background: var(--redSoft);
@@ -1580,7 +1577,7 @@ select:focus-visible {
 .quickMeal input:focus,
 .foodForm input:focus {
   border-color: var(--red);
-  box-shadow: 0 0 0 4px rgba(34,211,238,.10);
+  box-shadow: 0 0 0 4px rgba(22,163,74,.10);
 }
 
 .quickMeal button,
@@ -1632,7 +1629,7 @@ select:focus-visible {
 
 .workoutDay:hover,
 .workoutDay.current {
-  border-color: rgba(34,211,238,.30);
+  border-color: rgba(22,163,74,.28);
 }
 
 .workoutDay.current {
@@ -1643,7 +1640,7 @@ select:focus-visible {
       transparent
     ),
     var(--card);
-  box-shadow: 0 15px 40px rgba(34,211,238,.10);
+  box-shadow: 0 15px 40px rgba(22,163,74,.10);
 }
 
 .dayTitle {
@@ -1732,7 +1729,7 @@ select:focus-visible {
   right: -70px;
   bottom: -70px;
   border-radius: 50%;
-  background: rgba(34,211,238,.10);
+  background: rgba(22,163,74,.10);
 }
 
 .nutritionCard span,
@@ -1830,8 +1827,8 @@ select:focus-visible {
   height: 30px;
   border: 0;
   border-radius: 8px;
-  color: #ef4444;
-  background: rgba(239,68,68,.10);
+  color: #9ca3af;
+  background: rgba(107,114,128,.10);
   font-size: 18px;
 }
 
@@ -1845,12 +1842,12 @@ select:focus-visible {
   gap: 16px;
   margin-bottom: 15px;
   padding: 22px;
-  border: 1px solid rgba(34,211,238,.20);
+  border: 1px solid rgba(22,163,74,.20);
   border-radius: 17px;
   background:
     linear-gradient(
       135deg,
-      rgba(4,30,38,.55),
+      rgba(4,20,10,.55),
       var(--card)
     );
 }
@@ -1864,8 +1861,8 @@ select:focus-visible {
   flex-shrink: 0;
   border-radius: 50%;
   color: #fff;
-  background: linear-gradient(145deg,#fbbf24,#92400e);
-  box-shadow: 0 0 30px rgba(245,158,11,.26);
+  background: linear-gradient(145deg,#16a34a,#052e16);
+  box-shadow: 0 0 30px rgba(22,163,74,.26);
 }
 
 .plannerHero span {
@@ -2070,7 +2067,7 @@ select:focus-visible {
       var(--red),
       var(--redBright)
     );
-  box-shadow: 0 0 13px rgba(34,211,238,.32);
+  box-shadow: 0 0 13px rgba(22,163,74,.32);
   transition: width .7s ease;
 }
 
@@ -2120,7 +2117,7 @@ select:focus-visible {
   gap: 12px;
   margin-bottom: 16px;
   padding: 15px;
-  border: 1px solid rgba(34,211,238,.20);
+  border: 1px solid rgba(22,163,74,.20);
   border-radius: 14px;
   background: var(--redSoft);
 }
@@ -2181,7 +2178,7 @@ select:focus-visible {
 
 .exerciseCard:hover {
   transform: translateY(-4px);
-  border-color: rgba(34,211,238,.30);
+  border-color: rgba(22,163,74,.28);
   box-shadow: 0 20px 50px rgba(0,0,0,.12);
 }
 
@@ -2199,7 +2196,7 @@ select:focus-visible {
   background:
     radial-gradient(
       circle,
-      rgba(34,211,238,.12),
+      rgba(22,163,74,.12),
       transparent 48%
     ),
     var(--card2);
@@ -2218,7 +2215,7 @@ select:focus-visible {
   width: 130px;
   height: 130px;
   border-radius: 50%;
-  background: rgba(34,211,238,.12);
+  background: rgba(22,163,74,.12);
   filter: blur(30px);
   animation: exerciseGlow 3s infinite;
 }
@@ -2244,7 +2241,7 @@ select:focus-visible {
   position: relative;
   z-index: 2;
   font-size: 52px;
-  filter: drop-shadow(0 8px 15px rgba(34,211,238,.24));
+  filter: drop-shadow(0 8px 15px rgba(22,163,74,.24));
 }
 
 .exerciseInfo {
@@ -2328,7 +2325,7 @@ select:focus-visible {
   background:
     radial-gradient(
       circle at 50% 0,
-      rgba(34,211,238,.10),
+      rgba(22,163,74,.10),
       transparent 35%
     ),
     var(--card);
@@ -2338,7 +2335,7 @@ select:focus-visible {
   width: 75px;
   height: 75px;
   font-size: 29px;
-  box-shadow: 0 13px 30px rgba(34,211,238,.26);
+  box-shadow: 0 13px 30px rgba(22,163,74,.26);
 }
 
 .profileHero > div:nth-child(2) {
@@ -2478,7 +2475,7 @@ select:focus-visible {
   border: 0;
   border-radius: 8px;
   color: #fff;
-  background: #991b1b;
+  background: #374151;
   font-size: 9px;
   font-weight: 800;
 }
