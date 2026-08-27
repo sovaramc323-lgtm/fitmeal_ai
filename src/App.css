@@ -47,6 +47,14 @@ h1, h2, h3 {
   font-weight: 600;
 }
 
+/* Fixed tokens for panels that are intentionally always-dark
+   (hero, AI coach, meal planner) regardless of light/dark theme,
+   so their text never inherits the theme's flipped --text color. */
+:root {
+  --spotlightText: #f5eef0;
+  --spotlightMuted: #ab989a;
+}
+
 /* =========================================================
    THEMES
    ========================================================= */
@@ -980,6 +988,7 @@ h1, h2, h3 {
     );
   box-shadow:
     0 25px 65px var(--shadow);
+  color: var(--spotlightText);
 }
 
 .hero::before {
@@ -1149,6 +1158,7 @@ h1, h2, h3 {
     );
   box-shadow:
     0 25px 70px var(--shadow);
+  color: var(--spotlightText);
 }
 
 .aiCoachGlow {
@@ -2050,6 +2060,7 @@ h1, h2, h3 {
       rgba(28,4,9,.55),
       var(--card)
     );
+  color: var(--spotlightText);
 }
 
 .plannerOrb {
@@ -2079,7 +2090,7 @@ h1, h2, h3 {
 
 .plannerHero p {
   margin: 0;
-  color: var(--muted);
+  color: var(--spotlightMuted);
   font-size: 10px;
 }
 
