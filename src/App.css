@@ -499,6 +499,129 @@ select:focus-visible {
 }
 
 /* =========================================================
+   MOBILE TOPBAR + HAMBURGER
+   ========================================================= */
+
+.mobileTopbar {
+  display: none;
+}
+
+.hamburgerButton {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card2);
+  transition: .2s ease;
+}
+
+.hamburgerButton span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--text);
+  transition: transform .25s ease, opacity .2s ease;
+}
+
+.hamburgerButton.hamburgerOpen {
+  border-color: var(--borderStrong);
+  background: var(--redSoft);
+}
+
+.hamburgerButton.hamburgerOpen span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburgerButton.hamburgerOpen span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburgerButton.hamburgerOpen span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.mobileBrand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mobileBrand .logo {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 900;
+  background: linear-gradient(145deg,var(--redBright),var(--red));
+}
+
+.mobileBrand div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mobileBrand strong {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobileBrand span {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: .4px;
+}
+
+.mobileScore {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--redBright);
+  border: 1px solid var(--borderStrong);
+  background: var(--redSoft);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.navBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(2px);
+  animation: fadeIn .2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.sidebarCloseButton {
+  display: none;
+}
+
+/* =========================================================
    SIDEBAR
    ========================================================= */
 
@@ -2661,38 +2784,81 @@ select:focus-visible {
 }
 
 @media (max-width: 700px) {
+  /* Show the mobile topbar with hamburger, hide the desktop topbar row */
+  .mobileTopbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--sidebar);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(18px);
+  }
+
+  .mobileBrand {
+    flex: 1;
+  }
+
+  /* Sidebar becomes an off-canvas drawer */
   .sidebar {
-    position: relative;
-    width: 100%;
-    min-height: auto;
-    padding: 14px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(78vw, 300px);
+    z-index: 40;
+    transform: translateX(-100%);
+    transition: transform .28s ease;
+    box-shadow: 20px 0 60px rgba(0,0,0,.35);
   }
 
-  .appShell {
-    display: block;
+  .sidebar.sidebarOpen {
+    transform: translateX(0);
   }
 
-  .brand {
-    padding-bottom: 12px;
+  .sidebar nav {
+    flex-direction: column;
+    overflow-x: visible;
+  }
+
+  .sidebar nav button:hover {
+    transform: none;
   }
 
   .aiSideStatus,
   .sidebarScore,
   .sidebarBottom > button {
-    display: none;
+    display: flex;
   }
 
-  .sidebar nav {
-    flex-direction: row;
-    overflow-x: auto;
+  .sidebarBottom > button {
+    display: block;
   }
 
-  .sidebar nav button {
-    min-width: max-content;
+  .brand {
+    padding-bottom: 18px;
+    position: relative;
   }
 
-  .sidebar nav button:hover {
-    transform: none;
+  .sidebarCloseButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    margin-left: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    background: var(--card2);
+    font-size: 17px;
+    line-height: 1;
+  }
+
+  .appShell {
+    display: block;
   }
 
   .main {

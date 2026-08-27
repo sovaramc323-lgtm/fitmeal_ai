@@ -116,6 +116,8 @@ function App() {
   const [statWeight, setStatWeight] = useState("");
   const [statBodyFat, setStatBodyFat] = useState("");
 
+  const [navOpen, setNavOpen] = useState(false);
+
   const todayIndex = new Date().getDay();
   const todayName = DAYS[todayIndex];
 
@@ -250,6 +252,29 @@ function App() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, token]);
+
+  // Close the mobile nav whenever the page changes, and lock body
+  // scroll while the nav drawer is open so the page behind it doesn't move.
+  useEffect(() => {
+    setNavOpen(false);
+  }, [page]);
+
+  useEffect(() => {
+    document.body.style.overflow = navOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [navOpen]);
+
+  // Close the mobile nav automatically if the viewport is resized
+  // back up to desktop width.
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 700) setNavOpen(false);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const authHeaders = () => ({
     "Content-Type": "application/json",
@@ -870,6 +895,20 @@ function App() {
 
   /* ================= MAIN APP ================= */
 
+  const navItems = [
+    ["dashboard", "⌂", "Dashboard"],
+    ["workout", "●", "Workout"],
+    ["nutrition", "◈", "Nutrition"],
+    ["planner", "□", "Meal Planner"],
+    ["progress", "↗", "Progress"],
+    ["exercises", "▲", "Exercises"],
+    ["profile", "○", "Profile"],
+    ["leaderboard", "★", "Leaderboard"],
+  ];
+
+  const currentNavLabel =
+    navItems.find(([key]) => key === page)?.[2] || "Dashboard";
+
   return (
     <div
       className={
@@ -881,7 +920,45 @@ function App() {
       <div className="ambient ambientOne" />
       <div className="ambient ambientTwo" />
 
-      <aside className="sidebar">
+      {/* Mobile top bar with hamburger — only visible on small screens */}
+      <div className="mobileTopbar">
+        <button
+          className={
+            navOpen
+              ? "hamburgerButton hamburgerOpen"
+              : "hamburgerButton"
+          }
+          onClick={() => setNavOpen((open) => !open)}
+          aria-label={navOpen ? "Close menu" : "Open menu"}
+          aria-expanded={navOpen}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+
+        <div className="mobileBrand">
+          <div className="logo">F</div>
+          <div>
+            <strong>{currentNavLabel}</strong>
+            <span>FitMeal AI</span>
+          </div>
+        </div>
+
+        <div className="mobileScore">
+          <span>{aiScore}</span>
+        </div>
+      </div>
+
+      {/* Backdrop behind the drawer on mobile */}
+      {navOpen && (
+        <div
+          className="navBackdrop"
+          onClick={() => setNavOpen(false)}
+        />
+      )}
+
+      <aside className={navOpen ? "sidebar sidebarOpen" : "sidebar"}>
         <div className="brand">
           <div className="logo">
             F
@@ -891,6 +968,14 @@ function App() {
             <h2>FitMeal</h2>
             <span>AI Intelligence</span>
           </div>
+
+          <button
+            className="sidebarCloseButton"
+            onClick={() => setNavOpen(false)}
+            aria-label="Close menu"
+          >
+            ×
+          </button>
         </div>
 
         <div className="aiSideStatus">
@@ -899,16 +984,7 @@ function App() {
         </div>
 
         <nav>
-          {[
-            ["dashboard", "⌂", "Dashboard"],
-            ["workout", "●", "Workout"],
-            ["nutrition", "◈", "Nutrition"],
-            ["planner", "□", "Meal Planner"],
-            ["progress", "↗", "Progress"],
-            ["exercises", "▲", "Exercises"],
-            ["profile", "○", "Profile"],
-            ["leaderboard", "★", "Leaderboard"],
-          ].map(([key, icon, label]) => (
+          {navItems.map(([key, icon, label]) => (
             <button
               key={key}
               className={
