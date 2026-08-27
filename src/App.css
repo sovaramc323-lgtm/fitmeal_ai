@@ -78,6 +78,7 @@ h1, h2, h3 {
   --redSoft: rgba(239,68,104,.12);
   --input: #0d0708;
   --shadow: rgba(0,0,0,.35);
+  --ringInner: #170509;
 }
 
 .appShell.light,
@@ -87,18 +88,19 @@ h1, h2, h3 {
   --sidebar: rgba(255,255,255,.97);
   --card: rgba(255,255,255,.96);
   --card2: #efecf4;
-  --border: rgba(20,10,30,.08);
-  --borderStrong: rgba(124,58,237,.28);
+  --border: rgba(120,10,40,.09);
+  --borderStrong: rgba(200,20,66,.30);
   --text: #16121e;
   --muted: #6c6976;
-  --red: #6d28d9;
-  --redBright: #8b34e8;
-  --redDeep: #7c3aed;
+  --red: #7a0a2e;
+  --redBright: #c81e4d;
+  --redDeep: #9f1239;
   --amber: #c2790f;
   --amberSoft: rgba(194,121,15,.10);
-  --redSoft: rgba(139,52,232,.08);
+  --redSoft: rgba(200,20,66,.08);
   --input: #faf9fc;
   --shadow: rgba(30,15,60,.10);
+  --ringInner: var(--card);
 }
 
 /* =========================================================
@@ -1107,7 +1109,7 @@ h1, h2, h3 {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #170509;
+  background: var(--ringInner);
 }
 
 .heroRing strong,
@@ -1115,11 +1117,12 @@ h1, h2, h3 {
   font-family: "Space Grotesk", sans-serif;
   font-size: 32px;
   letter-spacing: -.5px;
+  color: var(--redBright);
 }
 
 .heroRing span,
 .progressBigRing span {
-  color: #90807f;
+  color: var(--muted);
   font-size: 8px;
   font-weight: 800;
   letter-spacing: 1.3px;
@@ -1128,7 +1131,7 @@ h1, h2, h3 {
 .heroCore > small {
   display: block;
   margin-top: 12px;
-  color: #90807f;
+  color: var(--spotlightMuted);
   font-size: 8px;
   font-weight: 700;
   letter-spacing: 1.5px;
