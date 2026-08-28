@@ -1756,20 +1756,34 @@ h1, h2, h3 {
   right: 0;
   top: calc(100% + 6px);
   z-index: 30;
-  max-height: 260px;
+  max-height: 420px;
+  min-width: 100%;
   overflow-y: auto;
   border: 1px solid var(--borderStrong);
-  border-radius: 11px;
+  border-radius: 13px;
   background: var(--card);
-  box-shadow: 0 20px 45px var(--shadow);
+  box-shadow: 0 24px 55px var(--shadow);
+}
+
+.foodSearchGroupLabel {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 8px 15px;
+  color: var(--redBright);
+  background: var(--card2);
+  border-bottom: 1px solid var(--border);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
 }
 
 .foodSearchOption {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
   width: 100%;
-  padding: 10px 13px;
+  padding: 14px 16px;
   border: 0;
   border-bottom: 1px solid var(--border);
   background: transparent;
@@ -1787,17 +1801,17 @@ h1, h2, h3 {
 }
 
 .foodSearchOption strong {
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 .foodSearchOption span {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
 }
 
 .foodSearchOption small {
   color: var(--redBright);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
 }
 

@@ -31,21 +31,191 @@ const WORKOUTS = [
 ];
 
 const FOOD_SUGGESTIONS = [
-  "Chicken breast",
-  "Rice",
-  "Egg",
-  "Oats",
-  "Banana",
+  "Roti",
+  "Basmati Rice",
+  "Dal Tadka",
   "Paneer",
-  "Milk",
-  "Black coffee",
-  "Orange juice",
-  "Green tea",
-  "Protein shake",
-  "Greek yogurt",
-  "Cola",
-  "Beer",
+  "Chicken Curry",
+  "Chicken Biryani",
+  "Masala Dosa",
+  "Idli",
+  "Samosa",
+  "Vada Pav",
+  "Pav Bhaji",
+  "Curd / Dahi",
+  "Masala Chai",
+  "Cold Coffee",
+  "Lassi (Sweet)",
+  "Thums Up / Cola",
 ];
+
+// Curated nutrition database for Indian foods, drinks, sweets, street
+// food and fast food. Values are per 100g (or 100ml for drinks) so they
+// scale the same way as the USDA results using the quantity field.
+// `serving` is just an informational hint (typical single-serving size)
+// shown in the dropdown — it does not affect the math.
+const INDIAN_FOODS = [
+  // Staples & grains
+  { name: "Basmati Rice (cooked)", category: "Staples", calories: 121, protein: 2.7, carbs: 25.7, fat: 0.4, serving: 150 },
+  { name: "Jeera Rice", category: "Staples", calories: 170, protein: 3, carbs: 30, fat: 4, serving: 150 },
+  { name: "Curd Rice", category: "Staples", calories: 120, protein: 3, carbs: 20, fat: 3, serving: 150 },
+  { name: "Roti / Chapati (whole wheat)", category: "Staples", calories: 297, protein: 11, carbs: 59, fat: 3.7, serving: 30 },
+  { name: "Naan (plain)", category: "Staples", calories: 310, protein: 9, carbs: 50, fat: 9, serving: 90 },
+  { name: "Paratha (plain)", category: "Staples", calories: 330, protein: 6.5, carbs: 45, fat: 14, serving: 60 },
+  { name: "Aloo Paratha", category: "Staples", calories: 260, protein: 5.5, carbs: 34, fat: 11, serving: 100 },
+  { name: "Puri", category: "Staples", calories: 390, protein: 6, carbs: 43, fat: 21, serving: 30 },
+  { name: "Idli", category: "Staples", calories: 130, protein: 4, carbs: 27, fat: 0.3, serving: 35 },
+  { name: "Dosa (plain)", category: "Staples", calories: 168, protein: 3.9, carbs: 28, fat: 4.5, serving: 80 },
+  { name: "Masala Dosa", category: "Staples", calories: 220, protein: 4.5, carbs: 30, fat: 9, serving: 150 },
+  { name: "Uttapam", category: "Staples", calories: 150, protein: 4, carbs: 27, fat: 3, serving: 100 },
+  { name: "Medu Vada", category: "Staples", calories: 280, protein: 8, carbs: 28, fat: 15, serving: 40 },
+  { name: "Upma", category: "Staples", calories: 130, protein: 3, carbs: 20, fat: 4, serving: 150 },
+  { name: "Poha", category: "Staples", calories: 130, protein: 2.6, carbs: 27, fat: 1.5, serving: 150 },
+  { name: "Dhokla", category: "Staples", calories: 160, protein: 6, carbs: 28, fat: 3, serving: 60 },
+  { name: "Thepla", category: "Staples", calories: 280, protein: 6, carbs: 38, fat: 11, serving: 40 },
+  { name: "Handvo", category: "Staples", calories: 220, protein: 6, carbs: 28, fat: 9, serving: 80 },
+
+  // Dals & curries
+  { name: "Dal Tadka (Toor Dal, cooked)", category: "Dals & Curries", calories: 116, protein: 7, carbs: 20, fat: 0.4, serving: 150 },
+  { name: "Dal Makhani", category: "Dals & Curries", calories: 220, protein: 8, carbs: 17, fat: 13, serving: 150 },
+  { name: "Rajma (Kidney Bean Curry)", category: "Dals & Curries", calories: 140, protein: 8, carbs: 20, fat: 3, serving: 150 },
+  { name: "Chole (Chickpea Curry)", category: "Dals & Curries", calories: 164, protein: 8, carbs: 22, fat: 5, serving: 150 },
+  { name: "Sambar", category: "Dals & Curries", calories: 90, protein: 4, carbs: 13, fat: 2.5, serving: 150 },
+  { name: "Rasam", category: "Dals & Curries", calories: 45, protein: 2, carbs: 7, fat: 1, serving: 150 },
+  { name: "Kadhi", category: "Dals & Curries", calories: 95, protein: 3, carbs: 8, fat: 5.5, serving: 150 },
+  { name: "Palak Paneer", category: "Dals & Curries", calories: 180, protein: 8, carbs: 7, fat: 14, serving: 150 },
+  { name: "Paneer Butter Masala", category: "Dals & Curries", calories: 240, protein: 9, carbs: 9, fat: 18, serving: 150 },
+  { name: "Butter Chicken", category: "Dals & Curries", calories: 220, protein: 16, carbs: 6, fat: 14, serving: 150 },
+  { name: "Chicken Curry", category: "Dals & Curries", calories: 170, protein: 15, carbs: 5, fat: 10, serving: 150 },
+  { name: "Egg Curry", category: "Dals & Curries", calories: 150, protein: 9, carbs: 4, fat: 10, serving: 150 },
+  { name: "Fish Curry", category: "Dals & Curries", calories: 140, protein: 14, carbs: 4, fat: 7, serving: 150 },
+  { name: "Mutton Curry", category: "Dals & Curries", calories: 220, protein: 17, carbs: 4, fat: 15, serving: 150 },
+  { name: "Bhindi Masala", category: "Dals & Curries", calories: 95, protein: 2, carbs: 8, fat: 6, serving: 100 },
+  { name: "Aloo Gobi", category: "Dals & Curries", calories: 110, protein: 2.5, carbs: 14, fat: 5, serving: 150 },
+  { name: "Baingan Bharta", category: "Dals & Curries", calories: 95, protein: 2, carbs: 9, fat: 6, serving: 150 },
+  { name: "Mixed Vegetable Curry", category: "Dals & Curries", calories: 100, protein: 3, carbs: 11, fat: 5, serving: 150 },
+
+  // Tandoor & grills
+  { name: "Chicken Tikka", category: "Tandoor & Grills", calories: 180, protein: 25, carbs: 3, fat: 8, serving: 100 },
+  { name: "Tandoori Chicken", category: "Tandoor & Grills", calories: 165, protein: 27, carbs: 2, fat: 5.5, serving: 100 },
+  { name: "Chicken 65", category: "Tandoor & Grills", calories: 220, protein: 20, carbs: 8, fat: 13, serving: 150 },
+  { name: "Seekh Kebab", category: "Tandoor & Grills", calories: 240, protein: 18, carbs: 4, fat: 17, serving: 100 },
+  { name: "Paneer Tikka", category: "Tandoor & Grills", calories: 210, protein: 14, carbs: 6, fat: 15, serving: 100 },
+
+  // Rice dishes
+  { name: "Chicken Biryani", category: "Rice Dishes", calories: 200, protein: 9, carbs: 22, fat: 8, serving: 250 },
+  { name: "Veg Biryani", category: "Rice Dishes", calories: 160, protein: 3.5, carbs: 24, fat: 5.5, serving: 250 },
+  { name: "Egg Biryani", category: "Rice Dishes", calories: 185, protein: 7, carbs: 23, fat: 7, serving: 250 },
+  { name: "Fried Rice (Veg)", category: "Rice Dishes", calories: 163, protein: 3.5, carbs: 27, fat: 4.5, serving: 200 },
+
+  // Street food & snacks
+  { name: "Samosa", category: "Street Food", calories: 262, protein: 4, carbs: 28, fat: 15, serving: 60 },
+  { name: "Kachori", category: "Street Food", calories: 280, protein: 5, carbs: 30, fat: 16, serving: 50 },
+  { name: "Pakora (Onion)", category: "Street Food", calories: 280, protein: 5, carbs: 25, fat: 18, serving: 50 },
+  { name: "Bhel Puri", category: "Street Food", calories: 175, protein: 4, carbs: 30, fat: 5, serving: 150 },
+  { name: "Sev Puri", category: "Street Food", calories: 200, protein: 4, carbs: 28, fat: 8, serving: 150 },
+  { name: "Dahi Puri", category: "Street Food", calories: 180, protein: 4, carbs: 25, fat: 7, serving: 150 },
+  { name: "Pani Puri (Golgappa)", category: "Street Food", calories: 230, protein: 5, carbs: 38, fat: 6, serving: 100 },
+  { name: "Vada Pav", category: "Street Food", calories: 290, protein: 6, carbs: 38, fat: 13, serving: 120 },
+  { name: "Misal Pav", category: "Street Food", calories: 210, protein: 7, carbs: 28, fat: 8, serving: 200 },
+  { name: "Pav Bhaji", category: "Street Food", calories: 200, protein: 5, carbs: 25, fat: 9, serving: 200 },
+  { name: "Chole Bhature", category: "Street Food", calories: 330, protein: 9, carbs: 40, fat: 15, serving: 250 },
+  { name: "Litti Chokha", category: "Street Food", calories: 230, protein: 6, carbs: 30, fat: 9, serving: 150 },
+  { name: "Momos (Veg)", category: "Street Food", calories: 160, protein: 5, carbs: 28, fat: 3, serving: 150 },
+  { name: "Momos (Chicken)", category: "Street Food", calories: 175, protein: 9, carbs: 22, fat: 5, serving: 150 },
+  { name: "Spring Roll", category: "Street Food", calories: 220, protein: 4, carbs: 26, fat: 11, serving: 100 },
+  { name: "Manchurian (Veg)", category: "Street Food", calories: 160, protein: 4, carbs: 18, fat: 8, serving: 150 },
+  { name: "Noodles (Veg Hakka)", category: "Street Food", calories: 150, protein: 4, carbs: 25, fat: 4, serving: 200 },
+
+  // Fast food (Indian-style)
+  { name: "French Fries", category: "Fast Food", calories: 312, protein: 3.4, carbs: 41, fat: 15, serving: 100 },
+  { name: "Burger (Veg)", category: "Fast Food", calories: 250, protein: 6, carbs: 33, fat: 10, serving: 150 },
+  { name: "Burger (Chicken)", category: "Fast Food", calories: 280, protein: 14, carbs: 28, fat: 13, serving: 150 },
+  { name: "Sandwich (Veg)", category: "Fast Food", calories: 200, protein: 5, carbs: 28, fat: 7, serving: 150 },
+  { name: "Sandwich (Chicken)", category: "Fast Food", calories: 220, protein: 12, carbs: 24, fat: 8, serving: 150 },
+  { name: "Cutlet (Veg)", category: "Fast Food", calories: 220, protein: 4, carbs: 24, fat: 12, serving: 60 },
+  { name: "Pizza (Cheese, regular crust)", category: "Fast Food", calories: 266, protein: 11, carbs: 33, fat: 10, serving: 100 },
+
+  // Sweets & desserts
+  { name: "Gulab Jamun", category: "Sweets", calories: 330, protein: 4, carbs: 50, fat: 13, serving: 40 },
+  { name: "Jalebi", category: "Sweets", calories: 350, protein: 2, carbs: 60, fat: 12, serving: 30 },
+  { name: "Rasgulla", category: "Sweets", calories: 186, protein: 4, carbs: 32, fat: 4, serving: 40 },
+  { name: "Besan Ladoo", category: "Sweets", calories: 400, protein: 7, carbs: 50, fat: 18, serving: 30 },
+  { name: "Gajar Halwa", category: "Sweets", calories: 280, protein: 3, carbs: 32, fat: 15, serving: 100 },
+  { name: "Kheer", category: "Sweets", calories: 130, protein: 3, carbs: 20, fat: 4, serving: 150 },
+  { name: "Barfi", category: "Sweets", calories: 380, protein: 6, carbs: 45, fat: 18, serving: 30 },
+
+  // Dairy & basics
+  { name: "Paneer", category: "Dairy & Basics", calories: 265, protein: 18, carbs: 1.2, fat: 21, serving: 50 },
+  { name: "Curd / Dahi (plain)", category: "Dairy & Basics", calories: 60, protein: 3.5, carbs: 4.7, fat: 3.3, serving: 150 },
+  { name: "Buttermilk (Chaas)", category: "Dairy & Basics", calories: 40, protein: 2, carbs: 4, fat: 1.5, serving: 200 },
+  { name: "Ghee", category: "Dairy & Basics", calories: 900, protein: 0, carbs: 0, fat: 100, serving: 5 },
+  { name: "Butter", category: "Dairy & Basics", calories: 717, protein: 0.9, carbs: 0.1, fat: 81, serving: 5 },
+  { name: "Full Fat Milk", category: "Dairy & Basics", calories: 61, protein: 3.2, carbs: 4.8, fat: 3.3, serving: 200 },
+  { name: "Boiled Egg", category: "Dairy & Basics", calories: 155, protein: 13, carbs: 1.1, fat: 11, serving: 50 },
+  { name: "Omelette (2 eggs)", category: "Dairy & Basics", calories: 190, protein: 13, carbs: 1.5, fat: 15, serving: 100 },
+  { name: "Egg Bhurji", category: "Dairy & Basics", calories: 180, protein: 12, carbs: 3, fat: 13, serving: 100 },
+  { name: "Papad (roasted)", category: "Dairy & Basics", calories: 280, protein: 20, carbs: 52, fat: 2, serving: 10 },
+  { name: "Pickle / Achaar", category: "Dairy & Basics", calories: 220, protein: 1, carbs: 15, fat: 18, serving: 15 },
+  { name: "Coconut Chutney", category: "Dairy & Basics", calories: 150, protein: 2, carbs: 6, fat: 14, serving: 20 },
+
+  // Drinks & beverages
+  { name: "Masala Chai", category: "Drinks", calories: 55, protein: 1.5, carbs: 7, fat: 2.2, serving: 150, unit: "ml" },
+  { name: "Filter Coffee (South Indian)", category: "Drinks", calories: 60, protein: 2, carbs: 8, fat: 2.5, serving: 150, unit: "ml" },
+  { name: "Cold Coffee", category: "Drinks", calories: 130, protein: 4, carbs: 18, fat: 5, serving: 250, unit: "ml" },
+  { name: "Lassi (Sweet)", category: "Drinks", calories: 140, protein: 3.5, carbs: 22, fat: 4.5, serving: 250, unit: "ml" },
+  { name: "Nimbu Pani (Sweet)", category: "Drinks", calories: 45, protein: 0.1, carbs: 11, fat: 0, serving: 250, unit: "ml" },
+  { name: "Jaljeera", category: "Drinks", calories: 25, protein: 0.3, carbs: 6, fat: 0, serving: 200, unit: "ml" },
+  { name: "Coconut Water", category: "Drinks", calories: 19, protein: 0.7, carbs: 3.7, fat: 0.2, serving: 250, unit: "ml" },
+  { name: "Sugarcane Juice", category: "Drinks", calories: 39, protein: 0.3, carbs: 10, fat: 0, serving: 250, unit: "ml" },
+  { name: "Rooh Afza (prepared)", category: "Drinks", calories: 55, protein: 0, carbs: 14, fat: 0, serving: 250, unit: "ml" },
+  { name: "Badam Milk", category: "Drinks", calories: 110, protein: 4, carbs: 12, fat: 5, serving: 200, unit: "ml" },
+  { name: "Bournvita (prepared)", category: "Drinks", calories: 95, protein: 3, carbs: 17, fat: 1.5, serving: 200, unit: "ml" },
+  { name: "Horlicks (prepared)", category: "Drinks", calories: 100, protein: 3, carbs: 18, fat: 1.5, serving: 200, unit: "ml" },
+  { name: "Thums Up / Cola", category: "Drinks", calories: 43, protein: 0, carbs: 11, fat: 0, serving: 300, unit: "ml" },
+  { name: "Limca", category: "Drinks", calories: 40, protein: 0, carbs: 10.5, fat: 0, serving: 300, unit: "ml" },
+  { name: "Frooti (Mango Drink)", category: "Drinks", calories: 54, protein: 0.1, carbs: 13, fat: 0, serving: 200, unit: "ml" },
+  { name: "Maaza", category: "Drinks", calories: 55, protein: 0.1, carbs: 13.5, fat: 0, serving: 250, unit: "ml" },
+  { name: "Green Tea", category: "Drinks", calories: 1, protein: 0, carbs: 0.3, fat: 0, serving: 200, unit: "ml" },
+  { name: "Black Coffee", category: "Drinks", calories: 2, protein: 0.3, carbs: 0, fat: 0, serving: 150, unit: "ml" },
+  { name: "Beer (regular)", category: "Drinks", calories: 43, protein: 0.5, carbs: 3.6, fat: 0, serving: 330, unit: "ml" },
+  { name: "Whisky", category: "Drinks", calories: 250, protein: 0, carbs: 0, fat: 0, serving: 30, unit: "ml" },
+  { name: "Rum", category: "Drinks", calories: 231, protein: 0, carbs: 0, fat: 0, serving: 30, unit: "ml" },
+  { name: "Red Wine", category: "Drinks", calories: 85, protein: 0.1, carbs: 2.6, fat: 0, serving: 150, unit: "ml" },
+];
+
+// Instant, offline fuzzy search over the Indian foods database. Matches
+// every word in the query against the food name so "chicken curry" or
+// "cold coffee" both resolve correctly, and ranks exact/prefix matches
+// first.
+const searchIndianFoods = (query) => {
+  const q = query.toLowerCase().trim();
+  if (!q) return [];
+
+  const words = q.split(/\s+/).filter(Boolean);
+
+  return INDIAN_FOODS.map((food, idx) => ({
+    id: `in-${idx}`,
+    name: food.name,
+    brand: `${food.category} · Indian Foods DB · ~${food.serving}${
+      food.unit || "g"
+    } serving`,
+    calories: food.calories,
+    protein: food.protein,
+    carbs: food.carbs,
+    fat: food.fat,
+    _searchName: food.name.toLowerCase(),
+  }))
+    .filter((food) => words.every((w) => food._searchName.includes(w)))
+    .sort((a, b) => {
+      const aStarts = a._searchName.startsWith(q) ? 0 : 1;
+      const bStarts = b._searchName.startsWith(q) ? 0 : 1;
+      if (aStarts !== bStarts) return aStarts - bStarts;
+      return a._searchName.length - b._searchName.length;
+    })
+    .slice(0, 8)
+    .map(({ _searchName, ...food }) => food);
+};
 
 const EXERCISES = [
   ["Chest", "Bench Press", "🏋️", "Press the weight upward while keeping your shoulder blades stable."],
@@ -365,8 +535,13 @@ function App() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Debounced live search against USDA FoodData Central. Covers
-  // generic foods, branded packaged items, and drinks/beverages.
+  // Live search: Indian foods, drinks, sweets, street food and fast
+  // food (from the curated INDIAN_FOODS database) show up instantly on
+  // every keystroke — no network round-trip needed. A short debounce
+  // then also queries USDA FoodData Central in the background to fill
+  // in anything the local database doesn't cover (packaged/branded
+  // items, less common ingredients, etc), and those results are
+  // appended below the Indian matches.
   useEffect(() => {
     const q = foodQuery.trim();
 
@@ -375,15 +550,18 @@ function App() {
       return;
     }
 
+    const localMatches = searchIndianFoods(q);
+    setFoodResults(localMatches);
+
     const timer = setTimeout(() => {
-      searchFoods(q);
+      searchFoods(q, localMatches);
     }, 450);
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [foodQuery]);
 
-  const searchFoods = async (query) => {
+  const searchFoods = async (query, localMatches = []) => {
     setFoodSearching(true);
 
     try {
@@ -406,20 +584,30 @@ function App() {
         return match ? match.value : 0;
       };
 
-      const mapped = (data.foods || []).map((food) => ({
-        id: food.fdcId,
-        name: food.description,
-        brand: food.brandOwner || food.brandName || null,
-        calories: nutrientValue(food, "Energy"),
-        protein: nutrientValue(food, "Protein"),
-        carbs: nutrientValue(food, "Carbohydrate, by difference"),
-        fat: nutrientValue(food, "Total lipid (fat)"),
-      }));
+      const localNames = new Set(
+        localMatches.map((f) => f.name.toLowerCase())
+      );
 
-      setFoodResults(mapped);
+      const mapped = (data.foods || [])
+        .map((food) => ({
+          id: food.fdcId,
+          name: food.description,
+          brand: food.brandOwner || food.brandName || "USDA Database",
+          calories: nutrientValue(food, "Energy"),
+          protein: nutrientValue(food, "Protein"),
+          carbs: nutrientValue(food, "Carbohydrate, by difference"),
+          fat: nutrientValue(food, "Total lipid (fat)"),
+        }))
+        // Skip anything that's essentially a duplicate of a local match
+        .filter((food) => !localNames.has(food.name.toLowerCase()));
+
+      // Indian Foods DB matches always come first, USDA results fill
+      // in the rest — cap the combined list so the dropdown stays tidy.
+      setFoodResults([...localMatches, ...mapped].slice(0, 14));
     } catch (err) {
       console.error(err);
-      setFoodResults([]);
+      // Keep whatever local matches we already had, even if USDA fails.
+      setFoodResults(localMatches);
     } finally {
       setFoodSearching(false);
     }
@@ -1706,7 +1894,7 @@ function App() {
                 quantity={quantity}
                 onQuantityChange={setQuantity}
                 onAdd={addMeal}
-                placeholder="What did you eat or drink? e.g. grilled chicken, cola"
+                placeholder="What did you eat or drink? e.g. dal, biryani, vada pav, chai"
                 addLabel="+ Add Meal"
               />
             </section>
@@ -1919,7 +2107,7 @@ function App() {
                 quantity={quantity}
                 onQuantityChange={setQuantity}
                 onAdd={addMeal}
-                placeholder="Search any food or drink, e.g. dal, cold coffee, mango juice..."
+                placeholder="Search Indian food or drinks: samosa, biryani, lassi, chai..."
                 addLabel="Add Food"
               />
 
