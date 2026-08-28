@@ -3,6 +3,11 @@ import "./App.css";
 
 const API_URL = "https://fitmealai-production.up.railway.app";
 
+// Free USDA FoodData Central key: https://api.data.gov/signup/
+// DEMO_KEY works but is rate-limited (30 req/hour, 50/day per IP).
+// Swap in your own key here once you have one.
+const USDA_API_KEY = "DEMO_KEY";
+
 const DAYS = [
   "Sunday",
   "Monday",
@@ -25,20 +30,22 @@ const WORKOUTS = [
   "Rest",
 ];
 
-const FOOD = {
-  rice: { calories: 130, protein: 2.7, carbs: 28 },
-  roti: { calories: 297, protein: 9, carbs: 46 },
-  chicken: { calories: 239, protein: 27, carbs: 0 },
-  egg: { calories: 155, protein: 13, carbs: 1.1 },
-  paneer: { calories: 265, protein: 18, carbs: 6 },
-  milk: { calories: 61, protein: 3.2, carbs: 4.8 },
-  oats: { calories: 389, protein: 17, carbs: 66 },
-  banana: { calories: 89, protein: 1.1, carbs: 23 },
-  dal: { calories: 116, protein: 9, carbs: 20 },
-  potato: { calories: 77, protein: 2, carbs: 17 },
-  bread: { calories: 265, protein: 9, carbs: 49 },
-  curd: { calories: 61, protein: 3.5, carbs: 4.7 },
-};
+const FOOD_SUGGESTIONS = [
+  "Chicken breast",
+  "Rice",
+  "Egg",
+  "Oats",
+  "Banana",
+  "Paneer",
+  "Milk",
+  "Black coffee",
+  "Orange juice",
+  "Green tea",
+  "Protein shake",
+  "Greek yogurt",
+  "Cola",
+  "Beer",
+];
 
 const EXERCISES = [
   ["Chest", "Bench Press", "🏋️", "Press the weight upward while keeping your shoulder blades stable."],
@@ -75,6 +82,82 @@ const getWeekDates = () => {
   });
 };
 
+// Reusable live food/drink search box: type anything, hit the USDA
+// FoodData Central database, pick a match, scale it by grams/ml.
+function FoodSearchBox({
+  query,
+  onQueryChange,
+  results,
+  loading,
+  selected,
+  onSelect,
+  quantity,
+  onQuantityChange,
+  onAdd,
+  placeholder,
+  addLabel,
+}) {
+  return (
+    <div className="foodSearchWrap">
+      <div className="quickMeal foodSearchRow">
+        <div className="foodSearchInputWrap">
+          <input
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+            placeholder={placeholder}
+            autoComplete="off"
+          />
+
+          {loading && <span className="foodSearchSpinner">⟳</span>}
+
+          {results.length > 0 && (
+            <div className="foodSearchDropdown">
+              {results.map((item) => (
+                <button
+                  type="button"
+                  key={item.id}
+                  className="foodSearchOption"
+                  onClick={() => onSelect(item)}
+                >
+                  <div>
+                    <strong>{item.name}</strong>
+                    {item.brand && <span>{item.brand}</span>}
+                  </div>
+
+                  <small>
+                    {Math.round(item.calories)} kcal · P{" "}
+                    {item.protein.toFixed(1)}g · C{" "}
+                    {item.carbs.toFixed(1)}g
+                  </small>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <input
+          type="number"
+          value={quantity}
+          onChange={(e) => onQuantityChange(e.target.value)}
+          placeholder="grams / ml"
+        />
+
+        <button onClick={onAdd}>{addLabel}</button>
+      </div>
+
+      {selected && (
+        <div className="foodSelectedPreview">
+          Selected: <strong>{selected.name}</strong> — per 100g/ml:{" "}
+          {Math.round(selected.calories)} kcal, P{" "}
+          {selected.protein.toFixed(1)}g, C{" "}
+          {selected.carbs.toFixed(1)}g, F{" "}
+          {selected.fat.toFixed(1)}g
+        </div>
+      )}
+    </div>
+  );
+}
+
 function App() {
   const [page, setPage] = useState("dashboard");
 
@@ -83,7 +166,10 @@ function App() {
   const [split, setSplit] = useState(createSplit());
   const [setup, setSetup] = useState(false);
 
-  const [meal, setMeal] = useState("");
+  const [foodQuery, setFoodQuery] = useState("");
+  const [foodResults, setFoodResults] = useState([]);
+  const [foodSearching, setFoodSearching] = useState(false);
+  const [selectedFood, setSelectedFood] = useState(null);
   const [quantity, setQuantity] = useState(100);
   const [meals, setMeals] = useState([]);
 
@@ -146,11 +232,13 @@ function App() {
           calories: total.calories + item.calories,
           protein: total.protein + item.protein,
           carbs: total.carbs + item.carbs,
+          fat: total.fat + (item.fat || 0),
         }),
         {
           calories: 0,
           protein: 0,
           carbs: 0,
+          fat: 0,
         }
       ),
     [todayMeals]
@@ -166,8 +254,9 @@ function App() {
               calories: total.calories + item.calories,
               protein: total.protein + item.protein,
               carbs: total.carbs + item.carbs,
+              fat: total.fat + (item.fat || 0),
             }),
-            { calories: 0, protein: 0, carbs: 0 }
+            { calories: 0, protein: 0, carbs: 0, fat: 0 }
           )
       ),
     [meals, weekDates]
@@ -275,6 +364,72 @@ function App() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Debounced live search against USDA FoodData Central. Covers
+  // generic foods, branded packaged items, and drinks/beverages.
+  useEffect(() => {
+    const q = foodQuery.trim();
+
+    if (!q || (selectedFood && selectedFood.name === foodQuery)) {
+      setFoodResults([]);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      searchFoods(q);
+    }, 450);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [foodQuery]);
+
+  const searchFoods = async (query) => {
+    setFoodSearching(true);
+
+    try {
+      const res = await fetch(
+        `https://api.nal.usda.gov/fdc/v1/foods/search?api_key=${USDA_API_KEY}&query=${encodeURIComponent(
+          query
+        )}&pageSize=10&dataType=Foundation,SR%20Legacy,Branded`
+      );
+
+      if (!res.ok) {
+        throw new Error("Search failed");
+      }
+
+      const data = await res.json();
+
+      const nutrientValue = (food, nutrientName) => {
+        const match = (food.foodNutrients || []).find(
+          (n) => n.nutrientName === nutrientName
+        );
+        return match ? match.value : 0;
+      };
+
+      const mapped = (data.foods || []).map((food) => ({
+        id: food.fdcId,
+        name: food.description,
+        brand: food.brandOwner || food.brandName || null,
+        calories: nutrientValue(food, "Energy"),
+        protein: nutrientValue(food, "Protein"),
+        carbs: nutrientValue(food, "Carbohydrate, by difference"),
+        fat: nutrientValue(food, "Total lipid (fat)"),
+      }));
+
+      setFoodResults(mapped);
+    } catch (err) {
+      console.error(err);
+      setFoodResults([]);
+    } finally {
+      setFoodSearching(false);
+    }
+  };
+
+  const selectFood = (food) => {
+    setSelectedFood(food);
+    setFoodQuery(food.name);
+    setFoodResults([]);
+  };
 
   const authHeaders = () => ({
     "Content-Type": "application/json",
@@ -501,36 +656,36 @@ function App() {
   };
 
   const addMeal = () => {
-    const key = meal.toLowerCase().trim();
-
-    if (!FOOD[key]) {
+    if (!selectedFood) {
       alert(
-        "Food not found. Try rice, roti, chicken, egg, paneer, milk, oats, banana, dal, potato, bread or curd."
+        "Search for a food or drink above and select a result from the list first."
       );
       return;
     }
 
-    const data = FOOD[key];
     const multiplier = Number(quantity) / 100;
 
     const newMeal = {
       id: Date.now(),
       date: todayDate,
-      name: meal,
+      name: selectedFood.name,
       quantity: Number(quantity),
-      calories: Math.round(
-        data.calories * multiplier
-      ),
+      calories: Math.round(selectedFood.calories * multiplier),
       protein: Number(
-        (data.protein * multiplier).toFixed(1)
+        (selectedFood.protein * multiplier).toFixed(1)
       ),
       carbs: Number(
-        (data.carbs * multiplier).toFixed(1)
+        (selectedFood.carbs * multiplier).toFixed(1)
+      ),
+      fat: Number(
+        (selectedFood.fat * multiplier).toFixed(1)
       ),
     };
 
     setMeals((old) => [...old, newMeal]);
-    setMeal("");
+    setFoodQuery("");
+    setSelectedFood(null);
+    setFoodResults([]);
     setQuantity(100);
   };
 
@@ -1538,30 +1693,22 @@ function App() {
                 </button>
               </div>
 
-              <div className="quickMeal">
-                <input
-                  value={meal}
-                  onChange={(e) =>
-                    setMeal(e.target.value)
-                  }
-                  placeholder="What did you eat? e.g. chicken"
-                />
-
-                <input
-                  type="number"
-                  value={quantity}
-                  onChange={(e) =>
-                    setQuantity(
-                      e.target.value
-                    )
-                  }
-                  placeholder="grams"
-                />
-
-                <button onClick={addMeal}>
-                  + Add Meal
-                </button>
-              </div>
+              <FoodSearchBox
+                query={foodQuery}
+                onQueryChange={(value) => {
+                  setFoodQuery(value);
+                  setSelectedFood(null);
+                }}
+                results={foodResults}
+                loading={foodSearching}
+                selected={selectedFood}
+                onSelect={selectFood}
+                quantity={quantity}
+                onQuantityChange={setQuantity}
+                onAdd={addMeal}
+                placeholder="What did you eat or drink? e.g. grilled chicken, cola"
+                addLabel="+ Add Meal"
+              />
             </section>
           </>
         )}
@@ -1652,7 +1799,7 @@ function App() {
               <p>AI NUTRITION ENGINE</p>
               <h2>Nutrition Dashboard</h2>
               <span>
-                Track food and monitor your daily
+                Track food and drinks and monitor your daily
                 nutrition profile.
               </span>
             </section>
@@ -1680,6 +1827,14 @@ function App() {
                 <span>CARBS</span>
                 <strong>
                   {totals.carbs.toFixed(1)}
+                </strong>
+                <small>grams</small>
+              </div>
+
+              <div className="nutritionCard fat">
+                <span>FAT</span>
+                <strong>
+                  {totals.fat.toFixed(1)}
                 </strong>
                 <small>grams</small>
               </div>
@@ -1745,50 +1900,41 @@ function App() {
               <div className="panelHeader">
                 <div>
                   <span className="panelEyebrow">
-                    FOOD DATABASE
+                    LIVE FOOD & DRINK SEARCH
                   </span>
-                  <h2>Add Food</h2>
+                  <h2>Add Food or Drink</h2>
                 </div>
               </div>
 
-              <div className="foodForm">
-                <input
-                  value={meal}
-                  onChange={(e) =>
-                    setMeal(e.target.value)
-                  }
-                  placeholder="rice / chicken / egg / oats..."
-                />
-
-                <input
-                  type="number"
-                  value={quantity}
-                  onChange={(e) =>
-                    setQuantity(
-                      e.target.value
-                    )
-                  }
-                  placeholder="grams"
-                />
-
-                <button onClick={addMeal}>
-                  Add Food
-                </button>
-              </div>
+              <FoodSearchBox
+                query={foodQuery}
+                onQueryChange={(value) => {
+                  setFoodQuery(value);
+                  setSelectedFood(null);
+                }}
+                results={foodResults}
+                loading={foodSearching}
+                selected={selectedFood}
+                onSelect={selectFood}
+                quantity={quantity}
+                onQuantityChange={setQuantity}
+                onAdd={addMeal}
+                placeholder="Search any food or drink, e.g. dal, cold coffee, mango juice..."
+                addLabel="Add Food"
+              />
 
               <div className="foodHints">
-                {Object.keys(FOOD).map(
-                  (food) => (
-                    <button
-                      key={food}
-                      onClick={() =>
-                        setMeal(food)
-                      }
-                    >
-                      {food}
-                    </button>
-                  )
-                )}
+                {FOOD_SUGGESTIONS.map((food) => (
+                  <button
+                    key={food}
+                    onClick={() => {
+                      setSelectedFood(null);
+                      setFoodQuery(food);
+                    }}
+                  >
+                    {food}
+                  </button>
+                ))}
               </div>
             </section>
 
@@ -1985,18 +2131,14 @@ function App() {
                         const first =
                           title
                             .split("+")[0]
-                            .trim()
-                            .toLowerCase();
+                            .trim();
 
-                        if (FOOD[first]) {
-                          setMeal(first);
-                          setPage(
-                            "nutrition"
-                          );
-                        }
+                        setSelectedFood(null);
+                        setFoodQuery(first);
+                        setPage("nutrition");
                       }}
                     >
-                      Log Ingredient →
+                      Search Ingredient →
                     </button>
                   </div>
                 )

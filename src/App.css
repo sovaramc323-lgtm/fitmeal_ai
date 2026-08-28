@@ -1723,6 +1723,95 @@ h1, h2, h3 {
 }
 
 /* =========================================================
+   LIVE FOOD / DRINK SEARCH
+   ========================================================= */
+
+.foodSearchWrap {
+  position: relative;
+}
+
+.foodSearchInputWrap {
+  position: relative;
+  min-width: 0;
+}
+
+.foodSearchSpinner {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--redBright);
+  font-size: 13px;
+  animation: foodSpin 1s linear infinite;
+}
+
+@keyframes foodSpin {
+  from { transform: translateY(-50%) rotate(0deg); }
+  to { transform: translateY(-50%) rotate(360deg); }
+}
+
+.foodSearchDropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--borderStrong);
+  border-radius: 11px;
+  background: var(--card);
+  box-shadow: 0 20px 45px var(--shadow);
+}
+
+.foodSearchOption {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 10px 13px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  transition: background .15s ease;
+}
+
+.foodSearchOption:last-child {
+  border-bottom: none;
+}
+
+.foodSearchOption:hover {
+  background: var(--redSoft);
+}
+
+.foodSearchOption strong {
+  font-size: 12px;
+}
+
+.foodSearchOption span {
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.foodSearchOption small {
+  color: var(--redBright);
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.foodSelectedPreview {
+  margin-top: 8px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--muted);
+  background: var(--card2);
+  font-size: 10px;
+}
+
+/* =========================================================
    PAGE INTRO
    ========================================================= */
 
@@ -1839,7 +1928,7 @@ h1, h2, h3 {
 
 .nutritionLarge {
   display: grid;
-  grid-template-columns: repeat(3,1fr);
+  grid-template-columns: repeat(4,1fr);
   gap: 14px;
   margin-bottom: 15px;
 }
@@ -1864,11 +1953,13 @@ h1, h2, h3 {
   background: var(--redSoft);
 }
 
-.nutritionCard.protein::after {
+.nutritionCard.protein::after,
+.nutritionCard.fat::after {
   background: var(--amberSoft);
 }
 
-.nutritionCard.protein strong {
+.nutritionCard.protein strong,
+.nutritionCard.fat strong {
   color: var(--amber);
 }
 
@@ -2866,6 +2957,10 @@ h1, h2, h3 {
   .checkGrid {
     grid-template-columns: repeat(3,1fr);
   }
+
+  .nutritionLarge {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 850px) {
@@ -3142,6 +3237,10 @@ h1, h2, h3 {
   .weekDayCard small:nth-of-type(2),
   .weekDayCard small:nth-of-type(3) {
     display: none;
+  }
+
+  .nutritionLarge {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
