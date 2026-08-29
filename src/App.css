@@ -892,14 +892,10 @@ p {
   border-radius: 50%;
   background: var(--redBright);
   box-shadow: 0 0 6px rgba(181, 50, 78, .8);
-  animation: pulseRing 2.2s ease-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .aiSideStatus span,
-  .systemBadge span {
-    animation: none;
-  }
+  /* Steady glow, not a perpetual pulse — this chrome is always on screen,
+     so constant motion here reads as noise rather than signal. The one
+     place a live pulse earns its keep is .aiStatus (the coach is actually
+     "thinking" in real time); see that rule further down. */
 }
 
 .sidebar nav {
@@ -1216,13 +1212,6 @@ p {
   border-radius: 50%;
   background: var(--redBright);
   box-shadow: 0 0 6px rgba(181, 50, 78, .8);
-  animation: pulseRing 2.2s ease-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .heroEyebrow span {
-    animation: none;
-  }
 }
 
 .hero h2 {
@@ -3155,14 +3144,29 @@ p {
   border: 0;
   border-radius: 8px;
   color: #fff;
-  background: #5a2c39;
+  background: #7c2434;
   font-size: 12px;
   font-weight: 700;
-  transition: background .15s ease;
+  box-shadow: 0 6px 16px rgba(124, 36, 52, .28);
+  transition: background .15s ease, transform .2s var(--easeSpring), box-shadow .2s ease;
 }
 
 .danger:hover {
-  background: #72374a;
+  background: #9c2e42;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(124, 36, 52, .36);
+}
+
+.danger:active {
+  transform: translateY(0);
+}
+
+.danger:disabled {
+  color: var(--muted);
+  background: var(--card2);
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: .6;
 }
 
 .emptyState {
@@ -3631,4 +3635,399 @@ p {
     transition-duration: .01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* =========================================================
+   MISSING-PIECES PASS — components a real app needs that the
+   original sheet didn't have yet: feedback (toast), confirmation
+   (modal), micro-help (tooltip), loading (skeleton), form
+   validation states, and badge variants beyond the single
+   all-purpose accent badge. Built on the existing --token system
+   so they inherit the maroon/ember palette automatically instead
+   of introducing new one-off colors.
+   ========================================================= */
+
+/* ---------- Toasts ---------- */
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(10px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.toastStack {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(340px, calc(100vw - 32px));
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 14px 15px;
+  border: 1px solid var(--borderStrong);
+  border-radius: 13px;
+  background: var(--card);
+  box-shadow: 0 18px 44px var(--shadow), 0 0 0 1px rgba(0, 0, 0, .04);
+  backdrop-filter: blur(18px) saturate(1.2);
+  animation: toastIn .3s var(--ease) both;
+}
+
+.toastIcon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  color: #fff;
+  font-size: 14px;
+  background: var(--red);
+}
+
+.toast.success .toastIcon { background: #1f7a4c; }
+.toast.warning .toastIcon { background: #a06a1a; color: #1a1211; }
+.toast.info .toastIcon { background: #33627a; }
+
+.toastBody { flex: 1; min-width: 0; }
+
+.toastBody strong {
+  display: block;
+  font-size: 13px;
+}
+
+.toastBody p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.toastClose {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px;
+  transition: color .15s ease;
+}
+
+.toastClose:hover { color: var(--text); }
+
+/* ---------- Modal / confirmation dialog ---------- */
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(4, 2, 2, .6);
+  backdrop-filter: blur(3px);
+  animation: fadeIn .18s ease;
+}
+
+.modal {
+  width: 100%;
+  max-width: 420px;
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--card);
+  box-shadow: 0 30px 80px var(--shadow);
+  animation: fadeInUp .25s var(--ease) both;
+}
+
+.modalIcon {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  border-radius: 13px;
+  color: #fff;
+  font-size: 19px;
+  background: linear-gradient(145deg, var(--redBright), var(--red));
+  box-shadow: 0 10px 26px rgba(181, 50, 78, .26);
+}
+
+.modal.destructive .modalIcon {
+  background: linear-gradient(145deg, #9c2e42, #5c1420);
+  box-shadow: 0 10px 26px rgba(124, 36, 52, .3);
+}
+
+.modal h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.modal p {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.modalActions {
+  display: flex;
+  gap: 9px;
+}
+
+.modalActions button {
+  flex: 1;
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  transition: transform .2s var(--easeSpring), filter .2s ease;
+}
+
+.modalActions button:hover { transform: translateY(-1px); }
+
+.modalActions .modalCancel {
+  color: var(--text);
+  background: var(--card2);
+  border: 1px solid var(--border);
+}
+
+.modalActions .modalConfirm {
+  color: #fff;
+  background: linear-gradient(135deg, var(--redBright), var(--red));
+}
+
+.modal.destructive .modalConfirm {
+  background: linear-gradient(135deg, #9c2e42, #5c1420);
+}
+
+/* ---------- Tooltip ---------- */
+
+.tooltipWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.tooltipWrap .tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 9px);
+  z-index: 40;
+  width: max-content;
+  max-width: 220px;
+  padding: 8px 11px;
+  border: 1px solid var(--borderStrong);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--card2);
+  box-shadow: 0 14px 30px var(--shadow);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 4px);
+  transition: opacity .15s ease, transform .15s ease;
+}
+
+.tooltipWrap .tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: var(--card2);
+  border-right: 1px solid var(--borderStrong);
+  border-bottom: 1px solid var(--borderStrong);
+  transform: translateX(-50%) translateY(-50%) rotate(45deg);
+}
+
+.tooltipWrap:hover .tooltip,
+.tooltipWrap:focus-within .tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ---------- Skeleton loading states ---------- */
+
+@keyframes skeletonSheen {
+  0% { background-position: -180% 0; }
+  100% { background-position: 180% 0; }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--card2);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 35%,
+    rgba(181, 50, 78, .12) 50%,
+    transparent 65%
+  );
+  background-size: 250% 100%;
+  animation: skeletonSheen 1.6s ease-in-out infinite;
+}
+
+.skeletonText {
+  height: 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+}
+
+.skeletonText.short { width: 45%; }
+.skeletonText.medium { width: 70%; }
+
+.skeletonCard {
+  height: 150px;
+  border-radius: 16px;
+}
+
+.skeletonAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
+}
+
+/* ---------- Form validation states ---------- */
+/* The sheet only styled the neutral + focus states of inputs.
+   These add success/error so forms (goals, macros, profile edits)
+   can actually tell someone what went wrong or was saved. */
+
+.fieldError input,
+.fieldError select,
+input.inputError {
+  border-color: #c4455b !important;
+  box-shadow: 0 0 0 4px rgba(196, 69, 91, .14) !important;
+}
+
+.fieldSuccess input,
+.fieldSuccess select,
+input.inputSuccess {
+  border-color: #2f8f5f !important;
+  box-shadow: 0 0 0 4px rgba(47, 143, 95, .14) !important;
+}
+
+.fieldHint {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.fieldHint.error { color: #e08196; }
+.fieldHint.success { color: #6bc99a; }
+
+.setupCard input:disabled,
+.quickMeal input:disabled,
+.foodForm input:disabled {
+  color: var(--muted);
+  background: var(--card2);
+  cursor: not-allowed;
+  opacity: .65;
+}
+
+.mainButton:disabled,
+.quickMeal button:disabled,
+.foodForm button:disabled {
+  background: var(--card2);
+  color: var(--muted);
+  box-shadow: none;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+}
+
+.mainButton:disabled::after { display: none; }
+
+/* ---------- Badge variants ---------- */
+/* .badge previously only came in the brand-accent color. Status
+   badges (goal hit, behind pace, needs attention) need their own
+   hues so they're distinguishable at a glance, not just by text. */
+
+.badge.success {
+  color: #6bc99a;
+  border-color: rgba(47, 143, 95, .32);
+  background: rgba(47, 143, 95, .12);
+}
+
+.badge.warning {
+  color: #e0ab5c;
+  border-color: rgba(201, 146, 72, .34);
+  background: var(--amberSoft);
+}
+
+.badge.info {
+  color: #7fb2c9;
+  border-color: rgba(74, 130, 154, .32);
+  background: rgba(74, 130, 154, .12);
+}
+
+.badge.neutral {
+  color: var(--muted);
+  border-color: var(--border);
+  background: var(--card2);
+}
+
+/* ---------- Accessibility: skip link ---------- */
+/* Keyboard/screen-reader users had no way to bypass the sidebar
+   nav to reach main content — a real gap given how much nav
+   markup sits before .main in the DOM. */
+
+.skipLink {
+  position: fixed;
+  top: -60px;
+  left: 14px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 8px;
+  color: #fff;
+  background: var(--red);
+  font-size: 13px;
+  font-weight: 700;
+  transition: top .2s ease;
+}
+
+.skipLink:focus {
+  top: 14px;
+}
+
+/* ---------- Brand mark ---------- */
+/* Replaces a generic letter-in-a-box with an actual ember/flame
+   glyph so "Ember" has a mark instead of a monogram placeholder. */
+
+.flameMark {
+  width: 58%;
+  height: 58%;
+}
+
+.flameMark .flameOuter {
+  fill: url(#flameGradOuter);
+}
+
+.flameMark .flameInner {
+  fill: url(#flameGradInner);
 }
