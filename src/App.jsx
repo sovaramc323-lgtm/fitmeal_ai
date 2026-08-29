@@ -2910,7 +2910,7 @@ function App() {
     {friendCode && (
       <span
         className="badge"
-        style={{ cursor: "pointer", fontSize: "12px", padding: "9px 12px" }}
+        style={{ cursor: "pointer", fontSize: "13px", padding: "9px 12px" }}
         onClick={() => {
           navigator.clipboard.writeText(friendCode);
           alert("Friend code copied!");
