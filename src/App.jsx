@@ -217,20 +217,270 @@ const searchIndianFoods = (query) => {
     .map(({ _searchName, ...food }) => food);
 };
 
+// =========================================================
+// EXERCISE ANATOMY DATA
+// -----------------------------------------------------------
+// Every exercise carries the muscles it trains (highlighted red on
+// the dummy figure) plus a "start" and "end" pose, expressed as pure
+// joint-rotation angles so a single reusable <ExerciseFigure> can
+// draw every exercise in the library — the same idea as a printed
+// muscle-chart poster, just generated instead of hand-drawn per pose.
+// =========================================================
+
 const EXERCISES = [
-  ["Chest", "Bench Press", "🏋️", "Press the weight upward while keeping your shoulder blades stable."],
-  ["Chest", "Cable Fly", "💪", "Bring the handles together slowly and squeeze the chest."],
-  ["Back", "Lat Pulldown", "🔻", "Pull the bar toward your upper chest and control the return."],
-  ["Back", "Seated Row", "↔️", "Pull toward your torso while keeping your spine neutral."],
-  ["Shoulders", "Lateral Raise", "🪽", "Raise your arms to shoulder height with controlled movement."],
-  ["Shoulders", "Shoulder Press", "⬆️", "Press overhead without arching your lower back."],
-  ["Legs", "Leg Press", "🦵", "Lower the platform under control and drive through your feet."],
-  ["Legs", "Leg Extension", "⚡", "Extend your knees smoothly and squeeze your quads."],
-  ["Arms & Abs", "Bicep Curl", "💪", "Curl without swinging your elbows forward."],
-  ["Arms & Abs", "Tricep Pushdown", "⬇️", "Keep elbows tucked and push the cable downward."],
-  ["Arms & Abs", "Cable Crunch", "🔥", "Curl your torso down while keeping the movement controlled."],
-  ["Cardio", "Treadmill", "🏃", "Start easy, build pace gradually and finish with a cooldown."],
+  {
+    muscle: "Chest",
+    title: "Bench Press",
+    description:
+      "Press the weight upward while keeping your shoulder blades stable.",
+    highlight: ["chest", "triceps"],
+    pose: {
+      start: { arm: 68, arm2: -95 },
+      end: { arm: 14, arm2: -12 },
+    },
+  },
+  {
+    muscle: "Chest",
+    title: "Cable Fly",
+    description: "Bring the handles together slowly and squeeze the chest.",
+    highlight: ["chest"],
+    pose: {
+      start: { arm: 96, arm2: -8 },
+      end: { arm: 24, arm2: -8 },
+    },
+  },
+  {
+    muscle: "Back",
+    title: "Lat Pulldown",
+    description: "Pull the bar toward your upper chest and control the return.",
+    highlight: ["back", "biceps"],
+    pose: {
+      start: { arm: 172, arm2: 0 },
+      end: { arm: 92, arm2: -42 },
+    },
+  },
+  {
+    muscle: "Back",
+    title: "Seated Row",
+    description: "Pull toward your torso while keeping your spine neutral.",
+    highlight: ["back", "biceps"],
+    pose: {
+      start: { arm: 108, arm2: 0 },
+      end: { arm: 22, arm2: -32 },
+    },
+  },
+  {
+    muscle: "Shoulders",
+    title: "Lateral Raise",
+    description: "Raise your arms to shoulder height with controlled movement.",
+    highlight: ["shoulders"],
+    pose: {
+      start: { arm: 6, arm2: 0 },
+      end: { arm: 90, arm2: 0 },
+    },
+  },
+  {
+    muscle: "Shoulders",
+    title: "Shoulder Press",
+    description: "Press overhead without arching your lower back.",
+    highlight: ["shoulders", "triceps"],
+    pose: {
+      start: { arm: 92, arm2: -92 },
+      end: { arm: 174, arm2: -10 },
+    },
+  },
+  {
+    muscle: "Legs",
+    title: "Leg Press",
+    description: "Lower the platform under control and drive through your feet.",
+    highlight: ["quads"],
+    pose: {
+      start: { leg: 46, leg2: -72 },
+      end: { leg: 8, leg2: -6 },
+    },
+  },
+  {
+    muscle: "Legs",
+    title: "Leg Extension",
+    description: "Extend your knees smoothly and squeeze your quads.",
+    highlight: ["quads"],
+    pose: {
+      start: { leg: 6, leg2: -86 },
+      end: { leg: 6, leg2: -4 },
+    },
+  },
+  {
+    muscle: "Arms & Abs",
+    title: "Bicep Curl",
+    description: "Curl without swinging your elbows forward.",
+    highlight: ["biceps"],
+    pose: {
+      start: { arm: 14, arm2: 0 },
+      end: { arm: 14, arm2: -150 },
+    },
+  },
+  {
+    muscle: "Arms & Abs",
+    title: "Tricep Pushdown",
+    description: "Keep elbows tucked and push the cable downward.",
+    highlight: ["triceps"],
+    pose: {
+      start: { arm: 14, arm2: -102 },
+      end: { arm: 14, arm2: -8 },
+    },
+  },
+  {
+    muscle: "Arms & Abs",
+    title: "Cable Crunch",
+    description: "Curl your torso down while keeping the movement controlled.",
+    highlight: ["abs"],
+    pose: {
+      start: { arm: 168, arm2: 0 },
+      end: { arm: 68, arm2: -44 },
+    },
+  },
+  {
+    muscle: "Cardio",
+    title: "Treadmill",
+    description: "Start easy, build pace gradually and finish with a cooldown.",
+    highlight: ["quads", "calves"],
+    pose: {
+      start: { arm: 30, arm2: -20, leg: 34, leg2: -18 },
+      end: { arm: -30, arm2: 10, leg: -26, leg2: 14 },
+    },
+  },
 ];
+
+const MUSCLE_LABELS = {
+  chest: "Chest",
+  back: "Back / Lats",
+  shoulders: "Shoulders",
+  biceps: "Biceps",
+  triceps: "Triceps",
+  abs: "Abs",
+  quads: "Quads",
+  calves: "Calves",
+};
+
+// Reusable anatomical dummy — a simplified front-facing silhouette
+// whose limbs rotate around shoulder/elbow/hip/knee pivots, with the
+// trained muscle group(s) filled red the same way a wall-chart poster
+// highlights the "effective area" for each move.
+function ExerciseFigure({ highlight = [], arm = 8, arm2 = 0, leg = 4, leg2 = 0, size = 78 }) {
+  const isHi = (m) => highlight.includes(m);
+  const bodyFill = isHi("chest") || isHi("abs") || isHi("back") ? "figureMuscle" : "figureSkin";
+
+  return (
+    <svg viewBox="0 0 100 168" width={size} height={size * 1.68} aria-hidden="true">
+      {/* torso */}
+      <path d="M35,30 Q50,25 65,30 L68,72 Q50,80 32,72 Z" className={bodyFill} />
+
+      {/* chest overlay */}
+      {isHi("chest") && (
+        <g className="figureMuscle">
+          <ellipse cx="42" cy="40" rx="9" ry="7" />
+          <ellipse cx="58" cy="40" rx="9" ry="7" />
+        </g>
+      )}
+
+      {/* back / lat overlay */}
+      {isHi("back") && (
+        <path d="M35,32 L50,44 L65,32 L68,60 L50,73 L32,60 Z" className="figureMuscle" />
+      )}
+
+      {/* abs overlay */}
+      {isHi("abs") && (
+        <g className="figureMuscle">
+          <rect x="42" y="38" width="16" height="6" rx="1.4" />
+          <rect x="42" y="46" width="16" height="6" rx="1.4" />
+          <rect x="42" y="54" width="16" height="6" rx="1.4" />
+          <rect x="42" y="62" width="16" height="6" rx="1.4" />
+        </g>
+      )}
+
+      {/* head + neck */}
+      <circle cx="50" cy="15" r="9" className="figureSkin" />
+      <rect x="46" y="23" width="8" height="7" className="figureSkin" />
+
+      {/* shoulders */}
+      <circle cx="33" cy="32" r={isHi("shoulders") ? 8.5 : 6} className={isHi("shoulders") ? "figureMuscle" : "figureSkin"} />
+      <circle cx="67" cy="32" r={isHi("shoulders") ? 8.5 : 6} className={isHi("shoulders") ? "figureMuscle" : "figureSkin"} />
+
+      {/* left arm */}
+      <g transform={`rotate(${arm} 33 32)`}>
+        <rect x="28" y="32" width="10" height="29" rx="5" className={isHi("biceps") || isHi("triceps") ? "figureMuscle" : "figureSkin"} />
+        <g transform={`rotate(${arm2} 33 61)`}>
+          <rect x="28.5" y="61" width="9" height="25" rx="4" className="figureSkin" />
+          <circle cx="33" cy="88" r="5" className="figureJoint" />
+        </g>
+      </g>
+
+      {/* right arm (mirrored) */}
+      <g transform={`rotate(${-arm} 67 32)`}>
+        <rect x="62" y="32" width="10" height="29" rx="5" className={isHi("biceps") || isHi("triceps") ? "figureMuscle" : "figureSkin"} />
+        <g transform={`rotate(${-arm2} 67 61)`}>
+          <rect x="62.5" y="61" width="9" height="25" rx="4" className="figureSkin" />
+          <circle cx="67" cy="88" r="5" className="figureJoint" />
+        </g>
+      </g>
+
+      {/* hips */}
+      <path d="M32,72 Q50,80 68,72 L66,90 Q50,96 34,90 Z" className="figureSkin" />
+
+      {/* left leg */}
+      <g transform={`rotate(${leg} 40 90)`}>
+        <rect x="35" y="90" width="11" height="33" rx="5" className={isHi("quads") ? "figureMuscle" : "figureSkin"} />
+        <g transform={`rotate(${leg2} 40 123)`}>
+          <rect x="36" y="123" width="9" height="29" rx="4" className={isHi("calves") ? "figureMuscle" : "figureSkin"} />
+        </g>
+      </g>
+
+      {/* right leg (mirrored) */}
+      <g transform={`rotate(${-leg} 60 90)`}>
+        <rect x="54" y="90" width="11" height="33" rx="5" className={isHi("quads") ? "figureMuscle" : "figureSkin"} />
+        <g transform={`rotate(${-leg2} 60 123)`}>
+          <rect x="55" y="123" width="9" height="29" rx="4" className={isHi("calves") ? "figureMuscle" : "figureSkin"} />
+        </g>
+      </g>
+    </svg>
+  );
+}
+
+// Side-by-side START → END dummy pair, mirroring how the reference
+// wall-chart shows two frames of the same movement per exercise.
+function ExercisePosePair({ exercise, size = 78 }) {
+  const { highlight, pose } = exercise;
+
+  return (
+    <div className="exerciseFigurePair">
+      <div className="exerciseFigureFrame">
+        <ExerciseFigure
+          highlight={highlight}
+          arm={pose.start.arm ?? 8}
+          arm2={pose.start.arm2 ?? 0}
+          leg={pose.start.leg ?? 4}
+          leg2={pose.start.leg2 ?? 0}
+          size={size}
+        />
+        <span>START</span>
+      </div>
+
+      <div className="exerciseFigureArrow">→</div>
+
+      <div className="exerciseFigureFrame">
+        <ExerciseFigure
+          highlight={highlight}
+          arm={pose.end.arm ?? 8}
+          arm2={pose.end.arm2 ?? 0}
+          leg={pose.end.leg ?? 4}
+          leg2={pose.end.leg2 ?? 0}
+          size={size}
+        />
+        <span>END</span>
+      </div>
+    </div>
+  );
+}
 
 const createSplit = () =>
   DAYS.map((_, i) => ({
@@ -2834,6 +3084,11 @@ function App() {
                   Select an exercise to view
                   technique cues.
                 </strong>
+
+                <div className="muscleLegend">
+                  <i />
+                  Red highlight = effective / targeted muscle area
+                </div>
               </div>
 
               <button
@@ -2847,18 +3102,17 @@ function App() {
 
             <div className="exerciseGrid">
               {EXERCISES.map(
-                (
-                  [
+                (exercise, index) => {
+                  const {
                     muscle,
                     title,
-                    icon,
                     description,
-                  ],
-                  index
-                ) => {
+                    highlight,
+                    pose,
+                  } = exercise;
+
                   const open =
-                    expandedExercise ===
-                    title;
+                    expandedExercise === title;
 
                   return (
                     <div
@@ -2870,9 +3124,7 @@ function App() {
                       key={title}
                       onClick={() =>
                         setExpandedExercise(
-                          open
-                            ? null
-                            : title
+                          open ? null : title
                         )
                       }
                     >
@@ -2883,9 +3135,21 @@ function App() {
                           ).padStart(2, "0")}
                         </div>
 
-                        <div className="exerciseIcon">
-                          {icon}
+                        <div className="exerciseMuscleTag">
+                          <i />
+                          {highlight
+                            .map(
+                              (m) =>
+                                MUSCLE_LABELS[m] ||
+                                m
+                            )
+                            .join(" + ")}
                         </div>
+
+                        <ExercisePosePair
+                          exercise={exercise}
+                          size={72}
+                        />
 
                         <div className="exerciseGridGlow" />
                       </div>
@@ -2915,32 +3179,61 @@ function App() {
                               "01",
                               "SETUP",
                               "Position yourself correctly and brace your body.",
+                              "start",
                             ],
                             [
                               "02",
                               "EXECUTE",
                               description,
+                              "end",
                             ],
                             [
                               "03",
                               "CONTROL",
                               "Return slowly and keep the movement controlled.",
+                              "start",
                             ],
                           ].map(
                             ([
                               number,
                               label,
                               text,
+                              frame,
                             ]) => (
                               <div
                                 className="stepItem"
                                 key={number}
                               >
-                                <span>
-                                  {number}
-                                </span>
+                                <div className="stepFigure">
+                                  <ExerciseFigure
+                                    highlight={
+                                      highlight
+                                    }
+                                    arm={
+                                      pose[frame]
+                                        .arm ?? 8
+                                    }
+                                    arm2={
+                                      pose[frame]
+                                        .arm2 ?? 0
+                                    }
+                                    leg={
+                                      pose[frame]
+                                        .leg ?? 4
+                                    }
+                                    leg2={
+                                      pose[frame]
+                                        .leg2 ?? 0
+                                    }
+                                    size={38}
+                                  />
+                                </div>
 
                                 <div>
+                                  <span>
+                                    {number}
+                                  </span>
+
                                   <b>
                                     {label}
                                   </b>
