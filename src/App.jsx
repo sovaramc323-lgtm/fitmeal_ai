@@ -328,6 +328,71 @@ function FoodSearchBox({
   );
 }
 
+// Small toast stack — replaces raw alert()/confirm() calls with
+// something that matches the rest of the shell and doesn't block
+// the UI thread. Each toast auto-dismisses after ~3.5s.
+function ToastStack({ toasts, onDismiss }) {
+  if (!toasts.length) return null;
+
+  return (
+    <div className="toastStack">
+      {toasts.map((t) => (
+        <div className={`toast ${t.type || ""}`} key={t.id}>
+          <div className="toastIcon">
+            {t.type === "success"
+              ? "✓"
+              : t.type === "warning"
+              ? "!"
+              : "✦"}
+          </div>
+
+          <div className="toastBody">
+            <strong>{t.title}</strong>
+            {t.message && <p>{t.message}</p>}
+          </div>
+
+          <button
+            className="toastClose"
+            onClick={() => onDismiss(t.id)}
+            aria-label="Dismiss"
+          >
+            ×
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Confirmation modal — used for destructive/irreversible actions
+// (resetting all data, removing a friend) instead of the browser's
+// native confirm() dialog.
+function ConfirmModal({ config, onCancel, onConfirm }) {
+  if (!config) return null;
+
+  return (
+    <div className="modalBackdrop" onClick={onCancel}>
+      <div
+        className={`modal ${config.destructive ? "destructive" : ""}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="modalIcon">{config.destructive ? "⚠" : "✦"}</div>
+        <h3>{config.title}</h3>
+        <p>{config.message}</p>
+
+        <div className="modalActions">
+          <button className="modalCancel" onClick={onCancel}>
+            Cancel
+          </button>
+          <button className="modalConfirm" onClick={onConfirm}>
+            {config.confirmLabel || "Confirm"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [page, setPage] = useState("dashboard");
 
@@ -373,6 +438,33 @@ function App() {
   const [statBodyFat, setStatBodyFat] = useState("");
 
   const [navOpen, setNavOpen] = useState(false);
+
+  // Toasts + confirmation modal — shared feedback surfaces used across
+  // every page instead of window.alert()/window.confirm().
+  const [toasts, setToasts] = useState([]);
+  const [confirmConfig, setConfirmConfig] = useState(null);
+
+  const pushToast = (title, message = "", type = "info") => {
+    const id = Date.now() + Math.random();
+    setToasts((old) => [...old, { id, title, message, type }]);
+    setTimeout(() => {
+      setToasts((old) => old.filter((t) => t.id !== id));
+    }, 3500);
+  };
+
+  const dismissToast = (id) =>
+    setToasts((old) => old.filter((t) => t.id !== id));
+
+  const askConfirm = ({ title, message, confirmLabel, destructive, onConfirm }) => {
+    setConfirmConfig({ title, message, confirmLabel, destructive, onConfirm });
+  };
+
+  const closeConfirm = () => setConfirmConfig(null);
+
+  const runConfirm = () => {
+    confirmConfig?.onConfirm?.();
+    setConfirmConfig(null);
+  };
 
   const todayIndex = new Date().getDay();
   const todayName = DAYS[todayIndex];
@@ -431,6 +523,53 @@ function App() {
       ),
     [meals, weekDates]
   );
+
+  // Consecutive-day logging streak, counting back from today (or from
+  // yesterday if nothing has been logged yet today so a streak isn't
+  // lost the moment the clock rolls over).
+  const loggedDates = useMemo(
+    () => new Set(meals.map((item) => item.date)),
+    [meals]
+  );
+
+  const streak = useMemo(() => {
+    let count = 0;
+    const cursor = new Date();
+
+    if (!loggedDates.has(toDateKey(cursor))) {
+      cursor.setDate(cursor.getDate() - 1);
+    }
+
+    while (loggedDates.has(toDateKey(cursor))) {
+      count += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    }
+
+    return count;
+  }, [loggedDates]);
+
+  // Macro ring angles — protein/carb/fat share of today's grams,
+  // expressed as cumulative conic-gradient stops.
+  const macroRingStyle = useMemo(() => {
+    const p = Math.max(totals.protein, 0);
+    const c = Math.max(totals.carbs, 0);
+    const f = Math.max(totals.fat, 0);
+    const sum = p + c + f;
+
+    if (!sum) {
+      return { "--proteinDeg": "0deg", "--carbDeg": "0deg", "--fatDeg": "0deg" };
+    }
+
+    const proteinDeg = (p / sum) * 360;
+    const carbDeg = proteinDeg + (c / sum) * 360;
+    const fatDeg = carbDeg + (f / sum) * 360;
+
+    return {
+      "--proteinDeg": `${proteinDeg}deg`,
+      "--carbDeg": `${carbDeg}deg`,
+      "--fatDeg": `${fatDeg}deg`,
+    };
+  }, [totals]);
 
   const aiScore = Math.min(
     100,
@@ -674,14 +813,20 @@ function App() {
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || "Could not send request");
+        pushToast(
+          "Couldn't send request",
+          data.message || "Check the code and try again.",
+          "warning"
+        );
         return;
       }
 
       setAddFriendCode("");
+      pushToast("Friend request sent", "", "success");
       fetchFriends();
     } catch (err) {
       console.error(err);
+      pushToast("Couldn't send request", "Check your connection.", "warning");
     }
   };
 
@@ -699,24 +844,31 @@ function App() {
     }
   };
 
-  const removeFriend = async (friendId) => {
-    if (!confirm("Remove this friend?")) return;
-
-    try {
-      await fetch(`${API_URL}/api/friends/${friendId}`, {
-        method: "DELETE",
-        headers: authHeaders(),
-      });
-      fetchFriends();
-      fetchLeaderboard();
-    } catch (err) {
-      console.error(err);
-    }
+  const removeFriend = (friendId) => {
+    askConfirm({
+      title: "Remove this friend?",
+      message: "They'll be removed from your leaderboard and friends list. You can always reconnect later with their code.",
+      confirmLabel: "Remove Friend",
+      destructive: true,
+      onConfirm: async () => {
+        try {
+          await fetch(`${API_URL}/api/friends/${friendId}`, {
+            method: "DELETE",
+            headers: authHeaders(),
+          });
+          fetchFriends();
+          fetchLeaderboard();
+          pushToast("Friend removed", "", "info");
+        } catch (err) {
+          console.error(err);
+        }
+      },
+    });
   };
 
   const logStats = async () => {
     if (!statWeight) {
-      alert("Enter your current weight.");
+      pushToast("Enter your current weight", "", "warning");
       return;
     }
 
@@ -734,8 +886,10 @@ function App() {
       setStatWeight("");
       setStatBodyFat("");
       fetchLeaderboard();
+      pushToast("Stats logged", "Your leaderboard standing has been updated.", "success");
     } catch (err) {
       console.error(err);
+      pushToast("Couldn't log stats", "Check your connection and try again.", "warning");
     }
   };
 
@@ -845,8 +999,10 @@ function App() {
 
   const addMeal = () => {
     if (!selectedFood) {
-      alert(
-        "Search for a food or drink above and select a result from the list first."
+      pushToast(
+        "Select a food first",
+        "Search above and pick a result from the list before adding.",
+        "warning"
       );
       return;
     }
@@ -875,6 +1031,7 @@ function App() {
     setSelectedFood(null);
     setFoodResults([]);
     setQuantity(100);
+    pushToast("Meal logged", `${newMeal.name} · ${newMeal.calories} kcal`, "success");
   };
 
   const removeMeal = (id) => {
@@ -885,7 +1042,7 @@ function App() {
 
   const saveSetup = () => {
     if (!name || !weight) {
-      alert("Please enter your name and weight.");
+      pushToast("Missing details", "Please enter your name and weight.", "warning");
       return;
     }
 
@@ -895,7 +1052,7 @@ function App() {
 
   const enableNotification = async () => {
     if (!("Notification" in window)) {
-      alert("Notifications are not supported.");
+      pushToast("Not supported", "Notifications aren't supported in this browser.", "warning");
       return;
     }
 
@@ -907,21 +1064,28 @@ function App() {
         body:
           "Your AI coach is ready. Check today's workout and nutrition.",
       });
+      pushToast("Notifications enabled", "", "success");
     }
   };
 
   const resetApp = () => {
-    if (!confirm("Reset all FitMeal AI data?")) return;
+    askConfirm({
+      title: "Reset all FitMeal AI data?",
+      message: "This clears your profile, workout split and meal history from this device. This can't be undone.",
+      confirmLabel: "Reset Everything",
+      destructive: true,
+      onConfirm: () => {
+        localStorage.removeItem("fitmealApp");
 
-    localStorage.removeItem("fitmealApp");
-
-    setName("");
-    setWeight("");
-    setSplit(createSplit());
-    setMeals([]);
-    setSetup(false);
-    setPage("dashboard");
-    setDarkMode(true);
+        setName("");
+        setWeight("");
+        setSplit(createSplit());
+        setMeals([]);
+        setSetup(false);
+        setPage("dashboard");
+        setDarkMode(true);
+      },
+    });
   };
 
   const askAI = () => {
@@ -1112,6 +1276,8 @@ function App() {
             <span>▲ WORKOUTS</span>
           </div>
         </div>
+
+        <ToastStack toasts={toasts} onDismiss={dismissToast} />
       </div>
     );
   }
@@ -1232,6 +1398,8 @@ function App() {
             Launch My Dashboard ✦
           </button>
         </div>
+
+        <ToastStack toasts={toasts} onDismiss={dismissToast} />
       </div>
     );
   }
@@ -1260,6 +1428,10 @@ function App() {
           : "appShell light"
       }
     >
+      <a href="#mainContent" className="skipLink">
+        Skip to content
+      </a>
+
       <div className="ambient ambientOne" />
       <div className="ambient ambientTwo" />
 
@@ -1346,6 +1518,16 @@ function App() {
         </nav>
 
         <div className="sidebarBottom">
+          {streak > 0 && (
+            <div
+              className="streakBadge"
+              style={{ margin: "0 5px 10px", justifyContent: "center", width: "calc(100% - 10px)" }}
+            >
+              <span className="streakFlame">🔥</span>
+              {streak} day{streak === 1 ? "" : "s"} streak
+            </div>
+          )}
+
           <div className="sidebarScore">
             <div>
               <span>AI SCORE</span>
@@ -1384,7 +1566,7 @@ function App() {
         </div>
       </aside>
 
-      <main className="main">
+      <main className="main" id="mainContent">
         <header className="topbar">
           <div>
             <div className="smallTitle">
@@ -2028,6 +2210,53 @@ function App() {
               </div>
             </div>
 
+            <section className="panel">
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">
+                    TODAY'S SPLIT
+                  </span>
+                  <h2>Macro Breakdown</h2>
+                </div>
+              </div>
+
+              {totals.protein + totals.carbs + totals.fat > 0 ? (
+                <div className="macroRingRow">
+                  <div className="macroRing" style={macroRingStyle}>
+                    <div>
+                      <strong>
+                        {Math.round(totals.protein + totals.carbs + totals.fat)}g
+                      </strong>
+                      <span>TOTAL</span>
+                    </div>
+                  </div>
+
+                  <div className="macroLegend">
+                    <div className="macroLegendRow">
+                      <i className="protein" />
+                      Protein
+                      <b>{totals.protein.toFixed(1)}g</b>
+                    </div>
+                    <div className="macroLegendRow">
+                      <i className="carbs" />
+                      Carbs
+                      <b>{totals.carbs.toFixed(1)}g</b>
+                    </div>
+                    <div className="macroLegendRow">
+                      <i className="fat" />
+                      Fat
+                      <b>{totals.fat.toFixed(1)}g</b>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="emptyState">
+                  <strong>No macros yet</strong>
+                  <span>Log a meal below to see today's protein / carb / fat split.</span>
+                </div>
+              )}
+            </section>
+
             <section className="panel weekPanel">
               <div className="panelHeader">
                 <div>
@@ -2407,6 +2636,16 @@ function App() {
                   nutrition logging, protein
                   intake and meal consistency.
                 </p>
+
+                {streak > 0 && (
+                  <div
+                    className="streakBadge"
+                    style={{ marginTop: 12 }}
+                  >
+                    <span className="streakFlame">🔥</span>
+                    {streak} day{streak === 1 ? "" : "s"} logging streak
+                  </div>
+                )}
               </div>
             </div>
 
@@ -2751,6 +2990,12 @@ function App() {
                     {weight} kg
                   </strong>
                 </p>
+                {streak > 0 && (
+                  <div className="streakBadge" style={{ marginTop: 8 }}>
+                    <span className="streakFlame">🔥</span>
+                    {streak} day{streak === 1 ? "" : "s"} streak
+                  </div>
+                )}
               </div>
 
               <div className="profileScore">
@@ -2913,7 +3158,7 @@ function App() {
         style={{ cursor: "pointer", fontSize: "13px", padding: "9px 12px" }}
         onClick={() => {
           navigator.clipboard.writeText(friendCode);
-          alert("Friend code copied!");
+          pushToast("Friend code copied", "", "success");
         }}
         title="Click to copy"
       >
@@ -3081,7 +3326,17 @@ function App() {
                 leaderboard.rankings[leaderboardTab].map(
                   (row, index) => (
                     <div className="leaderboardRow" key={row.id}>
-                      <div className="friendRankBadge">
+                      <div
+                        className={`friendRankBadge ${
+                          index === 0
+                            ? "rankGold"
+                            : index === 1
+                            ? "rankSilver"
+                            : index === 2
+                            ? "rankBronze"
+                            : ""
+                        }`}
+                      >
                         {index === 0
                           ? "🥇"
                           : index === 1
@@ -3124,7 +3379,19 @@ function App() {
               {leaderboard &&
                 leaderboard.points.map((p, index) => (
                   <div className="leaderboardRow" key={p.id}>
-                    <div className="friendRankBadge">{index + 1}</div>
+                    <div
+                      className={`friendRankBadge ${
+                        index === 0
+                          ? "rankGold"
+                          : index === 1
+                          ? "rankSilver"
+                          : index === 2
+                          ? "rankBronze"
+                          : ""
+                      }`}
+                    >
+                      {index + 1}
+                    </div>
                     <div className="friendRowInfo">
                       <strong>{p.name}</strong>
                       <span>Earned by winning weekly challenges</span>
@@ -3136,6 +3403,13 @@ function App() {
           </>
         )}
       </main>
+
+      <ToastStack toasts={toasts} onDismiss={dismissToast} />
+      <ConfirmModal
+        config={confirmConfig}
+        onCancel={closeConfirm}
+        onConfirm={runConfirm}
+      />
     </div>
   );
 }
