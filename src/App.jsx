@@ -50,11 +50,12 @@ const FOOD_SUGGESTIONS = [
 ];
 
 // Daily targets used for the dashboard's progress bars / AI insight.
-// Kept as simple constants for now — could later be derived from the
-// user's weight/goals or made editable on the Profile page.
-const CALORIE_TARGET = 2400;
-const PROTEIN_TARGET = 140;
-const WATER_TARGET_ML = 3000;
+// These are now editable via the Profile page (see `targets` state);
+// these constants are only the defaults used the very first time the
+// app runs, before anything has been saved to localStorage.
+const DEFAULT_CALORIE_TARGET = 2400;
+const DEFAULT_PROTEIN_TARGET = 140;
+const DEFAULT_WATER_TARGET_ML = 3000;
 const WATER_STEP_ML = 250;
 
 // Curated nutrition database for Indian foods, drinks, sweets, street
@@ -490,6 +491,80 @@ function ExercisePosePair({ exercise, size = 78 }) {
   );
 }
 
+// Simple inline SVG line chart for body weight over time — no charting
+// dependency needed since it's just one series of dated points.
+function WeightChart({ entries }) {
+  if (!entries || entries.length < 2) {
+    return (
+      <div className="emptyState">
+        <strong>Not enough data yet</strong>
+        <span>Log your weight at least twice (Leaderboard → Weekly Check-In) to see a trend line.</span>
+      </div>
+    );
+  }
+
+  const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
+  const weights = sorted.map((e) => e.weight);
+  const min = Math.min(...weights);
+  const max = Math.max(...weights);
+  const range = max - min || 1;
+
+  const width = 600;
+  const height = 160;
+  const padX = 10;
+  const padY = 14;
+
+  const points = sorted.map((entry, i) => {
+    const x =
+      sorted.length === 1
+        ? width / 2
+        : padX + (i / (sorted.length - 1)) * (width - padX * 2);
+    const y =
+      height -
+      padY -
+      ((entry.weight - min) / range) * (height - padY * 2);
+    return { x, y, entry };
+  });
+
+  const path = points
+    .map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`)
+    .join(" ");
+
+  const first = sorted[0];
+  const last = sorted[sorted.length - 1];
+  const delta = last.weight - first.weight;
+
+  return (
+    <div className="weightChartWrap">
+      <div className="weightChartSummary">
+        <div>
+          <span>LATEST</span>
+          <strong>{last.weight} kg</strong>
+        </div>
+        <div>
+          <span>SINCE FIRST LOG</span>
+          <strong className={delta <= 0 ? "posChange" : "negChange"}>
+            {delta > 0 ? "+" : ""}
+            {delta.toFixed(1)} kg
+          </strong>
+        </div>
+      </div>
+
+      <svg viewBox={`0 0 ${width} ${height}`} className="weightChartSvg">
+        <path d={path} className="weightChartLine" fill="none" />
+        {points.map((p, i) => (
+          <circle key={i} cx={p.x} cy={p.y} r={i === points.length - 1 ? 4.5 : 3} className="weightChartDot" />
+        ))}
+      </svg>
+
+      <div className="weightChartAxis">
+        <span>{first.date}</span>
+        <span>{last.date}</span>
+      </div>
+    </div>
+  );
+}
+
 const createSplit = () =>
   DAYS.map((_, i) => ({
     day: i + 1,
@@ -698,6 +773,32 @@ function App() {
 
   const [navOpen, setNavOpen] = useState(false);
 
+  // Editable daily targets (Profile page) — replace the old hardcoded
+  // CALORIE_TARGET / PROTEIN_TARGET / WATER_TARGET_ML constants so the
+  // progress bars and AI score actually reflect the person's own goals.
+  const [calorieTarget, setCalorieTarget] = useState(DEFAULT_CALORIE_TARGET);
+  const [proteinTarget, setProteinTarget] = useState(DEFAULT_PROTEIN_TARGET);
+  const [waterTarget, setWaterTarget] = useState(DEFAULT_WATER_TARGET_ML);
+  const [targetDraft, setTargetDraft] = useState({
+    calorieTarget: DEFAULT_CALORIE_TARGET,
+    proteinTarget: DEFAULT_PROTEIN_TARGET,
+    waterTarget: DEFAULT_WATER_TARGET_ML,
+  });
+
+  // Strength/weight progression — the biggest functional gap in the
+  // original app. exerciseLogs holds every logged set so the Exercise
+  // Library can show history + detect PRs; weightHistory is a local,
+  // dated record of body weight so Progress can chart it even before
+  // (or without) the backend leaderboard weight-log endpoint.
+  const [exerciseLogs, setExerciseLogs] = useState([]);
+  const [setDraft, setSetDraft] = useState({});
+  const [weightHistory, setWeightHistory] = useState([]);
+
+  // Real (if lightweight) AI chat log, replacing the old single
+  // question/answer pair that didn't actually accumulate a
+  // conversation and whose Enter-key handler didn't send anything.
+  const [aiChatLog, setAiChatLog] = useState([]);
+
   // Toasts + confirmation modal — shared feedback surfaces used across
   // every page instead of window.alert()/window.confirm().
   const [toasts, setToasts] = useState([]);
@@ -847,10 +948,10 @@ function App() {
     )
   );
 
-  const proteinRemaining = Math.max(PROTEIN_TARGET - totals.protein, 0);
+  const proteinRemaining = Math.max(proteinTarget - totals.protein, 0);
 
   const aiInsight =
-    totals.protein < PROTEIN_TARGET
+    totals.protein < proteinTarget
       ? "Protein is your biggest opportunity today."
       : totals.calories < 1200
       ? "Your energy intake looks light. Consider a balanced meal."
@@ -859,11 +960,45 @@ function App() {
       : "Your nutrition pattern is looking strong today.";
 
   const aiInsightDetail =
-    totals.protein < PROTEIN_TARGET
-      ? `${totals.protein.toFixed(0)}g / ${PROTEIN_TARGET}g protein — you're ${proteinRemaining.toFixed(
+    totals.protein < proteinTarget
+      ? `${totals.protein.toFixed(0)}g / ${proteinTarget}g protein — you're ${proteinRemaining.toFixed(
           0
         )}g short of today's target.`
       : "Keep your meals consistent and match your nutrition with today's activity.";
+
+  // Recent/favorite meals — dedupe the meal log by name (most recent
+  // logging wins) so "log again" one-tap entries surface the things
+  // actually eaten often, without requiring a fresh search + typed
+  // quantity every single time.
+  const recentMeals = useMemo(() => {
+    const seen = new Map();
+    for (let i = meals.length - 1; i >= 0; i -= 1) {
+      const item = meals[i];
+      if (!seen.has(item.name)) {
+        seen.set(item.name, item);
+      }
+      if (seen.size >= 8) break;
+    }
+    return Array.from(seen.values());
+  }, [meals]);
+
+  // Best set ever logged per exercise (by weight, then reps) — used to
+  // show "current best" on each card and to detect PRs when a new set
+  // is logged.
+  const bestSetByExercise = useMemo(() => {
+    const best = {};
+    exerciseLogs.forEach((log) => {
+      const current = best[log.exercise];
+      if (
+        !current ||
+        log.weight > current.weight ||
+        (log.weight === current.weight && log.reps > current.reps)
+      ) {
+        best[log.exercise] = log;
+      }
+    });
+    return best;
+  }, [exerciseLogs]);
 
   useEffect(() => {
     const saved = localStorage.getItem("fitmealApp");
@@ -890,6 +1025,16 @@ function App() {
         setSetup(data.setup || false);
         setReminders(data.reminders ?? true);
         setDarkMode(data.darkMode ?? true);
+        setCalorieTarget(data.calorieTarget || DEFAULT_CALORIE_TARGET);
+        setProteinTarget(data.proteinTarget || DEFAULT_PROTEIN_TARGET);
+        setWaterTarget(data.waterTarget || DEFAULT_WATER_TARGET_ML);
+        setTargetDraft({
+          calorieTarget: data.calorieTarget || DEFAULT_CALORIE_TARGET,
+          proteinTarget: data.proteinTarget || DEFAULT_PROTEIN_TARGET,
+          waterTarget: data.waterTarget || DEFAULT_WATER_TARGET_ML,
+        });
+        setExerciseLogs(data.exerciseLogs || []);
+        setWeightHistory(data.weightHistory || []);
       } catch {
         localStorage.removeItem("fitmealApp");
       }
@@ -914,6 +1059,11 @@ function App() {
         setup,
         reminders,
         darkMode,
+        calorieTarget,
+        proteinTarget,
+        waterTarget,
+        exerciseLogs,
+        weightHistory,
       })
     );
   }, [
@@ -926,6 +1076,11 @@ function App() {
     reminders,
     darkMode,
     weekDates,
+    calorieTarget,
+    proteinTarget,
+    waterTarget,
+    exerciseLogs,
+    weightHistory,
   ]);
 
   useEffect(() => {
@@ -1169,6 +1324,15 @@ function App() {
       });
 
       setWeight(String(statWeight));
+      setWeightHistory((old) => [
+        ...old,
+        {
+          id: Date.now(),
+          date: todayDate,
+          weight: Number(statWeight),
+          bodyFat: statBodyFat ? Number(statBodyFat) : null,
+        },
+      ]);
       setStatWeight("");
       setStatBodyFat("");
       fetchLeaderboard();
@@ -1177,6 +1341,75 @@ function App() {
       console.error(err);
       pushToast("Couldn't log stats", "Check your connection and try again.", "warning");
     }
+  };
+
+  // Log one set (reps + weight) for an exercise, detect whether it's a
+  // new personal record against everything logged for that exercise so
+  // far, and surface it with a toast.
+  const logSet = (exerciseTitle) => {
+    const draft = setDraft[exerciseTitle] || {};
+    const reps = Number(draft.reps);
+    const weight = Number(draft.weight);
+
+    if (!reps || weight < 0 || draft.weight === undefined || draft.weight === "") {
+      pushToast("Enter reps and weight", "", "warning");
+      return;
+    }
+
+    const previousBest = bestSetByExercise[exerciseTitle];
+    const isPR =
+      !previousBest ||
+      weight > previousBest.weight ||
+      (weight === previousBest.weight && reps > previousBest.reps);
+
+    const entry = {
+      id: Date.now(),
+      date: todayDate,
+      exercise: exerciseTitle,
+      reps,
+      weight,
+    };
+
+    setExerciseLogs((old) => [...old, entry]);
+    setSetDraft((old) => ({ ...old, [exerciseTitle]: { reps: "", weight: "" } }));
+
+    if (isPR && previousBest) {
+      pushToast(
+        `🏆 New PR — ${exerciseTitle}`,
+        `${weight}kg × ${reps} beats your previous best of ${previousBest.weight}kg × ${previousBest.reps}.`,
+        "success"
+      );
+    } else {
+      pushToast("Set logged", `${exerciseTitle}: ${weight}kg × ${reps}`, "success");
+    }
+  };
+
+  const saveTargets = () => {
+    const nextCalorie = Number(targetDraft.calorieTarget) || DEFAULT_CALORIE_TARGET;
+    const nextProtein = Number(targetDraft.proteinTarget) || DEFAULT_PROTEIN_TARGET;
+    const nextWater = Number(targetDraft.waterTarget) || DEFAULT_WATER_TARGET_ML;
+
+    setCalorieTarget(nextCalorie);
+    setProteinTarget(nextProtein);
+    setWaterTarget(nextWater);
+    pushToast("Targets updated", "Your dashboard and AI score now use your new goals.", "success");
+  };
+
+  // Send the current AI chat draft into the (still simulated, but now
+  // real conversation-log) chat, instead of the old handler that just
+  // set aiMessage back to itself on Enter and never appended anything.
+  const sendAiMessage = () => {
+    const text = aiMessage.trim();
+    if (!text) return;
+
+    const reply = askAI(text);
+
+    setAiChatLog((old) => [
+      ...old,
+      { id: Date.now(), role: "user", text },
+      { id: Date.now() + 1, role: "bot", text: reply },
+    ]);
+    setAiMessage("");
   };
 
   const handleLogin = async () => {
@@ -1382,8 +1615,8 @@ function App() {
     });
   };
 
-  const askAI = () => {
-    const text = aiMessage.toLowerCase();
+  const askAI = (message) => {
+    const text = (message ?? aiMessage).toLowerCase();
 
     if (text.includes("protein")) {
       return `You've logged ${totals.protein.toFixed(
@@ -1956,14 +2189,14 @@ function App() {
                   <div className="progressRowHead">
                     <b>🔥 Calories</b>
                     <span>
-                      {Math.round(totals.calories)} / {CALORIE_TARGET} kcal
+                      {Math.round(totals.calories)} / {calorieTarget} kcal
                     </span>
                   </div>
                   <div className="progressRowBar">
                     <i
                       style={{
                         width: `${Math.min(
-                          (totals.calories / CALORIE_TARGET) * 100,
+                          (totals.calories / calorieTarget) * 100,
                           100
                         )}%`,
                       }}
@@ -1975,14 +2208,14 @@ function App() {
                   <div className="progressRowHead">
                     <b>🥩 Protein</b>
                     <span>
-                      {totals.protein.toFixed(0)} / {PROTEIN_TARGET} g
+                      {totals.protein.toFixed(0)} / {proteinTarget} g
                     </span>
                   </div>
                   <div className="progressRowBar">
                     <i
                       style={{
                         width: `${Math.min(
-                          (totals.protein / PROTEIN_TARGET) * 100,
+                          (totals.protein / proteinTarget) * 100,
                           100
                         )}%`,
                       }}
@@ -1995,14 +2228,14 @@ function App() {
                     <b>💧 Water</b>
                     <span>
                       {(todayWater / 1000).toFixed(1)} /{" "}
-                      {(WATER_TARGET_ML / 1000).toFixed(1)} L
+                      {(waterTarget / 1000).toFixed(1)} L
                     </span>
                   </div>
                   <div className="progressRowBar water">
                     <i
                       style={{
                         width: `${Math.min(
-                          (todayWater / WATER_TARGET_ML) * 100,
+                          (todayWater / waterTarget) * 100,
                           100
                         )}%`,
                       }}
@@ -2188,7 +2421,7 @@ function App() {
                       g protein
                     </strong>
                     <span>
-                      {totals.protein < PROTEIN_TARGET
+                      {totals.protein < proteinTarget
                         ? "Needs attention"
                         : "On track"}
                     </span>
@@ -2245,17 +2478,17 @@ function App() {
                       today's workout.
                     </div>
 
-                    {aiMessage && (
-                      <div className="aiChatBubble user">
-                        {aiMessage}
-                      </div>
-                    )}
-
-                    {aiMessage && (
-                      <div className="aiChatBubble bot">
-                        <span>✦</span>
-                        {askAI()}
-                      </div>
+                    {aiChatLog.map((entry) =>
+                      entry.role === "user" ? (
+                        <div className="aiChatBubble user" key={entry.id}>
+                          {entry.text}
+                        </div>
+                      ) : (
+                        <div className="aiChatBubble bot" key={entry.id}>
+                          <span>✦</span>
+                          {entry.text}
+                        </div>
+                      )
                     )}
                   </div>
 
@@ -2268,24 +2501,14 @@ function App() {
                         )
                       }
                       onKeyDown={(e) => {
-                        if (
-                          e.key === "Enter"
-                        ) {
-                          setAiMessage(
-                            e.currentTarget.value
-                          );
+                        if (e.key === "Enter") {
+                          sendAiMessage();
                         }
                       }}
                       placeholder="Ask FitMeal AI..."
                     />
 
-                    <button
-                      onClick={() =>
-                        setAiMessage(
-                          aiMessage.trim()
-                        )
-                      }
-                    >
+                    <button onClick={sendAiMessage}>
                       ↑
                     </button>
                   </div>
@@ -2708,6 +2931,46 @@ function App() {
               </div>
             </section>
 
+            {recentMeals.length > 0 && (
+              <section className="panel">
+                <div className="panelHeader">
+                  <div>
+                    <span className="panelEyebrow">
+                      ONE-TAP LOGGING
+                    </span>
+                    <h2>Log Again</h2>
+                  </div>
+                </div>
+
+                <div className="recentMealsRow">
+                  {recentMeals.map((item) => (
+                    <button
+                      className="recentMealChip"
+                      key={item.id}
+                      onClick={() => {
+                        const newMeal = {
+                          ...item,
+                          id: Date.now(),
+                          date: todayDate,
+                        };
+                        setMeals((old) => [...old, newMeal]);
+                        pushToast(
+                          "Meal logged",
+                          `${newMeal.name} · ${newMeal.calories} kcal`,
+                          "success"
+                        );
+                      }}
+                    >
+                      <strong>{item.name}</strong>
+                      <span>
+                        {item.quantity}g · {item.calories} kcal
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
             <section className="panel">
               <div className="panelHeader">
                 <div>
@@ -2715,6 +2978,11 @@ function App() {
                     LIVE FOOD & DRINK SEARCH
                   </span>
                   <h2>Add Food or Drink</h2>
+                  <p className="foodSearchNote">
+                    Indian foods search instantly offline. Anything else falls back to USDA's free
+                    DEMO_KEY, which is limited to 30 searches/hour — add your own key in the code for
+                    heavier use.
+                  </p>
                 </div>
               </div>
 
@@ -3153,6 +3421,64 @@ function App() {
               <div className="panelHeader">
                 <div>
                   <span className="panelEyebrow">
+                    BODY WEIGHT
+                  </span>
+
+                  <h2>Weight Trend</h2>
+                </div>
+
+                <button
+                  className="textButton"
+                  onClick={() => setPage("leaderboard")}
+                >
+                  Log Weight →
+                </button>
+              </div>
+
+              <WeightChart entries={weightHistory} />
+            </section>
+
+            <section className="panel">
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">
+                    STRENGTH
+                  </span>
+
+                  <h2>Personal Records</h2>
+                </div>
+
+                <button
+                  className="textButton"
+                  onClick={() => setPage("exercises")}
+                >
+                  Log a Set →
+                </button>
+              </div>
+
+              {Object.keys(bestSetByExercise).length === 0 ? (
+                <div className="emptyState">
+                  <strong>No sets logged yet</strong>
+                  <span>Open any exercise in the Exercise Library and log a set to start tracking PRs.</span>
+                </div>
+              ) : (
+                <div className="prGrid">
+                  {Object.entries(bestSetByExercise).map(([exercise, log]) => (
+                    <div className="prCard" key={exercise}>
+                      <span>{exercise}</span>
+                      <strong>
+                        {log.weight}kg × {log.reps}
+                      </strong>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="panel">
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">
                     AI FEEDBACK
                   </span>
 
@@ -3309,6 +3635,50 @@ function App() {
                         <p>
                           {description}
                         </p>
+
+                        {bestSetByExercise[title] && (
+                          <div className="exerciseBestLift">
+                            🏆 Best: {bestSetByExercise[title].weight}kg ×{" "}
+                            {bestSetByExercise[title].reps}
+                          </div>
+                        )}
+
+                        <div
+                          className="exerciseLogRow"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <input
+                            type="number"
+                            placeholder="kg"
+                            value={setDraft[title]?.weight ?? ""}
+                            onChange={(e) =>
+                              setSetDraft((old) => ({
+                                ...old,
+                                [title]: {
+                                  ...old[title],
+                                  weight: e.target.value,
+                                },
+                              }))
+                            }
+                          />
+                          <input
+                            type="number"
+                            placeholder="reps"
+                            value={setDraft[title]?.reps ?? ""}
+                            onChange={(e) =>
+                              setSetDraft((old) => ({
+                                ...old,
+                                [title]: {
+                                  ...old[title],
+                                  reps: e.target.value,
+                                },
+                              }))
+                            }
+                          />
+                          <button onClick={() => logSet(title)}>
+                            Log Set
+                          </button>
+                        </div>
 
                         <b>
                           {open
@@ -3491,6 +3861,65 @@ function App() {
                   </span>
                 </button>
               </div>
+            </section>
+
+            <section className="panel">
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">
+                    DAILY GOALS
+                  </span>
+                  <h2>Nutrition Targets</h2>
+                </div>
+              </div>
+
+              <div className="targetInputs">
+                <div>
+                  <label>Calorie target (kcal)</label>
+                  <input
+                    type="number"
+                    value={targetDraft.calorieTarget}
+                    onChange={(e) =>
+                      setTargetDraft((old) => ({
+                        ...old,
+                        calorieTarget: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label>Protein target (g)</label>
+                  <input
+                    type="number"
+                    value={targetDraft.proteinTarget}
+                    onChange={(e) =>
+                      setTargetDraft((old) => ({
+                        ...old,
+                        proteinTarget: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+
+                <div>
+                  <label>Water target (ml)</label>
+                  <input
+                    type="number"
+                    value={targetDraft.waterTarget}
+                    onChange={(e) =>
+                      setTargetDraft((old) => ({
+                        ...old,
+                        waterTarget: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              </div>
+
+              <button className="outlineButton" onClick={saveTargets}>
+                Save Targets
+              </button>
             </section>
 
             <section className="panel">
