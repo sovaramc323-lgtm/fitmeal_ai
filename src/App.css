@@ -4423,3 +4423,217 @@ select {
   background: var(--redBright);
   box-shadow: 0 0 5px rgba(196, 42, 68, .7);
 }
+
+/* =========================================================
+   DASHBOARD REDESIGN PASS — greeting header, today's progress
+   (calories/protein/water with real targets), a compact "start
+   workout" card, and a quick-actions row, all placed above the
+   existing hero/AI-coach sections so the most actionable info
+   is visible without scrolling on mobile. Also adds a mobile
+   bottom nav + floating quick-add button.
+   ========================================================= */
+
+.greetingBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.greetingEyebrow {
+  color: var(--redBright);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.greetingBar h1 {
+  margin: 4px 0 0;
+  font-size: 26px;
+  letter-spacing: -.6px;
+}
+
+.progressPanel {
+  margin-bottom: 16px;
+}
+
+.progressRows {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.progressRowHead {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 7px;
+}
+
+.progressRowHead span {
+  color: var(--muted);
+}
+
+.progressRowBar {
+  height: 9px;
+  border-radius: 99px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.progressRowBar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--red), var(--redBright));
+  transition: width .5s var(--ease);
+}
+
+.progressRowBar.water i {
+  background: linear-gradient(90deg, #2a5f7a, #4a9bc4);
+}
+
+.todayWorkoutMini {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+}
+
+.todayWorkoutMini button {
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  background: linear-gradient(135deg, var(--redBright), var(--red));
+  box-shadow: 0 8px 20px rgba(196, 42, 68, .2);
+  transition: transform .2s var(--easeSpring), box-shadow .2s ease;
+}
+
+.todayWorkoutMini button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(196, 42, 68, .3);
+}
+
+.quickActionsRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.quickActionBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 8px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  transition: transform .2s var(--easeSpring), border-color .2s ease;
+}
+
+.quickActionBtn:hover {
+  transform: translateY(-3px);
+  border-color: var(--borderStrong);
+}
+
+.quickActionBtn span {
+  font-size: 19px;
+}
+
+/* ---------- Mobile bottom nav + floating quick-add button ---------- */
+
+.bottomNav {
+  display: none;
+}
+
+.fab {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .bottomNav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 35;
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
+    background: var(--sidebar);
+    border-top: 1px solid var(--border);
+    backdrop-filter: blur(18px);
+  }
+
+  .bottomNav button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 10px;
+    padding: 4px 0;
+  }
+
+  .bottomNav button.navActive {
+    color: var(--redBright);
+  }
+
+  .bottomNav button span {
+    font-size: 17px;
+  }
+
+  .fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    right: 16px;
+    bottom: 74px;
+    z-index: 36;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 0;
+    color: #fff;
+    font-size: 24px;
+    background: linear-gradient(135deg, var(--redBright), var(--red));
+    box-shadow: 0 12px 28px rgba(196, 42, 68, .35);
+  }
+
+  .main {
+    padding-bottom: 90px;
+  }
+
+  .quickActionsRow {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .quickActionBtn {
+    padding: 12px 4px;
+    font-size: 10.5px;
+  }
+
+  .todayWorkoutMini {
+    flex-wrap: wrap;
+  }
+}

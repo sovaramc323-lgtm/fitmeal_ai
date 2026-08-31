@@ -49,6 +49,14 @@ const FOOD_SUGGESTIONS = [
   "Thums Up / Cola",
 ];
 
+// Daily targets used for the dashboard's progress bars / AI insight.
+// Kept as simple constants for now — could later be derived from the
+// user's weight/goals or made editable on the Profile page.
+const CALORIE_TARGET = 2400;
+const PROTEIN_TARGET = 140;
+const WATER_TARGET_ML = 3000;
+const WATER_STEP_ML = 250;
+
 // Curated nutrition database for Indian foods, drinks, sweets, street
 // food and fast food. Values are per 100g (or 100ml for drinks) so they
 // scale the same way as the USDA results using the quantity field.
@@ -657,6 +665,7 @@ function App() {
   const [selectedFood, setSelectedFood] = useState(null);
   const [quantity, setQuantity] = useState(100);
   const [meals, setMeals] = useState([]);
+  const [waterLogs, setWaterLogs] = useState([]);
 
   const [darkMode, setDarkMode] = useState(true);
   const [reminders, setReminders] = useState(true);
@@ -756,6 +765,14 @@ function App() {
     [todayMeals]
   );
 
+  const todayWater = useMemo(
+    () =>
+      waterLogs
+        .filter((item) => item.date === todayDate)
+        .reduce((sum, item) => sum + item.amount, 0),
+    [waterLogs, todayDate]
+  );
+
   const weeklyTotals = useMemo(
     () =>
       weekDates.map((date) =>
@@ -830,14 +847,23 @@ function App() {
     )
   );
 
+  const proteinRemaining = Math.max(PROTEIN_TARGET - totals.protein, 0);
+
   const aiInsight =
-    totals.protein < 40
+    totals.protein < PROTEIN_TARGET
       ? "Protein is your biggest opportunity today."
       : totals.calories < 1200
       ? "Your energy intake looks light. Consider a balanced meal."
       : todayMeals.length < 3
       ? "Your nutrition log needs another meal or snack."
       : "Your nutrition pattern is looking strong today.";
+
+  const aiInsightDetail =
+    totals.protein < PROTEIN_TARGET
+      ? `${totals.protein.toFixed(0)}g / ${PROTEIN_TARGET}g protein — you're ${proteinRemaining.toFixed(
+          0
+        )}g short of today's target.`
+      : "Keep your meals consistent and match your nutrition with today's activity.";
 
   useEffect(() => {
     const saved = localStorage.getItem("fitmealApp");
@@ -851,6 +877,12 @@ function App() {
         setSplit(data.split || createSplit());
         setMeals(
           (data.meals || []).map((item) => ({
+            ...item,
+            date: item.date || toDateKey(new Date()),
+          }))
+        );
+        setWaterLogs(
+          (data.waterLogs || []).map((item) => ({
             ...item,
             date: item.date || toDateKey(new Date()),
           }))
@@ -876,6 +908,9 @@ function App() {
         meals: meals.filter(
           (item) => item.date >= currentWeekStart
         ),
+        waterLogs: waterLogs.filter(
+          (item) => item.date >= currentWeekStart
+        ),
         setup,
         reminders,
         darkMode,
@@ -886,6 +921,7 @@ function App() {
     weight,
     split,
     meals,
+    waterLogs,
     setup,
     reminders,
     darkMode,
@@ -1282,6 +1318,14 @@ function App() {
     setFoodResults([]);
     setQuantity(100);
     pushToast("Meal logged", `${newMeal.name} · ${newMeal.calories} kcal`, "success");
+  };
+
+  const addWater = (amount) => {
+    setWaterLogs((old) => [
+      ...old,
+      { id: Date.now() + Math.random(), date: todayDate, amount },
+    ]);
+    pushToast("Water logged", `+${amount} ml`, "success");
   };
 
   const removeMeal = (id) => {
@@ -1867,6 +1911,157 @@ function App() {
 
         {page === "dashboard" && (
           <>
+            {(() => {
+              const hour = new Date().getHours();
+              const greeting =
+                hour < 12
+                  ? "Good morning"
+                  : hour < 18
+                  ? "Good afternoon"
+                  : "Good evening";
+
+              return (
+                <section className="greetingBar">
+                  <div>
+                    <span className="greetingEyebrow">
+                      {todayName.toUpperCase()}
+                    </span>
+                    <h1>
+                      {greeting}, {name} 👋
+                    </h1>
+                  </div>
+
+                  {streak > 0 && (
+                    <div className="streakBadge">
+                      <span className="streakFlame">🔥</span>
+                      {streak} day{streak === 1 ? "" : "s"} streak
+                    </div>
+                  )}
+                </section>
+              );
+            })()}
+
+            <section className="panel progressPanel">
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">
+                    TODAY'S PROGRESS
+                  </span>
+                  <h2>Calories, Protein & Water</h2>
+                </div>
+              </div>
+
+              <div className="progressRows">
+                <div className="progressRow">
+                  <div className="progressRowHead">
+                    <b>🔥 Calories</b>
+                    <span>
+                      {Math.round(totals.calories)} / {CALORIE_TARGET} kcal
+                    </span>
+                  </div>
+                  <div className="progressRowBar">
+                    <i
+                      style={{
+                        width: `${Math.min(
+                          (totals.calories / CALORIE_TARGET) * 100,
+                          100
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="progressRow">
+                  <div className="progressRowHead">
+                    <b>🥩 Protein</b>
+                    <span>
+                      {totals.protein.toFixed(0)} / {PROTEIN_TARGET} g
+                    </span>
+                  </div>
+                  <div className="progressRowBar">
+                    <i
+                      style={{
+                        width: `${Math.min(
+                          (totals.protein / PROTEIN_TARGET) * 100,
+                          100
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="progressRow">
+                  <div className="progressRowHead">
+                    <b>💧 Water</b>
+                    <span>
+                      {(todayWater / 1000).toFixed(1)} /{" "}
+                      {(WATER_TARGET_ML / 1000).toFixed(1)} L
+                    </span>
+                  </div>
+                  <div className="progressRowBar water">
+                    <i
+                      style={{
+                        width: `${Math.min(
+                          (todayWater / WATER_TARGET_ML) * 100,
+                          100
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="todayWorkoutMini">
+              <div>
+                <span className="panelEyebrow">
+                  TODAY · DAY {todayIndex + 1}
+                </span>
+                <h3 style={{ margin: "6px 0 0" }}>
+                  {today?.workouts?.length
+                    ? today.workouts.join(" + ")
+                    : "Recovery Day"}
+                </h3>
+              </div>
+              <button onClick={() => setPage("workout")}>
+                Start Workout →
+              </button>
+            </section>
+
+            <section className="quickActionsRow">
+              <button
+                className="quickActionBtn"
+                onClick={() => setPage("nutrition")}
+              >
+                <span>＋</span>
+                Log Meal
+              </button>
+
+              <button
+                className="quickActionBtn"
+                onClick={() => addWater(WATER_STEP_ML)}
+              >
+                <span>💧</span>
+                Add Water
+              </button>
+
+              <button
+                className="quickActionBtn"
+                onClick={() => setPage("workout")}
+              >
+                <span>🏋️</span>
+                Log Workout
+              </button>
+
+              <button
+                className="quickActionBtn"
+                onClick={() => setPage("leaderboard")}
+              >
+                <span>⚖️</span>
+                Update Weight
+              </button>
+            </section>
+
             <section className="hero">
               <div className="heroContent">
                 <div className="heroEyebrow">
@@ -1975,11 +2170,7 @@ function App() {
 
                   <h3>{aiInsight}</h3>
 
-                  <p>
-                    {totals.protein < 40
-                      ? "Add a protein-rich food to move your daily score upward."
-                      : "Keep your meals consistent and match your nutrition with today's activity."}
-                  </p>
+                  <p>{aiInsightDetail}</p>
                 </div>
               </div>
 
@@ -1997,7 +2188,7 @@ function App() {
                       g protein
                     </strong>
                     <span>
-                      {totals.protein < 40
+                      {totals.protein < PROTEIN_TARGET
                         ? "Needs attention"
                         : "On track"}
                     </span>
@@ -2113,54 +2304,6 @@ function App() {
               </div>
             </section>
 
-            <section className="stats">
-              <div className="stat">
-                <div className="statIcon">
-                  🔥
-                </div>
-                <span>CALORIES</span>
-                <strong>
-                  {Math.round(
-                    totals.calories
-                  )}
-                </strong>
-                <small>kcal today</small>
-              </div>
-
-              <div className="stat">
-                <div className="statIcon">
-                  🥩
-                </div>
-                <span>PROTEIN</span>
-                <strong>
-                  {totals.protein.toFixed(1)}
-                  g
-                </strong>
-                <small>consumed</small>
-              </div>
-
-              <div className="stat">
-                <div className="statIcon">
-                  ⚡
-                </div>
-                <span>CARBS</span>
-                <strong>
-                  {totals.carbs.toFixed(1)}
-                  g
-                </strong>
-                <small>consumed</small>
-              </div>
-
-              <div className="stat">
-                <div className="statIcon">
-                  ⚖
-                </div>
-                <span>BODY WEIGHT</span>
-                <strong>{weight}</strong>
-                <small>kg</small>
-              </div>
-            </section>
-
             <div className="dashboardGrid">
               <section className="panel">
                 <div className="panelHeader">
@@ -2222,8 +2365,10 @@ function App() {
                   </div>
 
                   <span className="badge">
-                    DAY{" "}
-                    {tomorrowIndex + 1}
+                    DAY {tomorrowIndex + 1} ·{" "}
+                    {tomorrow?.workouts?.length
+                      ? tomorrow.workouts.join(" + ")
+                      : "REST"}
                   </span>
                 </div>
 
@@ -3696,6 +3841,29 @@ function App() {
           </>
         )}
       </main>
+
+      <nav className="bottomNav">
+        {[
+          ["dashboard", "⌂", "Home"],
+          ["nutrition", "🍽️", "Meals"],
+          ["workout", "🏋️", "Workout"],
+          ["progress", "📊", "Progress"],
+          ["profile", "👤", "Profile"],
+        ].map(([key, icon, label]) => (
+          <button
+            key={key}
+            className={page === key ? "navActive" : ""}
+            onClick={() => setPage(key)}
+          >
+            <span>{icon}</span>
+            {label}
+          </button>
+        ))}
+      </nav>
+
+      <button className="fab" onClick={() => setPage("nutrition")}>
+        ＋
+      </button>
 
       <ToastStack toasts={toasts} onDismiss={dismissToast} />
       <ConfirmModal
