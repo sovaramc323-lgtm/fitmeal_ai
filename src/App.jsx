@@ -358,6 +358,169 @@ const EXERCISES = [
       end: { arm: -30, arm2: 10, leg: -26, leg2: 14 },
     },
   },
+
+  // ---- Library expansion — same schema as above, additive only ----
+
+  {
+    muscle: "Chest",
+    title: "Incline Dumbbell Press",
+    description: "Press dumbbells up and slightly in, targeting the upper chest.",
+    highlight: ["chest", "shoulders", "triceps"],
+    pose: {
+      start: { arm: 74, arm2: -100 },
+      end: { arm: 20, arm2: -16 },
+    },
+  },
+  {
+    muscle: "Chest",
+    title: "Push-Up",
+    description: "Lower your chest to the floor while keeping your core braced.",
+    highlight: ["chest", "triceps", "abs"],
+    pose: {
+      start: { arm: 62, arm2: -110 },
+      end: { arm: 18, arm2: -20 },
+    },
+  },
+  {
+    muscle: "Back",
+    title: "Deadlift",
+    description: "Hinge at the hips and drive through your heels, keeping your back flat.",
+    highlight: ["back", "quads"],
+    pose: {
+      start: { arm: 24, arm2: 0, leg: 26, leg2: -8 },
+      end: { arm: 4, arm2: 0, leg: 4, leg2: -2 },
+    },
+  },
+  {
+    muscle: "Back",
+    title: "Pull-Up",
+    description: "Pull your chin over the bar, leading with your elbows down and back.",
+    highlight: ["back", "biceps"],
+    pose: {
+      start: { arm: 176, arm2: -4 },
+      end: { arm: 86, arm2: -60 },
+    },
+  },
+  {
+    muscle: "Shoulders",
+    title: "Front Raise",
+    description: "Raise the weight straight in front to shoulder height.",
+    highlight: ["shoulders"],
+    pose: {
+      start: { arm: 4, arm2: 0 },
+      end: { arm: 88, arm2: 0 },
+    },
+  },
+  {
+    muscle: "Shoulders",
+    title: "Face Pull",
+    description: "Pull the rope toward your face, flaring elbows out wide.",
+    highlight: ["shoulders", "back"],
+    pose: {
+      start: { arm: 110, arm2: -6 },
+      end: { arm: 70, arm2: -70 },
+    },
+  },
+  {
+    muscle: "Legs",
+    title: "Squat",
+    description: "Sit your hips back and down, keeping your chest up and knees tracking your toes.",
+    highlight: ["quads"],
+    pose: {
+      start: { leg: 6, leg2: -8 },
+      end: { leg: 52, leg2: -74 },
+    },
+  },
+  {
+    muscle: "Legs",
+    title: "Lunges",
+    description: "Step forward and lower until both knees reach about 90 degrees.",
+    highlight: ["quads", "calves"],
+    pose: {
+      start: { leg: 4, leg2: -4 },
+      end: { leg: 44, leg2: -66 },
+    },
+  },
+  {
+    muscle: "Legs",
+    title: "Calf Raise",
+    description: "Rise onto your toes and pause at the top, then lower slowly.",
+    highlight: ["calves"],
+    pose: {
+      start: { leg: 4, leg2: 6 },
+      end: { leg: 4, leg2: -18 },
+    },
+  },
+  {
+    muscle: "Arms & Abs",
+    title: "Hammer Curl",
+    description: "Curl with a neutral grip, keeping wrists locked and elbows still.",
+    highlight: ["biceps"],
+    pose: {
+      start: { arm: 12, arm2: 0 },
+      end: { arm: 12, arm2: -140 },
+    },
+  },
+  {
+    muscle: "Arms & Abs",
+    title: "Skull Crusher",
+    description: "Lower the bar toward your forehead, then extend back up.",
+    highlight: ["triceps"],
+    pose: {
+      start: { arm: 178, arm2: -110 },
+      end: { arm: 178, arm2: -6 },
+    },
+  },
+  {
+    muscle: "Arms & Abs",
+    title: "Plank",
+    description: "Hold a straight line from shoulders to heels, bracing your core.",
+    highlight: ["abs"],
+    pose: {
+      start: { arm: 100, arm2: -4, leg: 2, leg2: 0 },
+      end: { arm: 100, arm2: -4, leg: 2, leg2: 0 },
+    },
+  },
+  {
+    muscle: "Arms & Abs",
+    title: "Russian Twist",
+    description: "Rotate your torso side to side, keeping feet lifted and controlled.",
+    highlight: ["abs"],
+    pose: {
+      start: { arm: 96, arm2: -30 },
+      end: { arm: 96, arm2: 30 },
+    },
+  },
+  {
+    muscle: "Cardio",
+    title: "Cycling",
+    description: "Keep a steady cadence, then push pace for short intervals.",
+    highlight: ["quads", "calves"],
+    pose: {
+      start: { leg: 44, leg2: -70 },
+      end: { leg: -18, leg2: -10 },
+    },
+  },
+  {
+    muscle: "Cardio",
+    title: "Rowing Machine",
+    description: "Drive with your legs first, then finish the pull with your arms.",
+    highlight: ["back", "quads"],
+    pose: {
+      start: { arm: 30, arm2: 0, leg: 46, leg2: -70 },
+      end: { arm: 140, arm2: -60, leg: 6, leg2: -4 },
+    },
+  },
+  {
+    muscle: "Cardio",
+    title: "Jump Rope",
+    description: "Stay light on your feet with small, quick hops.",
+    highlight: ["calves"],
+    pose: {
+      start: { arm: 20, arm2: -10, leg: 2, leg2: 4 },
+      end: { arm: -10, arm2: -10, leg: 2, leg2: -14 },
+    },
+  },
 ];
 
 const MUSCLE_LABELS = {
@@ -794,6 +957,15 @@ function App() {
   const [setDraft, setSetDraft] = useState({});
   const [weightHistory, setWeightHistory] = useState([]);
 
+  // Exercise Library enhancements — muscle-group filter + text search so
+  // a growing library stays browsable, per-exercise notes (form cues,
+  // reminders) that persist locally, and a simple rest timer that starts
+  // automatically after a set is logged.
+  const [exerciseFilter, setExerciseFilter] = useState("All");
+  const [exerciseSearch, setExerciseSearch] = useState("");
+  const [exerciseNotes, setExerciseNotes] = useState({});
+  const [restTimer, setRestTimer] = useState(null); // { exercise, secondsLeft, duration, running }
+
   // Real (if lightweight) AI chat log, replacing the old single
   // question/answer pair that didn't actually accumulate a
   // conversation and whose Enter-key handler didn't send anything.
@@ -1000,6 +1172,43 @@ function App() {
     return best;
   }, [exerciseLogs]);
 
+  // Distinct muscle-group tabs for the Exercise Library filter bar,
+  // in the same order the exercises were authored ("All" always first).
+  const muscleGroups = useMemo(() => {
+    const seen = [];
+    EXERCISES.forEach((ex) => {
+      if (!seen.includes(ex.muscle)) seen.push(ex.muscle);
+    });
+    return ["All", ...seen];
+  }, []);
+
+  // Exercises visible in the Library after applying the muscle-group tab
+  // and the free-text search (matches title, muscle group or description).
+  const filteredExercises = useMemo(() => {
+    const q = exerciseSearch.trim().toLowerCase();
+
+    return EXERCISES.filter((ex) => {
+      const matchesFilter =
+        exerciseFilter === "All" || ex.muscle === exerciseFilter;
+
+      const matchesSearch =
+        !q ||
+        ex.title.toLowerCase().includes(q) ||
+        ex.muscle.toLowerCase().includes(q) ||
+        ex.description.toLowerCase().includes(q);
+
+      return matchesFilter && matchesSearch;
+    });
+  }, [exerciseFilter, exerciseSearch]);
+
+  // Most recent logged sets for a given exercise, newest first — powers
+  // the small history list shown inside each exercise's open detail.
+  const historyForExercise = (title) =>
+    exerciseLogs
+      .filter((log) => log.exercise === title)
+      .slice()
+      .reverse();
+
   useEffect(() => {
     const saved = localStorage.getItem("fitmealApp");
 
@@ -1035,6 +1244,7 @@ function App() {
         });
         setExerciseLogs(data.exerciseLogs || []);
         setWeightHistory(data.weightHistory || []);
+        setExerciseNotes(data.exerciseNotes || {});
       } catch {
         localStorage.removeItem("fitmealApp");
       }
@@ -1064,6 +1274,7 @@ function App() {
         waterTarget,
         exerciseLogs,
         weightHistory,
+        exerciseNotes,
       })
     );
   }, [
@@ -1081,6 +1292,7 @@ function App() {
     waterTarget,
     exerciseLogs,
     weightHistory,
+    exerciseNotes,
   ]);
 
   useEffect(() => {
@@ -1114,6 +1326,25 @@ function App() {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // Rest-timer countdown — ticks once a second while a timer is
+  // running, and stops itself (without clearing the display) at 0 so
+  // the "rest's over" state is visible until dismissed or restarted.
+  useEffect(() => {
+    if (!restTimer || !restTimer.running) return undefined;
+
+    const id = setInterval(() => {
+      setRestTimer((old) => {
+        if (!old || !old.running) return old;
+        if (old.secondsLeft <= 1) {
+          return { ...old, secondsLeft: 0, running: false };
+        }
+        return { ...old, secondsLeft: old.secondsLeft - 1 };
+      });
+    }, 1000);
+
+    return () => clearInterval(id);
+  }, [restTimer?.running, restTimer?.exercise]);
 
   // Live search: Indian foods, drinks, sweets, street food and fast
   // food (from the curated INDIAN_FOODS database) show up instantly on
@@ -1382,6 +1613,48 @@ function App() {
     } else {
       pushToast("Set logged", `${exerciseTitle}: ${weight}kg × ${reps}`, "success");
     }
+
+    startRestTimer(exerciseTitle, 60);
+  };
+
+  // ---- Rest timer controls ----
+
+  const startRestTimer = (exerciseTitle, seconds) => {
+    setRestTimer({
+      exercise: exerciseTitle,
+      duration: seconds,
+      secondsLeft: seconds,
+      running: true,
+    });
+  };
+
+  const toggleRestTimer = (exerciseTitle) => {
+    setRestTimer((old) => {
+      if (!old || old.exercise !== exerciseTitle) {
+        return {
+          exercise: exerciseTitle,
+          duration: 60,
+          secondsLeft: 60,
+          running: true,
+        };
+      }
+      return { ...old, running: !old.running };
+    });
+  };
+
+  const resetRestTimer = (exerciseTitle, seconds) => {
+    setRestTimer({
+      exercise: exerciseTitle,
+      duration: seconds,
+      secondsLeft: seconds,
+      running: true,
+    });
+  };
+
+  // ---- Per-exercise notes (form cues / reminders), saved locally ----
+
+  const setExerciseNote = (exerciseTitle, text) => {
+    setExerciseNotes((old) => ({ ...old, [exerciseTitle]: text }));
   };
 
   const saveTargets = () => {
@@ -3571,8 +3844,46 @@ function App() {
               </button>
             </div>
 
+            <div className="exerciseFilterBar">
+              <input
+                className="exerciseSearchInput"
+                value={exerciseSearch}
+                onChange={(e) => setExerciseSearch(e.target.value)}
+                placeholder="Search exercises — squat, curl, row..."
+              />
+
+              <div className="exerciseTabRow">
+                {muscleGroups.map((group) => (
+                  <button
+                    key={group}
+                    className={
+                      exerciseFilter === group
+                        ? "exerciseTab active"
+                        : "exerciseTab"
+                    }
+                    onClick={() => setExerciseFilter(group)}
+                  >
+                    {group}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="exerciseCount">
+              {filteredExercises.length} exercise
+              {filteredExercises.length === 1 ? "" : "s"}
+              {exerciseFilter !== "All" ? ` in ${exerciseFilter}` : ""}
+            </div>
+
+            {filteredExercises.length === 0 ? (
+              <div className="emptyState large">
+                <span>▲</span>
+                <strong>No exercises match</strong>
+                <p>Try a different muscle group or clear your search.</p>
+              </div>
+            ) : (
             <div className="exerciseGrid">
-              {EXERCISES.map(
+              {filteredExercises.map(
                 (exercise, index) => {
                   const {
                     muscle,
@@ -3762,11 +4073,113 @@ function App() {
                           )}
                         </div>
                       )}
+
+                      {open && (
+                        <div
+                          className="exerciseDetailExtra"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="restTimerBox">
+                            <div className="restTimerHead">
+                              <span>REST TIMER</span>
+                              {restTimer &&
+                                restTimer.exercise === title && (
+                                  <b>
+                                    {restTimer.secondsLeft === 0
+                                      ? "Rest's over"
+                                      : restTimer.running
+                                      ? "Running"
+                                      : "Paused"}
+                                  </b>
+                                )}
+                            </div>
+
+                            <div className="restTimerRow">
+                              <div className="restTimerDial">
+                                {restTimer && restTimer.exercise === title
+                                  ? `${Math.floor(
+                                      restTimer.secondsLeft / 60
+                                    )}:${String(
+                                      restTimer.secondsLeft % 60
+                                    ).padStart(2, "0")}`
+                                  : "1:00"}
+                              </div>
+
+                              <div className="restTimerActions">
+                                <button onClick={() => resetRestTimer(title, 30)}>
+                                  30s
+                                </button>
+                                <button onClick={() => resetRestTimer(title, 60)}>
+                                  60s
+                                </button>
+                                <button onClick={() => resetRestTimer(title, 90)}>
+                                  90s
+                                </button>
+                                <button
+                                  className="restTimerToggle"
+                                  onClick={() => toggleRestTimer(title)}
+                                >
+                                  {restTimer &&
+                                  restTimer.exercise === title &&
+                                  restTimer.running
+                                    ? "Pause"
+                                    : "Start"}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="exerciseHistoryNotesRow">
+                            <div className="exerciseHistoryBox">
+                              <span className="exerciseDetailLabel">
+                                RECENT SETS
+                              </span>
+
+                              {historyForExercise(title).length === 0 ? (
+                                <div className="exerciseHistoryEmpty">
+                                  No sets logged yet for this exercise.
+                                </div>
+                              ) : (
+                                <div className="exerciseHistoryList">
+                                  {historyForExercise(title)
+                                    .slice(0, 6)
+                                    .map((log) => (
+                                      <div
+                                        className="exerciseHistoryRow"
+                                        key={log.id}
+                                      >
+                                        <span>{log.date}</span>
+                                        <b>
+                                          {log.weight}kg × {log.reps}
+                                        </b>
+                                      </div>
+                                    ))}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="exerciseNotesBox">
+                              <span className="exerciseDetailLabel">
+                                YOUR NOTES
+                              </span>
+                              <textarea
+                                value={exerciseNotes[title] || ""}
+                                onChange={(e) =>
+                                  setExerciseNote(title, e.target.value)
+                                }
+                                placeholder="Form cues, machine settings, reminders..."
+                                rows={4}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 }
               )}
             </div>
+            )}
           </>
         )}
 

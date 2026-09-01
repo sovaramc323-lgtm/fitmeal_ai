@@ -4896,3 +4896,250 @@ select {
     gap: 16px;
   }
 }
+
+/* =========================================================
+   EXERCISE LIBRARY ENHANCEMENTS — filter/search bar, muscle-group
+   tabs, empty-state, per-exercise rest timer, recent-sets history
+   and personal notes. Purely additive: nothing above is touched,
+   this only adds the pieces the expanded library needed.
+   ========================================================= */
+
+.exerciseFilterBar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.exerciseSearchInput {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  color: var(--text);
+  background: var(--input);
+  outline: none;
+  font-size: 14px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.exerciseSearchInput:focus {
+  border-color: var(--redBright);
+  box-shadow: 0 0 0 4px var(--redSoft);
+}
+
+.exerciseTabRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.exerciseTab {
+  padding: 8px 13px;
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  color: var(--muted);
+  background: var(--card2);
+  font-size: 12px;
+  font-weight: 700;
+  transition: border-color .15s ease, color .15s ease, background .15s ease, transform .2s var(--easeSpring);
+}
+
+.exerciseTab:hover {
+  transform: translateY(-1px);
+  color: var(--text);
+  border-color: var(--borderStrong);
+}
+
+.exerciseTab.active {
+  color: #fff;
+  background: linear-gradient(135deg, var(--redBright), var(--red));
+  border-color: transparent;
+  box-shadow: 0 6px 16px rgba(196, 42, 68, .24);
+}
+
+.exerciseCount {
+  margin-bottom: 14px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+
+/* ---------- Extra detail block (rest timer / history / notes) ---------- */
+
+.exerciseDetailExtra {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  grid-column: 1 / -1;
+  padding: 13px;
+  border-top: 1px solid var(--border);
+  cursor: default;
+}
+
+.restTimerBox {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--card2);
+}
+
+.restTimerHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.restTimerHead span {
+  color: var(--redBright);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .8px;
+}
+
+.restTimerHead b {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.restTimerRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.restTimerDial {
+  min-width: 74px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  color: var(--redBright);
+  background: var(--redSoft);
+  border: 1px solid rgba(196, 42, 68, .3);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.restTimerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.restTimerActions button {
+  padding: 8px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  background: var(--card);
+  font-size: 12px;
+  font-weight: 700;
+  transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+
+.restTimerActions button:hover {
+  color: var(--text);
+  border-color: var(--redBright);
+}
+
+.restTimerActions .restTimerToggle {
+  color: #fff;
+  background: linear-gradient(135deg, var(--redBright), var(--red));
+  border-color: transparent;
+}
+
+.restTimerActions .restTimerToggle:hover {
+  filter: brightness(1.1);
+}
+
+.exerciseHistoryNotesRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.exerciseDetailLabel {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--redBright);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .7px;
+}
+
+.exerciseHistoryBox,
+.exerciseNotesBox {
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--card2);
+}
+
+.exerciseHistoryEmpty {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.exerciseHistoryList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.exerciseHistoryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 9px;
+  border-radius: 8px;
+  background: var(--card);
+  font-size: 12px;
+}
+
+.exerciseHistoryRow span {
+  color: var(--muted);
+}
+
+.exerciseHistoryRow b {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.exerciseNotesBox textarea {
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  color: var(--text);
+  background: var(--input);
+  outline: none;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.exerciseNotesBox textarea:focus {
+  border-color: var(--redBright);
+  box-shadow: 0 0 0 4px var(--redSoft);
+}
+
+@media (max-width: 700px) {
+  .exerciseHistoryNotesRow {
+    grid-template-columns: 1fr;
+  }
+
+  .restTimerRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
