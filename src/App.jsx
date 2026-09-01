@@ -957,6 +957,16 @@ function App() {
   const [setDraft, setSetDraft] = useState({});
   const [weightHistory, setWeightHistory] = useState([]);
 
+  // Custom water amount (dashboard water row) — lets someone log an
+  // exact amount instead of only the fixed +250ml quick-action button.
+  const [customWaterAmount, setCustomWaterAmount] = useState("");
+
+  // Inline meal editing — previously the food log only supported
+  // delete-and-re-add; this lets you adjust a logged meal's quantity
+  // (grams/ml) in place and have macros recalculated automatically.
+  const [editingMealId, setEditingMealId] = useState(null);
+  const [editQuantityDraft, setEditQuantityDraft] = useState("");
+
   // Exercise Library enhancements — muscle-group filter + text search so
   // a growing library stays browsable, per-exercise notes (form cues,
   // reminders) that persist locally, and a simple rest timer that starts
@@ -1171,6 +1181,35 @@ function App() {
     });
     return best;
   }, [exerciseLogs]);
+
+  // Training volume (Σ weight × reps) — a simple, standard way to see
+  // whether total work done is trending up, independent of any single
+  // exercise's PR. Tracked for today and for the current calendar week.
+  const todayVolume = useMemo(
+    () =>
+      exerciseLogs
+        .filter((log) => log.date === todayDate)
+        .reduce((sum, log) => sum + log.weight * log.reps, 0),
+    [exerciseLogs, todayDate]
+  );
+
+  const todaySetCount = useMemo(
+    () => exerciseLogs.filter((log) => log.date === todayDate).length,
+    [exerciseLogs, todayDate]
+  );
+
+  const weeklyVolume = useMemo(
+    () =>
+      exerciseLogs
+        .filter((log) => log.date >= weekDates[0])
+        .reduce((sum, log) => sum + log.weight * log.reps, 0),
+    [exerciseLogs, weekDates]
+  );
+
+  const weeklySetCount = useMemo(
+    () => exerciseLogs.filter((log) => log.date >= weekDates[0]).length,
+    [exerciseLogs, weekDates]
+  );
 
   // Distinct muscle-group tabs for the Exercise Library filter bar,
   // in the same order the exercises were authored ("All" always first).
@@ -1840,6 +1879,40 @@ function App() {
     );
   };
 
+  // Save an edited quantity for an already-logged meal, recalculating
+  // calories/protein/carbs/fat from the same per-100g/ml rates used
+  // when it was first added (rates are derived from the stored values
+  // and original quantity, so no need to re-look-up the food).
+  const saveMealEdit = (meal) => {
+    const newQuantity = Number(editQuantityDraft);
+
+    if (!newQuantity || newQuantity <= 0) {
+      pushToast("Enter a valid quantity", "", "warning");
+      return;
+    }
+
+    const ratio = newQuantity / meal.quantity;
+
+    setMeals((old) =>
+      old.map((item) =>
+        item.id === meal.id
+          ? {
+              ...item,
+              quantity: newQuantity,
+              calories: Math.round(item.calories * ratio),
+              protein: Number((item.protein * ratio).toFixed(1)),
+              carbs: Number((item.carbs * ratio).toFixed(1)),
+              fat: Number((item.fat * ratio).toFixed(1)),
+            }
+          : item
+      )
+    );
+
+    setEditingMealId(null);
+    setEditQuantityDraft("");
+    pushToast("Meal updated", `${meal.name} · ${newQuantity}${meal.name.toLowerCase().includes("chai") || meal.name.toLowerCase().includes("juice") ? "ml" : "g"}`, "success");
+  };
+
   const saveSetup = () => {
     if (!name || !weight) {
       pushToast("Missing details", "Please enter your name and weight.", "warning");
@@ -1886,6 +1959,93 @@ function App() {
         setDarkMode(true);
       },
     });
+  };
+
+  // ---- Backup & restore — everything FitMeal AI keeps in localStorage
+  // as a single portable JSON file, so someone can move to a new
+  // device/browser or just keep a manual backup without a server. ----
+
+  const exportData = () => {
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      version: 1,
+      data: {
+        name,
+        weight,
+        split,
+        meals,
+        waterLogs,
+        setup,
+        reminders,
+        darkMode,
+        calorieTarget,
+        proteinTarget,
+        waterTarget,
+        exerciseLogs,
+        weightHistory,
+        exerciseNotes,
+      },
+    };
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `fitmeal-backup-${todayDate}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    pushToast("Backup exported", "Your data has been downloaded as a JSON file.", "success");
+  };
+
+  const importData = (file) => {
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target.result);
+        const data = parsed.data || parsed; // tolerate a raw dump too
+
+        askConfirm({
+          title: "Import this backup?",
+          message: "This will overwrite your current profile, meals, water logs, exercise history and targets on this device.",
+          confirmLabel: "Import & Overwrite",
+          destructive: true,
+          onConfirm: () => {
+            setName(data.name || "");
+            setWeight(data.weight || "");
+            setSplit(data.split || createSplit());
+            setMeals(data.meals || []);
+            setWaterLogs(data.waterLogs || []);
+            setSetup(data.setup ?? true);
+            setReminders(data.reminders ?? true);
+            setDarkMode(data.darkMode ?? true);
+            setCalorieTarget(data.calorieTarget || DEFAULT_CALORIE_TARGET);
+            setProteinTarget(data.proteinTarget || DEFAULT_PROTEIN_TARGET);
+            setWaterTarget(data.waterTarget || DEFAULT_WATER_TARGET_ML);
+            setTargetDraft({
+              calorieTarget: data.calorieTarget || DEFAULT_CALORIE_TARGET,
+              proteinTarget: data.proteinTarget || DEFAULT_PROTEIN_TARGET,
+              waterTarget: data.waterTarget || DEFAULT_WATER_TARGET_ML,
+            });
+            setExerciseLogs(data.exerciseLogs || []);
+            setWeightHistory(data.weightHistory || []);
+            setExerciseNotes(data.exerciseNotes || {});
+
+            pushToast("Backup restored", "Your data has been imported successfully.", "success");
+          },
+        });
+      } catch (err) {
+        console.error(err);
+        pushToast("Import failed", "That file doesn't look like a valid FitMeal AI backup.", "warning");
+      }
+    };
+
+    reader.readAsText(file);
   };
 
   const askAI = (message) => {
@@ -2513,6 +2673,30 @@ function App() {
                         )}%`,
                       }}
                     />
+                  </div>
+
+                  <div className="waterCustomRow">
+                    <input
+                      type="number"
+                      min="0"
+                      value={customWaterAmount}
+                      onChange={(e) => setCustomWaterAmount(e.target.value)}
+                      placeholder="Custom ml"
+                    />
+                    <button
+                      className="waterCustomBtn"
+                      onClick={() => {
+                        const amt = Number(customWaterAmount);
+                        if (!amt || amt <= 0) {
+                          pushToast("Enter an amount", "", "warning");
+                          return;
+                        }
+                        addWater(amt);
+                        setCustomWaterAmount("");
+                      }}
+                    >
+                      + Add
+                    </button>
                   </div>
                 </div>
               </div>
@@ -3319,52 +3503,109 @@ function App() {
                 </div>
               ) : (
                 <div className="foodList">
-                  {todayMeals.map((item) => (
-                    <div
-                      className="foodRow"
-                      key={item.id}
-                    >
-                      <div className="foodAvatar">
-                        {item.name
-                          .charAt(0)
-                          .toUpperCase()}
-                      </div>
+                  {todayMeals.map((item) => {
+                    const isEditing = editingMealId === item.id;
 
-                      <div>
-                        <strong>
-                          {item.name}
-                        </strong>
-                        <span>
-                          {item.quantity}g
-                        </span>
-                      </div>
+                    if (isEditing) {
+                      return (
+                        <div className="foodRow foodRowEditing" key={item.id}>
+                          <div className="foodAvatar">
+                            {item.name.charAt(0).toUpperCase()}
+                          </div>
 
-                      <b>
-                        {item.calories} kcal
-                      </b>
+                          <div>
+                            <strong>{item.name}</strong>
+                            <span>editing quantity</span>
+                          </div>
 
-                      <span>
-                        P{" "}
-                        {item.protein}g
-                      </span>
+                          <input
+                            type="number"
+                            className="foodEditInput"
+                            value={editQuantityDraft}
+                            onChange={(e) => setEditQuantityDraft(e.target.value)}
+                            autoFocus
+                          />
 
-                      <span>
-                        C{" "}
-                        {item.carbs}g
-                      </span>
+                          <button
+                            className="foodEditSave"
+                            onClick={() => saveMealEdit(item)}
+                          >
+                            Save
+                          </button>
 
-                      <button
-                        className="deleteBtn"
-                        onClick={() =>
-                          removeMeal(
-                            item.id
-                          )
-                        }
+                          <button
+                            className="deleteBtn"
+                            onClick={() => setEditingMealId(null)}
+                            aria-label="Cancel edit"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div
+                        className="foodRow"
+                        key={item.id}
                       >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+                        <div className="foodAvatar">
+                          {item.name
+                            .charAt(0)
+                            .toUpperCase()}
+                        </div>
+
+                        <div>
+                          <strong>
+                            {item.name}
+                          </strong>
+                          <span>
+                            {item.quantity}g
+                          </span>
+                        </div>
+
+                        <b>
+                          {item.calories} kcal
+                        </b>
+
+                        <span>
+                          P{" "}
+                          {item.protein}g
+                        </span>
+
+                        <span>
+                          C{" "}
+                          {item.carbs}g
+                        </span>
+
+                        <div className="foodRowActions">
+                          <button
+                            className="foodEditBtn"
+                            onClick={() => {
+                              setEditingMealId(item.id);
+                              setEditQuantityDraft(String(item.quantity));
+                            }}
+                            aria-label={`Edit ${item.name}`}
+                            title="Edit quantity"
+                          >
+                            ✎
+                          </button>
+
+                          <button
+                            className="deleteBtn"
+                            onClick={() =>
+                              removeMeal(
+                                item.id
+                              )
+                            }
+                            aria-label={`Remove ${item.name}`}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </section>
@@ -3727,6 +3968,19 @@ function App() {
                 >
                   Log a Set →
                 </button>
+              </div>
+
+              <div className="volumeStatsRow">
+                <div className="volumeStat">
+                  <span>TODAY'S VOLUME</span>
+                  <strong>{todayVolume.toLocaleString()} kg</strong>
+                  <small>{todaySetCount} set{todaySetCount === 1 ? "" : "s"} logged</small>
+                </div>
+                <div className="volumeStat">
+                  <span>THIS WEEK'S VOLUME</span>
+                  <strong>{weeklyVolume.toLocaleString()} kg</strong>
+                  <small>{weeklySetCount} set{weeklySetCount === 1 ? "" : "s"} logged</small>
+                </div>
               </div>
 
               {Object.keys(bestSetByExercise).length === 0 ? (
@@ -4383,6 +4637,42 @@ function App() {
               >
                 Enable Browser Notifications
               </button>
+            </section>
+
+            <section className="panel">
+              <div className="panelHeader">
+                <div>
+                  <span className="panelEyebrow">
+                    YOUR DATA
+                  </span>
+                  <h2>Backup & Restore</h2>
+                </div>
+              </div>
+
+              <p className="backupNote">
+                Export everything FitMeal AI has stored on this device — profile, meals,
+                water logs, exercise history, weight trend and targets — as a single JSON
+                file. Import it back here (or on another device) to restore it.
+              </p>
+
+              <div className="backupActions">
+                <button className="outlineButton" onClick={exportData}>
+                  ⇩ Export Backup (.json)
+                </button>
+
+                <label className="outlineButton backupImportLabel">
+                  ⇧ Import Backup
+                  <input
+                    type="file"
+                    accept="application/json"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) importData(file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
             </section>
 
             <section className="panel dangerPanel">
