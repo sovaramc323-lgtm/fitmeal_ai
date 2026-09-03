@@ -538,12 +538,18 @@ const MUSCLE_LABELS = {
 // whose limbs rotate around shoulder/elbow/hip/knee pivots, with the
 // trained muscle group(s) filled red the same way a wall-chart poster
 // highlights the "effective area" for each move.
-function ExerciseFigure({ highlight = [], arm = 8, arm2 = 0, leg = 4, leg2 = 0, size = 78 }) {
+function ExerciseFigure({ highlight = [], arm = 8, arm2 = 0, leg = 4, leg2 = 0, size = 78, animated = false }) {
   const isHi = (m) => highlight.includes(m);
   const bodyFill = isHi("chest") || isHi("abs") || isHi("back") ? "figureMuscle" : "figureSkin";
 
   return (
-    <svg viewBox="0 0 100 168" width={size} height={size * 1.68} aria-hidden="true">
+    <svg
+      viewBox="0 0 100 168"
+      width={size}
+      height={size * 1.68}
+      aria-hidden="true"
+      className={animated ? "exerciseFigureSvg exerciseFigureAnimated" : "exerciseFigureSvg"}
+    >
       {/* torso */}
       <path d="M35,30 Q50,25 65,30 L68,72 Q50,80 32,72 Z" className={bodyFill} />
 
@@ -579,18 +585,18 @@ function ExerciseFigure({ highlight = [], arm = 8, arm2 = 0, leg = 4, leg2 = 0, 
       <circle cx="67" cy="32" r={isHi("shoulders") ? 8.5 : 6} className={isHi("shoulders") ? "figureMuscle" : "figureSkin"} />
 
       {/* left arm */}
-      <g transform={`rotate(${arm} 33 32)`}>
+      <g className="figureLimb" transform={`rotate(${arm} 33 32)`}>
         <rect x="28" y="32" width="10" height="29" rx="5" className={isHi("biceps") || isHi("triceps") ? "figureMuscle" : "figureSkin"} />
-        <g transform={`rotate(${arm2} 33 61)`}>
+        <g className="figureLimb" transform={`rotate(${arm2} 33 61)`}>
           <rect x="28.5" y="61" width="9" height="25" rx="4" className="figureSkin" />
           <circle cx="33" cy="88" r="5" className="figureJoint" />
         </g>
       </g>
 
       {/* right arm (mirrored) */}
-      <g transform={`rotate(${-arm} 67 32)`}>
+      <g className="figureLimb" transform={`rotate(${-arm} 67 32)`}>
         <rect x="62" y="32" width="10" height="29" rx="5" className={isHi("biceps") || isHi("triceps") ? "figureMuscle" : "figureSkin"} />
-        <g transform={`rotate(${-arm2} 67 61)`}>
+        <g className="figureLimb" transform={`rotate(${-arm2} 67 61)`}>
           <rect x="62.5" y="61" width="9" height="25" rx="4" className="figureSkin" />
           <circle cx="67" cy="88" r="5" className="figureJoint" />
         </g>
@@ -600,17 +606,17 @@ function ExerciseFigure({ highlight = [], arm = 8, arm2 = 0, leg = 4, leg2 = 0, 
       <path d="M32,72 Q50,80 68,72 L66,90 Q50,96 34,90 Z" className="figureSkin" />
 
       {/* left leg */}
-      <g transform={`rotate(${leg} 40 90)`}>
+      <g className="figureLimb" transform={`rotate(${leg} 40 90)`}>
         <rect x="35" y="90" width="11" height="33" rx="5" className={isHi("quads") ? "figureMuscle" : "figureSkin"} />
-        <g transform={`rotate(${leg2} 40 123)`}>
+        <g className="figureLimb" transform={`rotate(${leg2} 40 123)`}>
           <rect x="36" y="123" width="9" height="29" rx="4" className={isHi("calves") ? "figureMuscle" : "figureSkin"} />
         </g>
       </g>
 
       {/* right leg (mirrored) */}
-      <g transform={`rotate(${-leg} 60 90)`}>
+      <g className="figureLimb" transform={`rotate(${-leg} 60 90)`}>
         <rect x="54" y="90" width="11" height="33" rx="5" className={isHi("quads") ? "figureMuscle" : "figureSkin"} />
-        <g transform={`rotate(${-leg2} 60 123)`}>
+        <g className="figureLimb" transform={`rotate(${-leg2} 60 123)`}>
           <rect x="55" y="123" width="9" height="29" rx="4" className={isHi("calves") ? "figureMuscle" : "figureSkin"} />
         </g>
       </g>
@@ -619,37 +625,86 @@ function ExerciseFigure({ highlight = [], arm = 8, arm2 = 0, leg = 4, leg2 = 0, 
 }
 
 // Side-by-side START → END dummy pair, mirroring how the reference
-// wall-chart shows two frames of the same movement per exercise.
-function ExercisePosePair({ exercise, size = 78 }) {
+// wall-chart shows two frames of the same movement per exercise. When
+// `animated` is true, the pair auto-loops between the two poses so the
+// card reads as a rep in motion instead of two static screenshots —
+// same joint-rotation props as before, just interpolated by the browser
+// via CSS transitions instead of hand-drawn per frame.
+function ExercisePosePair({ exercise, size = 78, animated = true }) {
   const { highlight, pose } = exercise;
+  const [phase, setPhase] = useState("start");
+  const [playing, setPlaying] = useState(animated);
+
+  useEffect(() => {
+    if (!playing) return undefined;
+
+    const id = setInterval(() => {
+      setPhase((old) => (old === "start" ? "end" : "start"));
+    }, 900);
+
+    return () => clearInterval(id);
+  }, [playing]);
+
+  const live = playing ? pose[phase] : pose.start;
 
   return (
     <div className="exerciseFigurePair">
-      <div className="exerciseFigureFrame">
-        <ExerciseFigure
-          highlight={highlight}
-          arm={pose.start.arm ?? 8}
-          arm2={pose.start.arm2 ?? 0}
-          leg={pose.start.leg ?? 4}
-          leg2={pose.start.leg2 ?? 0}
-          size={size}
-        />
-        <span>START</span>
-      </div>
+      <button
+        type="button"
+        className={playing ? "poseAnimToggle poseAnimToggleOn" : "poseAnimToggle"}
+        onClick={(e) => {
+          e.stopPropagation();
+          setPlaying((old) => !old);
+          setPhase("start");
+        }}
+        aria-label={playing ? "Pause pose animation" : "Play pose animation"}
+        title={playing ? "Pause animation" : "Play animation"}
+      >
+        {playing ? "❚❚" : "▶"}
+      </button>
 
-      <div className="exerciseFigureArrow">→</div>
+      {playing ? (
+        <div className="exerciseFigureFrame exerciseFigureFrameLive">
+          <ExerciseFigure
+            highlight={highlight}
+            arm={live.arm ?? 8}
+            arm2={live.arm2 ?? 0}
+            leg={live.leg ?? 4}
+            leg2={live.leg2 ?? 0}
+            size={size}
+            animated
+          />
+          <span>{phase === "start" ? "START" : "END"}</span>
+        </div>
+      ) : (
+        <>
+          <div className="exerciseFigureFrame">
+            <ExerciseFigure
+              highlight={highlight}
+              arm={pose.start.arm ?? 8}
+              arm2={pose.start.arm2 ?? 0}
+              leg={pose.start.leg ?? 4}
+              leg2={pose.start.leg2 ?? 0}
+              size={size}
+            />
+            <span>START</span>
+          </div>
 
-      <div className="exerciseFigureFrame">
-        <ExerciseFigure
-          highlight={highlight}
-          arm={pose.end.arm ?? 8}
-          arm2={pose.end.arm2 ?? 0}
-          leg={pose.end.leg ?? 4}
-          leg2={pose.end.leg2 ?? 0}
-          size={size}
-        />
-        <span>END</span>
-      </div>
+          <div className="exerciseFigureArrow">→</div>
+
+          <div className="exerciseFigureFrame">
+            <ExerciseFigure
+              highlight={highlight}
+              arm={pose.end.arm ?? 8}
+              arm2={pose.end.arm2 ?? 0}
+              leg={pose.end.leg ?? 4}
+              leg2={pose.end.leg2 ?? 0}
+              size={size}
+            />
+            <span>END</span>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -907,6 +962,7 @@ function App() {
 
   const [darkMode, setDarkMode] = useState(true);
   const [reminders, setReminders] = useState(true);
+  const [themeTransitioning, setThemeTransitioning] = useState(false);
 
   const [token, setToken] = useState(
     localStorage.getItem("token") || ""
@@ -1006,6 +1062,16 @@ function App() {
   const runConfirm = () => {
     confirmConfig?.onConfirm?.();
     setConfirmConfig(null);
+  };
+
+  // Toggle dark/light with a brief "transitioning" flag so the shell can
+  // play a soft cross-fade/ripple instead of the theme just snapping —
+  // purely cosmetic, the underlying darkMode boolean still drives every
+  // --token in App.css exactly as before.
+  const toggleTheme = () => {
+    setThemeTransitioning(true);
+    setDarkMode((old) => !old);
+    setTimeout(() => setThemeTransitioning(false), 500);
   };
 
   const todayIndex = new Date().getDay();
@@ -2383,9 +2449,9 @@ function App() {
   return (
     <div
       className={
-        darkMode
+        (darkMode
           ? "appShell dark"
-          : "appShell light"
+          : "appShell light") + (themeTransitioning ? " themeSwitching" : "")
       }
     >
       <a href="#mainContent" className="skipLink">
@@ -2508,13 +2574,16 @@ function App() {
           </button>
 
           <button
-            onClick={() =>
-              setDarkMode(!darkMode)
-            }
+            className="themeSwitchRow"
+            onClick={toggleTheme}
+            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
           >
-            {darkMode
-              ? "☀ Light Mode"
-              : "☾ Dark Mode"}
+            <span className="themeSwitchLabel">
+              {darkMode ? "☾ Dark Mode" : "☀ Light Mode"}
+            </span>
+            <span className={darkMode ? "miniThemeSwitch" : "miniThemeSwitch miniThemeSwitchLight"}>
+              <i>{darkMode ? "☾" : "☀"}</i>
+            </span>
           </button>
 
           <button
@@ -4349,7 +4418,15 @@ function App() {
                             </div>
 
                             <div className="restTimerRow">
-                              <div className="restTimerDial">
+                              <div
+                                className={
+                                  restTimer &&
+                                  restTimer.exercise === title &&
+                                  restTimer.running
+                                    ? "restTimerDial restTimerDialActive"
+                                    : "restTimerDial"
+                                }
+                              >
                                 {restTimer && restTimer.exercise === title
                                   ? `${Math.floor(
                                       restTimer.secondsLeft / 60
@@ -4502,10 +4579,9 @@ function App() {
                 </div>
 
                 <button
-                  className="themeToggle"
-                  onClick={() =>
-                    setDarkMode(!darkMode)
-                  }
+                  className="themeToggle bigThemeToggle"
+                  onClick={toggleTheme}
+                  aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
                 >
                   <span
                     className={
@@ -4526,6 +4602,8 @@ function App() {
                   >
                     ☀ Light
                   </span>
+
+                  <i className={darkMode ? "themeToggleKnob" : "themeToggleKnob themeToggleKnobLight"} />
                 </button>
               </div>
             </section>
