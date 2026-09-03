@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import "./App.css";
 
 const API_URL = "https://fitmealai-production.up.railway.app";
@@ -538,9 +538,24 @@ const MUSCLE_LABELS = {
 // whose limbs rotate around shoulder/elbow/hip/knee pivots, with the
 // trained muscle group(s) filled red the same way a wall-chart poster
 // highlights the "effective area" for each move.
+// Rounded, gradient-shaded "dummy" figure — front-facing anatomical
+// mannequin (capsule limbs, domed head, tapered torso) instead of a
+// flat stick figure, so it reads as a 3D-ish plastic training dummy
+// with the trained muscle group lit up red, the way a gym wall-chart
+// mannequin does. Rotation is driven entirely by the numeric
+// arm/arm2/leg/leg2 props (set by the parent, either statically or
+// frame-by-frame from a JS animation loop) — never by a CSS
+// transition on the SVG transform, since animating that attribute
+// with CSS fights the explicit rotate(angle, cx, cy) pivot and makes
+// limbs visibly detach from the body.
 function ExerciseFigure({ highlight = [], arm = 8, arm2 = 0, leg = 4, leg2 = 0, size = 78, animated = false }) {
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
   const isHi = (m) => highlight.includes(m);
   const bodyFill = isHi("chest") || isHi("abs") || isHi("back") ? "figureMuscle" : "figureSkin";
+  const skinUrl = `url(#skin-${uid})`;
+  const muscleUrl = `url(#muscle-${uid})`;
+  const cls = (hi) => (hi ? "figureMuscle" : "figureSkin");
+  const fill = (hi) => (hi ? muscleUrl : skinUrl);
 
   return (
     <svg
@@ -550,102 +565,212 @@ function ExerciseFigure({ highlight = [], arm = 8, arm2 = 0, leg = 4, leg2 = 0, 
       aria-hidden="true"
       className={animated ? "exerciseFigureSvg exerciseFigureAnimated" : "exerciseFigureSvg"}
     >
-      {/* torso */}
-      <path d="M35,30 Q50,25 65,30 L68,72 Q50,80 32,72 Z" className={bodyFill} />
+      <defs>
+        <linearGradient id={`skin-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="var(--figureSkinLight)" />
+          <stop offset="55%" stopColor="var(--figureSkinMid)" />
+          <stop offset="100%" stopColor="var(--figureSkinDark)" />
+        </linearGradient>
+        <linearGradient id={`muscle-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="var(--figureMuscleLight)" />
+          <stop offset="55%" stopColor="var(--redBright)" />
+          <stop offset="100%" stopColor="var(--redDeep)" />
+        </linearGradient>
+        <radialGradient id={`head-${uid}`} cx="35%" cy="30%" r="75%">
+          <stop offset="0%" stopColor="var(--figureSkinLight)" />
+          <stop offset="100%" stopColor="var(--figureSkinDark)" />
+        </radialGradient>
+      </defs>
+
+      {/* torso — tapered, slightly domed chest for a molded-plastic look */}
+      <path
+        d="M34,29 Q50,23 66,29 L69,58 Q69,75 58,80 L50,83 L42,80 Q31,75 31,58 Z"
+        fill={bodyFill === "figureMuscle" ? muscleUrl : skinUrl}
+        className={`figureTorso ${bodyFill}`}
+      />
 
       {/* chest overlay */}
       {isHi("chest") && (
-        <g className="figureMuscle">
-          <ellipse cx="42" cy="40" rx="9" ry="7" />
-          <ellipse cx="58" cy="40" rx="9" ry="7" />
+        <g>
+          <ellipse cx="42" cy="40" rx="9.5" ry="7.5" fill={muscleUrl} className="figureMuscle" />
+          <ellipse cx="58" cy="40" rx="9.5" ry="7.5" fill={muscleUrl} className="figureMuscle" />
         </g>
       )}
 
       {/* back / lat overlay */}
       {isHi("back") && (
-        <path d="M35,32 L50,44 L65,32 L68,60 L50,73 L32,60 Z" className="figureMuscle" />
+        <path d="M34,31 L50,45 L66,31 L69,58 L50,74 L31,58 Z" fill={muscleUrl} className="figureMuscle" />
       )}
 
       {/* abs overlay */}
       {isHi("abs") && (
-        <g className="figureMuscle">
-          <rect x="42" y="38" width="16" height="6" rx="1.4" />
-          <rect x="42" y="46" width="16" height="6" rx="1.4" />
-          <rect x="42" y="54" width="16" height="6" rx="1.4" />
-          <rect x="42" y="62" width="16" height="6" rx="1.4" />
+        <g fill={muscleUrl} className="figureMuscle">
+          <rect x="42" y="38" width="16" height="6" rx="2" />
+          <rect x="42" y="46" width="16" height="6" rx="2" />
+          <rect x="42" y="54" width="16" height="6" rx="2" />
+          <rect x="42" y="62" width="16" height="6" rx="2" />
         </g>
       )}
 
       {/* head + neck */}
-      <circle cx="50" cy="15" r="9" className="figureSkin" />
-      <rect x="46" y="23" width="8" height="7" className="figureSkin" />
+      <circle cx="50" cy="14" r="10" fill={`url(#head-${uid})`} className="figureHead" />
+      <rect x="45.5" y="22" width="9" height="8" rx="3" fill={skinUrl} className="figureSkin" />
 
       {/* shoulders */}
-      <circle cx="33" cy="32" r={isHi("shoulders") ? 8.5 : 6} className={isHi("shoulders") ? "figureMuscle" : "figureSkin"} />
-      <circle cx="67" cy="32" r={isHi("shoulders") ? 8.5 : 6} className={isHi("shoulders") ? "figureMuscle" : "figureSkin"} />
+      <circle cx="32" cy="31" r={isHi("shoulders") ? 9 : 6.5} fill={fill(isHi("shoulders"))} className={cls(isHi("shoulders"))} />
+      <circle cx="68" cy="31" r={isHi("shoulders") ? 9 : 6.5} fill={fill(isHi("shoulders"))} className={cls(isHi("shoulders"))} />
 
       {/* left arm */}
-      <g className="figureLimb" transform={`rotate(${arm} 33 32)`}>
-        <rect x="28" y="32" width="10" height="29" rx="5" className={isHi("biceps") || isHi("triceps") ? "figureMuscle" : "figureSkin"} />
-        <g className="figureLimb" transform={`rotate(${arm2} 33 61)`}>
-          <rect x="28.5" y="61" width="9" height="25" rx="4" className="figureSkin" />
-          <circle cx="33" cy="88" r="5" className="figureJoint" />
+      <g transform={`rotate(${arm} 32 31)`}>
+        <rect x="27" y="31" width="11" height="30" rx="5.5" fill={fill(isHi("biceps") || isHi("triceps"))} className={cls(isHi("biceps") || isHi("triceps"))} />
+        <g transform={`rotate(${arm2} 32.5 61)`}>
+          <rect x="28" y="61" width="9.5" height="26" rx="4.5" fill={skinUrl} className="figureSkin" />
+          <circle cx="32.5" cy="89" r="5.2" fill="var(--figureJointColor)" className="figureJoint" />
         </g>
       </g>
 
       {/* right arm (mirrored) */}
-      <g className="figureLimb" transform={`rotate(${-arm} 67 32)`}>
-        <rect x="62" y="32" width="10" height="29" rx="5" className={isHi("biceps") || isHi("triceps") ? "figureMuscle" : "figureSkin"} />
-        <g className="figureLimb" transform={`rotate(${-arm2} 67 61)`}>
-          <rect x="62.5" y="61" width="9" height="25" rx="4" className="figureSkin" />
-          <circle cx="67" cy="88" r="5" className="figureJoint" />
+      <g transform={`rotate(${-arm} 68 31)`}>
+        <rect x="62" y="31" width="11" height="30" rx="5.5" fill={fill(isHi("biceps") || isHi("triceps"))} className={cls(isHi("biceps") || isHi("triceps"))} />
+        <g transform={`rotate(${-arm2} 67.5 61)`}>
+          <rect x="62.5" y="61" width="9.5" height="26" rx="4.5" fill={skinUrl} className="figureSkin" />
+          <circle cx="67.5" cy="89" r="5.2" fill="var(--figureJointColor)" className="figureJoint" />
         </g>
       </g>
 
       {/* hips */}
-      <path d="M32,72 Q50,80 68,72 L66,90 Q50,96 34,90 Z" className="figureSkin" />
+      <path d="M31,58 Q50,74 69,58 L67,90 Q50,97 33,90 Z" fill={skinUrl} className="figureSkin" />
 
       {/* left leg */}
-      <g className="figureLimb" transform={`rotate(${leg} 40 90)`}>
-        <rect x="35" y="90" width="11" height="33" rx="5" className={isHi("quads") ? "figureMuscle" : "figureSkin"} />
-        <g className="figureLimb" transform={`rotate(${leg2} 40 123)`}>
-          <rect x="36" y="123" width="9" height="29" rx="4" className={isHi("calves") ? "figureMuscle" : "figureSkin"} />
+      <g transform={`rotate(${leg} 40 90)`}>
+        <rect x="34.5" y="90" width="12" height="34" rx="5.8" fill={fill(isHi("quads"))} className={cls(isHi("quads"))} />
+        <g transform={`rotate(${leg2} 40 124)`}>
+          <rect x="35.5" y="124" width="10" height="30" rx="4.6" fill={fill(isHi("calves"))} className={cls(isHi("calves"))} />
         </g>
       </g>
 
       {/* right leg (mirrored) */}
-      <g className="figureLimb" transform={`rotate(${-leg} 60 90)`}>
-        <rect x="54" y="90" width="11" height="33" rx="5" className={isHi("quads") ? "figureMuscle" : "figureSkin"} />
-        <g className="figureLimb" transform={`rotate(${-leg2} 60 123)`}>
-          <rect x="55" y="123" width="9" height="29" rx="4" className={isHi("calves") ? "figureMuscle" : "figureSkin"} />
+      <g transform={`rotate(${-leg} 60 90)`}>
+        <rect x="53.5" y="90" width="12" height="34" rx="5.8" fill={fill(isHi("quads"))} className={cls(isHi("quads"))} />
+        <g transform={`rotate(${-leg2} 60 124)`}>
+          <rect x="54.5" y="124" width="10" height="30" rx="4.6" fill={fill(isHi("calves"))} className={cls(isHi("calves"))} />
         </g>
       </g>
     </svg>
   );
 }
 
+const easeInOutSmooth = (x) => x * x * (3 - 2 * x);
+const lerp = (a, b, p) => a + (b - a) * p;
+
 // Side-by-side START → END dummy pair, mirroring how the reference
-// wall-chart shows two frames of the same movement per exercise. When
-// `animated` is true, the pair auto-loops between the two poses so the
-// card reads as a rep in motion instead of two static screenshots —
-// same joint-rotation props as before, just interpolated by the browser
-// via CSS transitions instead of hand-drawn per frame.
-function ExercisePosePair({ exercise, size = 78, animated = true }) {
+// wall-chart shows two frames of the same movement per exercise.
+//
+// Only the exercise the person has actually opened animates — every
+// closed card in the grid shows the plain static START → END pair, so
+// scrolling the library isn't a wall of a dozen things moving at
+// once. `active` is passed in as `expandedExercise === title` by the
+// parent grid.
+//
+// The animation itself is a JS requestAnimationFrame tween that
+// interpolates the numeric arm/arm2/leg/leg2 angles between the two
+// poses and feeds the live numbers to <ExerciseFigure> every frame —
+// deliberately NOT a CSS transition on the SVG transform attribute,
+// which fights the rotate(angle, cx, cy) pivot and makes limbs
+// visibly fly apart from the body mid-rotation.
+function ExercisePosePair({ exercise, size = 78, active = false }) {
   const { highlight, pose } = exercise;
-  const [phase, setPhase] = useState("start");
-  const [playing, setPlaying] = useState(animated);
+  const [playing, setPlaying] = useState(true);
+  const [t, setT] = useState(0);
+  const dirRef = useRef(1);
+  const rafRef = useRef(null);
+  const lastRef = useRef(null);
+
+  const isRunning = active && playing;
 
   useEffect(() => {
-    if (!playing) return undefined;
+    if (!isRunning) return undefined;
 
-    const id = setInterval(() => {
-      setPhase((old) => (old === "start" ? "end" : "start"));
-    }, 900);
+    const durationMs = 950;
 
-    return () => clearInterval(id);
-  }, [playing]);
+    const step = (now) => {
+      if (lastRef.current == null) lastRef.current = now;
+      const dt = now - lastRef.current;
+      lastRef.current = now;
 
-  const live = playing ? pose[phase] : pose.start;
+      setT((old) => {
+        let next = old + (dirRef.current * dt) / durationMs;
+        if (next >= 1) {
+          next = 1;
+          dirRef.current = -1;
+        } else if (next <= 0) {
+          next = 0;
+          dirRef.current = 1;
+        }
+        return next;
+      });
+
+      rafRef.current = requestAnimationFrame(step);
+    };
+
+    rafRef.current = requestAnimationFrame(step);
+
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+      lastRef.current = null;
+    };
+  }, [isRunning]);
+
+  // Reset to a clean START pose whenever the card closes, so re-opening
+  // it doesn't resume mid-rep from wherever it last stopped.
+  useEffect(() => {
+    if (!active) {
+      setT(0);
+      dirRef.current = 1;
+      setPlaying(true);
+    }
+  }, [active]);
+
+  if (!active) {
+    return (
+      <div className="exerciseFigurePair">
+        <div className="exerciseFigureFrame">
+          <ExerciseFigure
+            highlight={highlight}
+            arm={pose.start.arm ?? 8}
+            arm2={pose.start.arm2 ?? 0}
+            leg={pose.start.leg ?? 4}
+            leg2={pose.start.leg2 ?? 0}
+            size={size}
+          />
+          <span>START</span>
+        </div>
+
+        <div className="exerciseFigureArrow">→</div>
+
+        <div className="exerciseFigureFrame">
+          <ExerciseFigure
+            highlight={highlight}
+            arm={pose.end.arm ?? 8}
+            arm2={pose.end.arm2 ?? 0}
+            leg={pose.end.leg ?? 4}
+            leg2={pose.end.leg2 ?? 0}
+            size={size}
+          />
+          <span>END</span>
+        </div>
+      </div>
+    );
+  }
+
+  const p = easeInOutSmooth(t);
+  const live = {
+    arm: lerp(pose.start.arm ?? 8, pose.end.arm ?? 8, p),
+    arm2: lerp(pose.start.arm2 ?? 0, pose.end.arm2 ?? 0, p),
+    leg: lerp(pose.start.leg ?? 4, pose.end.leg ?? 4, p),
+    leg2: lerp(pose.start.leg2 ?? 0, pose.end.leg2 ?? 0, p),
+  };
 
   return (
     <div className="exerciseFigurePair">
@@ -655,7 +780,6 @@ function ExercisePosePair({ exercise, size = 78, animated = true }) {
         onClick={(e) => {
           e.stopPropagation();
           setPlaying((old) => !old);
-          setPhase("start");
         }}
         aria-label={playing ? "Pause pose animation" : "Play pose animation"}
         title={playing ? "Pause animation" : "Play animation"}
@@ -663,48 +787,18 @@ function ExercisePosePair({ exercise, size = 78, animated = true }) {
         {playing ? "❚❚" : "▶"}
       </button>
 
-      {playing ? (
-        <div className="exerciseFigureFrame exerciseFigureFrameLive">
-          <ExerciseFigure
-            highlight={highlight}
-            arm={live.arm ?? 8}
-            arm2={live.arm2 ?? 0}
-            leg={live.leg ?? 4}
-            leg2={live.leg2 ?? 0}
-            size={size}
-            animated
-          />
-          <span>{phase === "start" ? "START" : "END"}</span>
-        </div>
-      ) : (
-        <>
-          <div className="exerciseFigureFrame">
-            <ExerciseFigure
-              highlight={highlight}
-              arm={pose.start.arm ?? 8}
-              arm2={pose.start.arm2 ?? 0}
-              leg={pose.start.leg ?? 4}
-              leg2={pose.start.leg2 ?? 0}
-              size={size}
-            />
-            <span>START</span>
-          </div>
-
-          <div className="exerciseFigureArrow">→</div>
-
-          <div className="exerciseFigureFrame">
-            <ExerciseFigure
-              highlight={highlight}
-              arm={pose.end.arm ?? 8}
-              arm2={pose.end.arm2 ?? 0}
-              leg={pose.end.leg ?? 4}
-              leg2={pose.end.leg2 ?? 0}
-              size={size}
-            />
-            <span>END</span>
-          </div>
-        </>
-      )}
+      <div className="exerciseFigureFrame exerciseFigureFrameLive">
+        <ExerciseFigure
+          highlight={highlight}
+          arm={live.arm}
+          arm2={live.arm2}
+          leg={live.leg}
+          leg2={live.leg2}
+          size={size}
+          animated={playing}
+        />
+        <span>{t < 0.5 ? "START" : "END"}</span>
+      </div>
     </div>
   );
 }
@@ -4254,6 +4348,7 @@ function App() {
                         <ExercisePosePair
                           exercise={exercise}
                           size={72}
+                          active={open}
                         />
 
                         <div className="exerciseGridGlow" />

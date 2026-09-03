@@ -4289,23 +4289,51 @@ select {
    effective/trained muscle group filled in red.
    ========================================================= */
 
-.figureSkin {
-  fill: var(--card2);
+/* Tone variables for the mannequin's gradient fills — fed into the
+   linear/radial gradients defined inline in each <ExerciseFigure>
+   (gradient <stop> colors can't live in a CSS class since each SVG
+   instance needs its own gradient id, but the color values themselves
+   still come from the shared theme so dark/light mode both look right). */
+.appShell.dark {
+  --figureSkinLight: #3a2226;
+  --figureSkinMid: #241315;
+  --figureSkinDark: #150a0b;
+  --figureMuscleLight: #ff6b86;
+  --figureJointColor: #6b5556;
+}
+
+.appShell.light {
+  --figureSkinLight: #ffffff;
+  --figureSkinMid: #e7dcdc;
+  --figureSkinDark: #c7b8b8;
+  --figureMuscleLight: #d9758c;
+  --figureJointColor: #a3898a;
+}
+
+/* NOTE: fill is intentionally NOT set here — every figure part fills
+   itself inline with its own gradient url(#skin-<uid>) / url(#muscle-<uid>)
+   so each SVG instance gets a correctly-scoped gradient. These classes
+   only add the stroke + glow. */
+.figureSkin,
+.figureTorso.figureSkin {
   stroke: var(--muted);
-  stroke-width: 1.2;
-  transition: fill .2s ease;
+  stroke-width: 1.1;
 }
 
 .figureJoint {
-  fill: var(--muted);
-  opacity: .5;
+  opacity: .6;
 }
 
-.figureMuscle {
-  fill: var(--redBright);
+.figureMuscle,
+.figureTorso.figureMuscle {
   stroke: var(--redDeep);
-  stroke-width: 1.2;
+  stroke-width: 1.1;
   filter: drop-shadow(0 0 5px rgba(196, 42, 68, .55));
+}
+
+.figureHead {
+  stroke: var(--muted);
+  stroke-width: 1.1;
 }
 
 .figureBar {
@@ -5353,12 +5381,13 @@ select {
    theme flips instead of colors snapping instantly. Additive only.
    ========================================================= */
 
-/* ---------- Animated pose figures ---------- */
-
-.exerciseFigureSvg .figureLimb {
-  transition: transform .85s cubic-bezier(.45, 0, .55, 1);
-  transform-origin: center;
-}
+/* ---------- Animated pose figures ----------
+   The limb angles themselves are tweened frame-by-frame in JS (see
+   ExercisePosePair), not via a CSS transition on the SVG "transform"
+   attribute — CSS-transitioning that attribute fights the explicit
+   rotate(angle, cx, cy) pivot and makes limbs visibly detach from the
+   body mid-rotation. CSS here only adds the muscle glow pulse, which
+   is safe since it animates filter/opacity, not the rotation pivot. */
 
 .exerciseFigureAnimated .figureMuscle {
   animation: muscleWorkPulse 1.8s ease-in-out infinite;
@@ -5374,9 +5403,6 @@ select {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .exerciseFigureSvg .figureLimb {
-    transition: none;
-  }
   .exerciseFigureAnimated .figureMuscle {
     animation: none;
   }
