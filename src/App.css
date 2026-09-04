@@ -4336,6 +4336,38 @@ select {
   stroke-width: 1.1;
 }
 
+/* Muscle-definition seam lines drawn inside the highlighted (red)
+   overlays — cheap, original linework (not traced from any source)
+   that reads as fiber direction/striation instead of a flat tinted
+   blob. Faint variant is for center seams (linea alba, spine line)
+   that should be barely-there rather than a bold accent. */
+.figureDefinitionLine {
+  fill: none;
+  stroke: rgba(0, 0, 0, .32);
+  stroke-width: .9;
+  stroke-linecap: round;
+}
+
+.figureDefinitionLineFaint {
+  stroke: rgba(0, 0, 0, .2);
+  stroke-width: .7;
+}
+
+.appShell.light .figureDefinitionLine {
+  stroke: rgba(0, 0, 0, .22);
+}
+
+.appShell.light .figureDefinitionLineFaint {
+  stroke: rgba(0, 0, 0, .14);
+}
+
+/* Soft rim-light gloss on the top edge of the torso/limb capsules —
+   the "sculpted plastic" highlight trick, entirely decorative. */
+.figureSheen {
+  pointer-events: none;
+  opacity: .8;
+}
+
 .figureBar {
   stroke: var(--muted);
   stroke-width: 3;
@@ -5567,24 +5599,4 @@ select {
   .appShell.themeSwitching {
     animation: none;
   }
-}
-
-/* =========================================================
-   REP COUNTER — small badge on each animating exercise pose
-   pair, ticking up once per completed start->end->start cycle.
-   ========================================================= */
-
-.exerciseRepCounter {
-  position: absolute;
-  top: -4px;
-  left: 2px;
-  z-index: 4;
-  padding: 3px 8px;
-  border-radius: 99px;
-  color: #fff;
-  background: var(--redBright);
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: .5px;
-  box-shadow: 0 0 8px rgba(196, 42, 68, .5);
 }
