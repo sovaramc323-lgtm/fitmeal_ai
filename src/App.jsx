@@ -670,11 +670,14 @@ const lerp = (a, b, p) => a + (b - a) * p;
 // Side-by-side START → END dummy pair, mirroring how the reference
 // wall-chart shows two frames of the same movement per exercise.
 //
-// Only the exercise the person has actually opened animates — every
-// closed card in the grid shows the plain static START → END pair, so
-// scrolling the library isn't a wall of a dozen things moving at
-// once. `active` is passed in as `expandedExercise === title` by the
-// parent grid.
+// Every card in the grid now animates continuously and simultaneously
+// (like a looping reference-video demo), not just the one the person
+// has opened — `active` is kept as a prop for API compatibility but is
+// no longer required to be true for the loop to run. Each card still
+// has its own independent play/pause toggle and, to protect scroll
+// performance with a full library on screen, only actually runs its
+// requestAnimationFrame loop while the card is in (or near) the
+// viewport — see the IntersectionObserver effect below.
 //
 // The animation itself is a JS requestAnimationFrame tween that
 // interpolates the numeric arm/arm2/leg/leg2 angles between the two
@@ -682,7 +685,7 @@ const lerp = (a, b, p) => a + (b - a) * p;
 // deliberately NOT a CSS transition on the SVG transform attribute,
 // which fights the rotate(angle, cx, cy) pivot and makes limbs
 // visibly fly apart from the body mid-rotation.
-function ExercisePosePair({ exercise, size = 78, active = false }) {
+function ExercisePosePair({ exercise, size = 78 }) {
   const { highlight, pose } = exercise;
   const prefersReducedMotion = () =>
     typeof window !== "undefined" &&
@@ -690,17 +693,38 @@ function ExercisePosePair({ exercise, size = 78, active = false }) {
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const [playing, setPlaying] = useState(() => !prefersReducedMotion());
+  const [inView, setInView] = useState(true);
   const [t, setT] = useState(0);
+  const [reps, setReps] = useState(0);
   const dirRef = useRef(1);
   const rafRef = useRef(null);
   const lastRef = useRef(null);
+  const wrapRef = useRef(null);
 
-  const isRunning = active && playing;
+  // Pause the rAF loop for cards scrolled off-screen so a full 24-item
+  // library doesn't run two dozen simultaneous animation loops at once.
+  useEffect(() => {
+    const node = wrapRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") return undefined;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { rootMargin: "200px 0px" }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  const isRunning = playing && inView;
 
   useEffect(() => {
-    if (!isRunning) return undefined;
+    if (!isRunning) {
+      lastRef.current = null;
+      return undefined;
+    }
 
-    const durationMs = 950;
+    const durationMs = 850;
 
     const step = (now) => {
       if (lastRef.current == null) lastRef.current = now;
@@ -715,6 +739,7 @@ function ExercisePosePair({ exercise, size = 78, active = false }) {
         } else if (next <= 0) {
           next = 0;
           dirRef.current = 1;
+          setReps((r) => r + 1); // completed one full rep (end -> back to start)
         }
         return next;
       });
@@ -731,48 +756,6 @@ function ExercisePosePair({ exercise, size = 78, active = false }) {
     };
   }, [isRunning]);
 
-  // Reset to a clean START pose whenever the card closes, so re-opening
-  // it doesn't resume mid-rep from wherever it last stopped.
-  useEffect(() => {
-    if (!active) {
-      setT(0);
-      dirRef.current = 1;
-      setPlaying(!prefersReducedMotion());
-    }
-  }, [active]);
-
-  if (!active) {
-    return (
-      <div className="exerciseFigurePair">
-        <div className="exerciseFigureFrame">
-          <ExerciseFigure
-            highlight={highlight}
-            arm={pose.start.arm ?? 8}
-            arm2={pose.start.arm2 ?? 0}
-            leg={pose.start.leg ?? 4}
-            leg2={pose.start.leg2 ?? 0}
-            size={size}
-          />
-          <span>START</span>
-        </div>
-
-        <div className="exerciseFigureArrow">→</div>
-
-        <div className="exerciseFigureFrame">
-          <ExerciseFigure
-            highlight={highlight}
-            arm={pose.end.arm ?? 8}
-            arm2={pose.end.arm2 ?? 0}
-            leg={pose.end.leg ?? 4}
-            leg2={pose.end.leg2 ?? 0}
-            size={size}
-          />
-          <span>END</span>
-        </div>
-      </div>
-    );
-  }
-
   const p = easeInOutSmooth(t);
   const live = {
     arm: lerp(pose.start.arm ?? 8, pose.end.arm ?? 8, p),
@@ -782,7 +765,7 @@ function ExercisePosePair({ exercise, size = 78, active = false }) {
   };
 
   return (
-    <div className="exerciseFigurePair">
+    <div className="exerciseFigurePair" ref={wrapRef}>
       <button
         type="button"
         className={playing ? "poseAnimToggle poseAnimToggleOn" : "poseAnimToggle"}
@@ -796,6 +779,8 @@ function ExercisePosePair({ exercise, size = 78, active = false }) {
         {playing ? "❚❚" : "▶"}
       </button>
 
+      {reps > 0 && <div className="exerciseRepCounter">REP {reps}</div>}
+
       <div className="exerciseFigureFrame exerciseFigureFrameLive">
         <ExerciseFigure
           highlight={highlight}
@@ -804,7 +789,7 @@ function ExercisePosePair({ exercise, size = 78, active = false }) {
           leg={live.leg}
           leg2={live.leg2}
           size={size}
-          animated={playing}
+          animated={isRunning}
         />
         <span>{t < 0.5 ? "START" : "END"}</span>
       </div>
@@ -4357,7 +4342,6 @@ function App() {
                         <ExercisePosePair
                           exercise={exercise}
                           size={72}
-                          active={open}
                         />
 
                         <div className="exerciseGridGlow" />
