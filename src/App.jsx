@@ -797,9 +797,9 @@ function ExercisePosePair({ exercise, size = 78, active = false }) {
   // cutout just sliding an arm up and down.
   const depth = inferDepthAxis(exercise.title);
   const dynamicTiltX =
-    depth === "press" ? p * 9 : depth === "pull" ? -p * 9 : (p - 0.5) * 5;
+    depth === "press" ? p * 16 : depth === "pull" ? -p * 16 : (p - 0.5) * 10;
   const dynamicScale =
-    depth === "press" ? 1 + p * 0.08 : depth === "pull" ? 1 - p * 0.05 : 1;
+    depth === "press" ? 1 + p * 0.14 : depth === "pull" ? 1 - p * 0.1 : 1;
   const liveStyle = {
     transform: `perspective(480px) rotateY(var(--figureBaseTiltY)) rotateX(${dynamicTiltX.toFixed(
       2
