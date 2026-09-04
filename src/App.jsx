@@ -667,6 +667,111 @@ function ExerciseFigure({ highlight = [], arm = 8, arm2 = 0, leg = 4, leg2 = 0, 
 const easeInOutSmooth = (x) => x * x * (3 - 2 * x);
 const lerp = (a, b, p) => a + (b - a) * p;
 
+// Real exercise demonstration GIFs — free, keyless hosted database
+// (oss.exercisedb.dev). No signup, no API key. We only ever fetch
+// when a card is actually opened (not for all 28 on page load), and
+// every result — hit or miss — is cached by exercise title for the
+// life of the tab so reopening the same exercise never re-fetches.
+// If the lookup fails for any reason (offline, no match, the API
+// being unreachable, CORS, etc.) the caller falls back to the
+// hand-drawn animated dummy automatically — this never breaks the UI.
+const EXERCISE_GIF_CACHE = {};
+
+async function fetchExerciseGif(title) {
+  if (Object.prototype.hasOwnProperty.call(EXERCISE_GIF_CACHE, title)) {
+    return EXERCISE_GIF_CACHE[title];
+  }
+
+  try {
+    const res = await fetch(
+      `https://oss.exercisedb.dev/api/v1/exercises?search=${encodeURIComponent(
+        title
+      )}&limit=5`
+    );
+
+    if (!res.ok) throw new Error("Exercise GIF lookup failed");
+
+    const json = await res.json();
+    const list = Array.isArray(json)
+      ? json
+      : json.data || json.exercises || json.results || [];
+
+    const lowerTitle = title.toLowerCase();
+    const match =
+      list.find((item) => (item.name || "").toLowerCase() === lowerTitle) ||
+      list[0];
+
+    const result = match && match.gifUrl ? { gifUrl: match.gifUrl, name: match.name } : null;
+    EXERCISE_GIF_CACHE[title] = result;
+    return result;
+  } catch (err) {
+    console.error(err);
+    EXERCISE_GIF_CACHE[title] = null;
+    return null;
+  }
+}
+
+// Chooses what to actually show for an exercise card: the real
+// demonstration GIF once it's been found (only looked up for the
+// exercise you've opened), a brief loading state while that lookup is
+// in flight, or the hand-drawn animated 2D dummy — used both as the
+// permanent look for closed/unselected cards and as the fallback if
+// no real GIF match exists for that exercise.
+function ExerciseVisualMedia({ exercise, size, active }) {
+  const [gif, setGif] = useState(() =>
+    Object.prototype.hasOwnProperty.call(EXERCISE_GIF_CACHE, exercise.title)
+      ? EXERCISE_GIF_CACHE[exercise.title]
+      : undefined
+  );
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!active || gif !== undefined) return undefined;
+
+    let cancelled = false;
+    setLoading(true);
+
+    fetchExerciseGif(exercise.title).then((result) => {
+      if (!cancelled) {
+        setGif(result);
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [active, exercise.title, gif]);
+
+  if (!active) {
+    return <ExercisePosePair exercise={exercise} size={size} active={false} />;
+  }
+
+  if (loading) {
+    return (
+      <div className="exerciseGifLoadingBox" style={{ minHeight: size * 1.68 }}>
+        <span className="loadingDots">
+          <i />
+          <i />
+          <i />
+        </span>
+        <span>Loading demonstration…</span>
+      </div>
+    );
+  }
+
+  if (gif && gif.gifUrl) {
+    return (
+      <div className="exerciseGifFrame">
+        <img src={gif.gifUrl} alt={`${exercise.title} demonstration`} loading="lazy" />
+      </div>
+    );
+  }
+
+  // No real GIF match found — fall back to the animated 2D dummy.
+  return <ExercisePosePair exercise={exercise} size={size} active />;
+}
+
 // Side-by-side START → END dummy pair, mirroring how the reference
 // wall-chart shows two frames of the same movement per exercise.
 //
@@ -4354,7 +4459,7 @@ function App() {
                             .join(" + ")}
                         </div>
 
-                        <ExercisePosePair
+                        <ExerciseVisualMedia
                           exercise={exercise}
                           size={72}
                           active={open}

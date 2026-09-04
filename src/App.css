@@ -5568,3 +5568,48 @@ select {
     animation: none;
   }
 }
+
+/* =========================================================
+   REAL EXERCISE GIFS — the demonstration GIF fetched for the exercise
+   you've opened (see ExerciseVisualMedia / fetchExerciseGif in
+   App.jsx), plus its loading state. Falls back to the existing
+   .exerciseFigureFrame / dummy styling automatically when no real
+   match is found, so nothing extra is needed here for that case.
+   ========================================================= */
+
+.exerciseGifFrame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 150px;
+}
+
+.exerciseGifFrame img {
+  max-width: 230px;
+  max-height: 230px;
+  width: auto;
+  height: auto;
+  border-radius: 14px;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, .35);
+}
+
+.exerciseGifLoadingBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .4px;
+}
+
+.exerciseGifLoadingBox .loadingDots {
+  color: var(--redBright);
+  font-size: 16px;
+}
