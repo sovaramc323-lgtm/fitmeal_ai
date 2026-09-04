@@ -79,6 +79,7 @@ p {
   --spotlightMuted: #c3adb0;
   --ease: cubic-bezier(.16, 1, .3, 1);
   --easeSpring: cubic-bezier(.34, 1.56, .64, 1);
+  --figureBaseTiltY: -14deg;
 }
 
 /* =========================================================
@@ -4369,6 +4370,20 @@ select {
 .exerciseFigureFrame svg {
   display: block;
   filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .3));
+}
+
+/* Every dummy — static or animated, main pose pair or the small
+   SETUP/EXECUTE/CONTROL thumbnails — gets a standing base 3D tilt via
+   this single rule, so the library reads as angled mannequins in
+   space rather than flat frontal cutouts. `perspective()` lives right
+   in the transform function (not on a parent element) so this one
+   rule is self-contained wherever the class is used. The live
+   animated frame layers extra rotateX/scale on top of the same
+   --figureBaseTiltY variable via an inline style (see
+   ExercisePosePair), so the base lean stays consistent everywhere. */
+.exerciseFigureSvg {
+  transform: perspective(480px) rotateY(var(--figureBaseTiltY));
+  transform-style: preserve-3d;
 }
 
 .exerciseFigureFrame span {

@@ -548,7 +548,7 @@ const MUSCLE_LABELS = {
 // transition on the SVG transform, since animating that attribute
 // with CSS fights the explicit rotate(angle, cx, cy) pivot and makes
 // limbs visibly detach from the body.
-function ExerciseFigure({ highlight = [], arm = 8, arm2 = 0, leg = 4, leg2 = 0, size = 78, animated = false }) {
+function ExerciseFigure({ highlight = [], arm = 8, arm2 = 0, leg = 4, leg2 = 0, size = 78, animated = false, style }) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
   const isHi = (m) => highlight.includes(m);
   const bodyFill = isHi("chest") || isHi("abs") || isHi("back") ? "figureMuscle" : "figureSkin";
@@ -563,6 +563,7 @@ function ExerciseFigure({ highlight = [], arm = 8, arm2 = 0, leg = 4, leg2 = 0, 
       width={size}
       height={size * 1.68}
       aria-hidden="true"
+      style={style}
       className={animated ? "exerciseFigureSvg exerciseFigureAnimated" : "exerciseFigureSvg"}
     >
       <defs>
@@ -663,6 +664,19 @@ function ExerciseFigure({ highlight = [], arm = 8, arm2 = 0, leg = 4, leg2 = 0, 
 const easeInOutSmooth = (x) => x * x * (3 - 2 * x);
 const lerp = (a, b, p) => a + (b - a) * p;
 
+// Rough movement-direction guess from the exercise name, used only to
+// pick which way the live 3D tilt leans — presses/pushes lean the
+// dummy forward and scale it up slightly (as if driving toward the
+// viewer), pulls/rows/curls lean it back and scale down a touch (as
+// if drawing away), everything else gets a small neutral sway. This
+// is cosmetic variety, not biomechanical modeling.
+const inferDepthAxis = (title) => {
+  const t = title.toLowerCase();
+  if (/press|push|extension|dip/.test(t)) return "press";
+  if (/pull|row|curl|crunch|twist|deadlift/.test(t)) return "pull";
+  return "neutral";
+};
+
 // Side-by-side START → END dummy pair, mirroring how the reference
 // wall-chart shows two frames of the same movement per exercise.
 //
@@ -680,7 +694,12 @@ const lerp = (a, b, p) => a + (b - a) * p;
 // visibly fly apart from the body mid-rotation.
 function ExercisePosePair({ exercise, size = 78, active = false }) {
   const { highlight, pose } = exercise;
-  const [playing, setPlaying] = useState(true);
+  const prefersReducedMotion = () =>
+    typeof window !== "undefined" &&
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const [playing, setPlaying] = useState(() => !prefersReducedMotion());
   const [t, setT] = useState(0);
   const dirRef = useRef(1);
   const rafRef = useRef(null);
@@ -728,7 +747,7 @@ function ExercisePosePair({ exercise, size = 78, active = false }) {
     if (!active) {
       setT(0);
       dirRef.current = 1;
-      setPlaying(true);
+      setPlaying(!prefersReducedMotion());
     }
   }, [active]);
 
@@ -772,6 +791,21 @@ function ExercisePosePair({ exercise, size = 78, active = false }) {
     leg2: lerp(pose.start.leg2 ?? 0, pose.end.leg2 ?? 0, p),
   };
 
+  // Layer a live 3D lean + scale on top of the base tilt every figure
+  // already gets from CSS (--figureBaseTiltY), so the exercise reads as
+  // a dummy turning through the rep in space instead of a flat 2D
+  // cutout just sliding an arm up and down.
+  const depth = inferDepthAxis(exercise.title);
+  const dynamicTiltX =
+    depth === "press" ? p * 9 : depth === "pull" ? -p * 9 : (p - 0.5) * 5;
+  const dynamicScale =
+    depth === "press" ? 1 + p * 0.08 : depth === "pull" ? 1 - p * 0.05 : 1;
+  const liveStyle = {
+    transform: `perspective(480px) rotateY(var(--figureBaseTiltY)) rotateX(${dynamicTiltX.toFixed(
+      2
+    )}deg) scale(${dynamicScale.toFixed(3)})`,
+  };
+
   return (
     <div className="exerciseFigurePair">
       <button
@@ -796,6 +830,7 @@ function ExercisePosePair({ exercise, size = 78, active = false }) {
           leg2={live.leg2}
           size={size}
           animated={playing}
+          style={liveStyle}
         />
         <span>{t < 0.5 ? "START" : "END"}</span>
       </div>
