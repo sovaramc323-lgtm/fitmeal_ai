@@ -79,7 +79,6 @@ p {
   --spotlightMuted: #c3adb0;
   --ease: cubic-bezier(.16, 1, .3, 1);
   --easeSpring: cubic-bezier(.34, 1.56, .64, 1);
-  --figureBaseTiltY: -26deg;
 }
 
 /* =========================================================
@@ -4372,18 +4371,12 @@ select {
   filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .3));
 }
 
-/* Every dummy — static or animated, main pose pair or the small
-   SETUP/EXECUTE/CONTROL thumbnails — gets a standing base 3D tilt via
-   this single rule, so the library reads as angled mannequins in
-   space rather than flat frontal cutouts. `perspective()` lives right
-   in the transform function (not on a parent element) so this one
-   rule is self-contained wherever the class is used. The live
-   animated frame layers extra rotateX/scale on top of the same
-   --figureBaseTiltY variable via an inline style (see
-   ExercisePosePair), so the base lean stays consistent everywhere. */
+/* Static/closed figures — the pose pair on unselected cards and the
+   small SETUP/EXECUTE/CONTROL thumbnails — stay flat, plain 2D. No
+   tilt, no perspective. Only the actively-playing figure (see
+   .exerciseFigureSpin below) gets a 3D treatment. */
 .exerciseFigureSvg {
-  transform: perspective(480px) rotateY(var(--figureBaseTiltY));
-  transform-style: preserve-3d;
+  transform: none;
 }
 
 .exerciseFigureFrame span {
@@ -5420,6 +5413,33 @@ select {
 @media (prefers-reduced-motion: reduce) {
   .exerciseFigureAnimated .figureMuscle {
     animation: none;
+  }
+}
+
+/* ---------- Real 360° spin — only on the exercise you've opened ----------
+   The whole SVG element (outer box, not the individual limb groups)
+   continuously rotates a full turn around the vertical axis, so the
+   dummy visibly reads as a 3D object being viewed from every side
+   while it performs the rep. This is a plain CSS transform on the
+   <svg> root, entirely separate from the per-limb "rotate(angle, cx,
+   cy)" attributes JS is tweening inside it, so the two never conflict
+   the way a CSS transition on an inner limb's transform attribute
+   did. Static/closed cards never get this class — see .exerciseFigureSvg
+   above, which keeps them flat 2D. */
+.exerciseFigureSpin {
+  animation: figureSpin360 3.2s linear infinite;
+  transform-style: preserve-3d;
+}
+
+@keyframes figureSpin360 {
+  from { transform: perspective(420px) rotateY(0deg); }
+  to { transform: perspective(420px) rotateY(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exerciseFigureSpin {
+    animation: none;
+    transform: none;
   }
 }
 
