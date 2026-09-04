@@ -4371,10 +4371,13 @@ select {
   filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .3));
 }
 
-/* Static/closed figures — the pose pair on unselected cards and the
-   small SETUP/EXECUTE/CONTROL thumbnails — stay flat, plain 2D. No
-   tilt, no perspective. Only the actively-playing figure (see
-   .exerciseFigureSpin below) gets a 3D treatment. */
+/* Every dummy — static or animated — stays flat, plain 2D. A full
+   360° spin was tried here and pulled back out: rotating a flat SVG
+   cutout on the Y axis inevitably goes edge-on to a paper-thin sliver
+   at 90°/270°, then flips to a mirrored view past that, which reads
+   as cheap/broken no matter how it's tuned. That needs an actual
+   volumetric model or hand-drawn multi-angle sprites to do properly,
+   not a CSS transform on a flat shape — so this stays 2D instead. */
 .exerciseFigureSvg {
   transform: none;
 }
@@ -5413,33 +5416,6 @@ select {
 @media (prefers-reduced-motion: reduce) {
   .exerciseFigureAnimated .figureMuscle {
     animation: none;
-  }
-}
-
-/* ---------- Real 360° spin — only on the exercise you've opened ----------
-   The whole SVG element (outer box, not the individual limb groups)
-   continuously rotates a full turn around the vertical axis, so the
-   dummy visibly reads as a 3D object being viewed from every side
-   while it performs the rep. This is a plain CSS transform on the
-   <svg> root, entirely separate from the per-limb "rotate(angle, cx,
-   cy)" attributes JS is tweening inside it, so the two never conflict
-   the way a CSS transition on an inner limb's transform attribute
-   did. Static/closed cards never get this class — see .exerciseFigureSvg
-   above, which keeps them flat 2D. */
-.exerciseFigureSpin {
-  animation: figureSpin360 3.2s linear infinite;
-  transform-style: preserve-3d;
-}
-
-@keyframes figureSpin360 {
-  from { transform: perspective(420px) rotateY(0deg); }
-  to { transform: perspective(420px) rotateY(360deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .exerciseFigureSpin {
-    animation: none;
-    transform: none;
   }
 }
 

@@ -565,7 +565,7 @@ function ExerciseFigure({ highlight = [], arm = 8, arm2 = 0, leg = 4, leg2 = 0, 
       aria-hidden="true"
       className={
         animated
-          ? "exerciseFigureSvg exerciseFigureAnimated exerciseFigureSpin"
+          ? "exerciseFigureSvg exerciseFigureAnimated"
           : "exerciseFigureSvg"
       }
     >
