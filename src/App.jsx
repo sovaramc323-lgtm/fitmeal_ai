@@ -1,5 +1,6 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
+import { ExerciseFigure3D, ExercisePosePair3D } from "./ExerciseFigure3D";
 
 const API_URL = "https://fitmealai-production.up.railway.app";
 
@@ -230,8 +231,9 @@ const searchIndianFoods = (query) => {
 // EXERCISE ANATOMY DATA
 // -----------------------------------------------------------
 // Every exercise carries the muscles it trains (highlighted red on
-// the dummy figure) plus a "start" and "end" pose, expressed as pure
-// joint-rotation angles so a single reusable <ExerciseFigure> can
+// the 3D dummy) plus a "start" and "end" pose, expressed as pure
+// joint-rotation angles so the reusable <ExercisePosePair3D> /
+// <ExerciseFigure3D> components (see ExerciseFigure3D.jsx) can
 // draw every exercise in the library — the same idea as a printed
 // muscle-chart poster, just generated instead of hand-drawn per pose.
 // =========================================================
@@ -533,269 +535,6 @@ const MUSCLE_LABELS = {
   quads: "Quads",
   calves: "Calves",
 };
-
-// Reusable anatomical dummy — a simplified front-facing silhouette
-// whose limbs rotate around shoulder/elbow/hip/knee pivots, with the
-// trained muscle group(s) filled red the same way a wall-chart poster
-// highlights the "effective area" for each move.
-// Rounded, gradient-shaded "dummy" figure — front-facing anatomical
-// mannequin (capsule limbs, domed head, tapered torso) instead of a
-// flat stick figure, so it reads as a 3D-ish plastic training dummy
-// with the trained muscle group lit up red, the way a gym wall-chart
-// mannequin does. Rotation is driven entirely by the numeric
-// arm/arm2/leg/leg2 props (set by the parent, either statically or
-// frame-by-frame from a JS animation loop) — never by a CSS
-// transition on the SVG transform, since animating that attribute
-// with CSS fights the explicit rotate(angle, cx, cy) pivot and makes
-// limbs visibly detach from the body.
-function ExerciseFigure({ highlight = [], arm = 8, arm2 = 0, leg = 4, leg2 = 0, size = 78, animated = false }) {
-  const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
-  const isHi = (m) => highlight.includes(m);
-  const bodyFill = isHi("chest") || isHi("abs") || isHi("back") ? "figureMuscle" : "figureSkin";
-  const skinUrl = `url(#skin-${uid})`;
-  const muscleUrl = `url(#muscle-${uid})`;
-  const cls = (hi) => (hi ? "figureMuscle" : "figureSkin");
-  const fill = (hi) => (hi ? muscleUrl : skinUrl);
-
-  return (
-    <svg
-      viewBox="0 0 100 168"
-      width={size}
-      height={size * 1.68}
-      aria-hidden="true"
-      className={
-        animated
-          ? "exerciseFigureSvg exerciseFigureAnimated"
-          : "exerciseFigureSvg"
-      }
-    >
-      <defs>
-        <linearGradient id={`skin-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="var(--figureSkinLight)" />
-          <stop offset="55%" stopColor="var(--figureSkinMid)" />
-          <stop offset="100%" stopColor="var(--figureSkinDark)" />
-        </linearGradient>
-        <linearGradient id={`muscle-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="var(--figureMuscleLight)" />
-          <stop offset="55%" stopColor="var(--redBright)" />
-          <stop offset="100%" stopColor="var(--redDeep)" />
-        </linearGradient>
-        <radialGradient id={`head-${uid}`} cx="35%" cy="30%" r="75%">
-          <stop offset="0%" stopColor="var(--figureSkinLight)" />
-          <stop offset="100%" stopColor="var(--figureSkinDark)" />
-        </radialGradient>
-      </defs>
-
-      {/* torso — tapered, slightly domed chest for a molded-plastic look */}
-      <path
-        d="M34,29 Q50,23 66,29 L69,58 Q69,75 58,80 L50,83 L42,80 Q31,75 31,58 Z"
-        fill={bodyFill === "figureMuscle" ? muscleUrl : skinUrl}
-        className={`figureTorso ${bodyFill}`}
-      />
-
-      {/* chest overlay */}
-      {isHi("chest") && (
-        <g>
-          <ellipse cx="42" cy="40" rx="9.5" ry="7.5" fill={muscleUrl} className="figureMuscle" />
-          <ellipse cx="58" cy="40" rx="9.5" ry="7.5" fill={muscleUrl} className="figureMuscle" />
-        </g>
-      )}
-
-      {/* back / lat overlay */}
-      {isHi("back") && (
-        <path d="M34,31 L50,45 L66,31 L69,58 L50,74 L31,58 Z" fill={muscleUrl} className="figureMuscle" />
-      )}
-
-      {/* abs overlay */}
-      {isHi("abs") && (
-        <g fill={muscleUrl} className="figureMuscle">
-          <rect x="42" y="38" width="16" height="6" rx="2" />
-          <rect x="42" y="46" width="16" height="6" rx="2" />
-          <rect x="42" y="54" width="16" height="6" rx="2" />
-          <rect x="42" y="62" width="16" height="6" rx="2" />
-        </g>
-      )}
-
-      {/* head + neck */}
-      <circle cx="50" cy="14" r="10" fill={`url(#head-${uid})`} className="figureHead" />
-      <rect x="45.5" y="22" width="9" height="8" rx="3" fill={skinUrl} className="figureSkin" />
-
-      {/* shoulders */}
-      <circle cx="32" cy="31" r={isHi("shoulders") ? 8 : 6.5} fill={fill(isHi("shoulders"))} className={cls(isHi("shoulders"))} />
-      <circle cx="68" cy="31" r={isHi("shoulders") ? 8 : 6.5} fill={fill(isHi("shoulders"))} className={cls(isHi("shoulders"))} />
-
-      {/* left arm */}
-      <g transform={`rotate(${arm} 32 31)`}>
-        <rect x="27" y="31" width="11" height="30" rx="5.5" fill={fill(isHi("biceps") || isHi("triceps"))} className={cls(isHi("biceps") || isHi("triceps"))} />
-        <g transform={`rotate(${arm2} 32.5 61)`}>
-          <rect x="28" y="61" width="9.5" height="26" rx="4.5" fill={skinUrl} className="figureSkin" />
-          <circle cx="32.5" cy="89" r="5.2" fill="var(--figureJointColor)" className="figureJoint" />
-        </g>
-      </g>
-
-      {/* right arm (mirrored) */}
-      <g transform={`rotate(${-arm} 68 31)`}>
-        <rect x="62" y="31" width="11" height="30" rx="5.5" fill={fill(isHi("biceps") || isHi("triceps"))} className={cls(isHi("biceps") || isHi("triceps"))} />
-        <g transform={`rotate(${-arm2} 67.5 61)`}>
-          <rect x="62.5" y="61" width="9.5" height="26" rx="4.5" fill={skinUrl} className="figureSkin" />
-          <circle cx="67.5" cy="89" r="5.2" fill="var(--figureJointColor)" className="figureJoint" />
-        </g>
-      </g>
-
-      {/* hips */}
-      <path d="M31,58 Q50,74 69,58 L67,90 Q50,97 33,90 Z" fill={skinUrl} className="figureSkin" />
-
-      {/* left leg */}
-      <g transform={`rotate(${leg} 40 90)`}>
-        <rect x="34.5" y="90" width="12" height="34" rx="5.8" fill={fill(isHi("quads"))} className={cls(isHi("quads"))} />
-        <g transform={`rotate(${leg2} 40 124)`}>
-          <rect x="35.5" y="124" width="10" height="30" rx="4.6" fill={fill(isHi("calves"))} className={cls(isHi("calves"))} />
-        </g>
-      </g>
-
-      {/* right leg (mirrored) */}
-      <g transform={`rotate(${-leg} 60 90)`}>
-        <rect x="53.5" y="90" width="12" height="34" rx="5.8" fill={fill(isHi("quads"))} className={cls(isHi("quads"))} />
-        <g transform={`rotate(${-leg2} 60 124)`}>
-          <rect x="54.5" y="124" width="10" height="30" rx="4.6" fill={fill(isHi("calves"))} className={cls(isHi("calves"))} />
-        </g>
-      </g>
-    </svg>
-  );
-}
-
-const easeInOutSmooth = (x) => x * x * (3 - 2 * x);
-const lerp = (a, b, p) => a + (b - a) * p;
-
-// Side-by-side START → END dummy pair, mirroring how the reference
-// wall-chart shows two frames of the same movement per exercise.
-//
-// Every card in the grid now animates continuously and simultaneously
-// (like a looping reference-video demo), not just the one the person
-// has opened — `active` is kept as a prop for API compatibility but is
-// no longer required to be true for the loop to run. Each card still
-// has its own independent play/pause toggle and, to protect scroll
-// performance with a full library on screen, only actually runs its
-// requestAnimationFrame loop while the card is in (or near) the
-// viewport — see the IntersectionObserver effect below.
-//
-// The animation itself is a JS requestAnimationFrame tween that
-// interpolates the numeric arm/arm2/leg/leg2 angles between the two
-// poses and feeds the live numbers to <ExerciseFigure> every frame —
-// deliberately NOT a CSS transition on the SVG transform attribute,
-// which fights the rotate(angle, cx, cy) pivot and makes limbs
-// visibly fly apart from the body mid-rotation.
-function ExercisePosePair({ exercise, size = 78 }) {
-  const { highlight, pose } = exercise;
-  const prefersReducedMotion = () =>
-    typeof window !== "undefined" &&
-    window.matchMedia &&
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  const [playing, setPlaying] = useState(() => !prefersReducedMotion());
-  const [inView, setInView] = useState(true);
-  const [t, setT] = useState(0);
-  const [reps, setReps] = useState(0);
-  const dirRef = useRef(1);
-  const rafRef = useRef(null);
-  const lastRef = useRef(null);
-  const wrapRef = useRef(null);
-
-  // Pause the rAF loop for cards scrolled off-screen so a full 24-item
-  // library doesn't run two dozen simultaneous animation loops at once.
-  useEffect(() => {
-    const node = wrapRef.current;
-    if (!node || typeof IntersectionObserver === "undefined") return undefined;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setInView(entry.isIntersecting),
-      { rootMargin: "200px 0px" }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-
-  const isRunning = playing && inView;
-
-  useEffect(() => {
-    if (!isRunning) {
-      lastRef.current = null;
-      return undefined;
-    }
-
-    const durationMs = 850;
-
-    const step = (now) => {
-      if (lastRef.current == null) lastRef.current = now;
-      const dt = now - lastRef.current;
-      lastRef.current = now;
-
-      setT((old) => {
-        let next = old + (dirRef.current * dt) / durationMs;
-        if (next >= 1) {
-          next = 1;
-          dirRef.current = -1;
-        } else if (next <= 0) {
-          next = 0;
-          dirRef.current = 1;
-          setReps((r) => r + 1); // completed one full rep (end -> back to start)
-        }
-        return next;
-      });
-
-      rafRef.current = requestAnimationFrame(step);
-    };
-
-    rafRef.current = requestAnimationFrame(step);
-
-    return () => {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-      lastRef.current = null;
-    };
-  }, [isRunning]);
-
-  const p = easeInOutSmooth(t);
-  const live = {
-    arm: lerp(pose.start.arm ?? 8, pose.end.arm ?? 8, p),
-    arm2: lerp(pose.start.arm2 ?? 0, pose.end.arm2 ?? 0, p),
-    leg: lerp(pose.start.leg ?? 4, pose.end.leg ?? 4, p),
-    leg2: lerp(pose.start.leg2 ?? 0, pose.end.leg2 ?? 0, p),
-  };
-
-  return (
-    <div className="exerciseFigurePair" ref={wrapRef}>
-      <button
-        type="button"
-        className={playing ? "poseAnimToggle poseAnimToggleOn" : "poseAnimToggle"}
-        onClick={(e) => {
-          e.stopPropagation();
-          setPlaying((old) => !old);
-        }}
-        aria-label={playing ? "Pause pose animation" : "Play pose animation"}
-        title={playing ? "Pause animation" : "Play animation"}
-      >
-        {playing ? "❚❚" : "▶"}
-      </button>
-
-      {reps > 0 && <div className="exerciseRepCounter">REP {reps}</div>}
-
-      <div className="exerciseFigureFrame exerciseFigureFrameLive">
-        <ExerciseFigure
-          highlight={highlight}
-          arm={live.arm}
-          arm2={live.arm2}
-          leg={live.leg}
-          leg2={live.leg2}
-          size={size}
-          animated={isRunning}
-        />
-        <span>{t < 0.5 ? "START" : "END"}</span>
-      </div>
-    </div>
-  );
-}
 
 // Simple inline SVG line chart for body weight over time — no charting
 // dependency needed since it's just one series of dated points.
@@ -4339,7 +4078,7 @@ function App() {
                             .join(" + ")}
                         </div>
 
-                        <ExercisePosePair
+                        <ExercisePosePair3D
                           exercise={exercise}
                           size={72}
                         />
@@ -4442,7 +4181,7 @@ function App() {
                                 key={number}
                               >
                                 <div className="stepFigure">
-                                  <ExerciseFigure
+                                  <ExerciseFigure3D
                                     highlight={
                                       highlight
                                     }
