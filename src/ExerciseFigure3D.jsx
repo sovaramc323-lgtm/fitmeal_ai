@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, ContactShadows } from "@react-three/drei";
 import * as THREE from "three";
 
@@ -11,6 +11,7 @@ import * as THREE from "three";
 // red highlighted muscles) using flat-shaded 3D primitives
 // instead of a painted/rendered asset.
 // =========================================================
+
 const SKIN = "#ece2dc";
 const MUSCLE = "#c9314f";
 
@@ -266,6 +267,14 @@ function AnimatedHumanoid({ pose, highlight, playing, onCycle }) {
 // per spec this is drag-only).
 // =========================================================
 
+function CameraAim({ target = [0, 1, 0] }) {
+  const { camera } = useThree();
+  useEffect(() => {
+    camera.lookAt(...target);
+  }, [camera, target]);
+  return null;
+}
+
 function Scene({ children, orbit = false }) {
   return (
     <>
@@ -274,14 +283,17 @@ function Scene({ children, orbit = false }) {
       <directionalLight position={[-3, 2, -2]} intensity={0.35} color="#ffdcdc" />
       {children}
       <ContactShadows position={[0, 0, 0]} opacity={0.35} blur={2} scale={3} far={2} />
-      {orbit && (
+      {orbit ? (
         <OrbitControls
+          target={[0, 1, 0]}
           enablePan={false}
           enableZoom={false}
           autoRotate={false}
           minPolarAngle={Math.PI / 3}
           maxPolarAngle={Math.PI / 1.7}
         />
+      ) : (
+        <CameraAim target={[0, 1, 0]} />
       )}
     </>
   );
