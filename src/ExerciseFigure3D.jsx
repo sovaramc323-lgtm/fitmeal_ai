@@ -6,14 +6,16 @@ import * as THREE from "three";
 // =========================================================
 // PALETTE
 // -----------------------------------------------------------
-// Ivory sculpted body + red muscle glow — deliberately echoes
-// the "anatomy poster" reference image's look (white figure,
-// red highlighted muscles) using flat-shaded 3D primitives
-// instead of a painted/rendered asset.
+// Ivory sculpted body + red muscle glow — echoes the "anatomy
+// poster" reference (white figure, red highlighted muscles,
+// dark gym equipment) using flat-shaded 3D primitives instead
+// of a painted/rendered asset.
 // =========================================================
-
 const SKIN = "#ece2dc";
 const MUSCLE = "#c9314f";
+const RIG_DARK = "#1b1416";
+const RIG_MID = "#2c2224";
+const PLATE = "#0f0b0c";
 
 // =========================================================
 // PRIMITIVES
@@ -35,25 +37,142 @@ function Part({
       )}
       {shape === "sphere" && <sphereGeometry args={[radius, 28, 28]} />}
       {shape === "box" && <boxGeometry args={args} />}
-      <meshStandardMaterial
+      <meshPhysicalMaterial
         color={color}
-        roughness={0.5}
-        metalness={0.05}
+        roughness={highlighted ? 0.32 : 0.38}
+        metalness={0.04}
+        clearcoat={0.55}
+        clearcoatRoughness={0.25}
         emissive={highlighted ? MUSCLE : "#000000"}
-        emissiveIntensity={highlighted ? 0.45 : 0}
+        emissiveIntensity={highlighted ? 0.5 : 0}
       />
     </mesh>
   );
 }
 
+// Flat dark metal used for gym equipment — visually distinct from the
+// glossy ivory body so the figure always reads as the subject.
+function RigPart({ shape = "box", args, position = [0, 0, 0], rotation, color = RIG_DARK, radius, length, radialSegments = 16 }) {
+  return (
+    <mesh position={position} rotation={rotation} castShadow receiveShadow>
+      {shape === "box" && <boxGeometry args={args} />}
+      {shape === "cylinder" && (
+        <cylinderGeometry args={[radius, radius, length, radialSegments]} />
+      )}
+      <meshStandardMaterial color={color} roughness={0.55} metalness={0.35} />
+    </mesh>
+  );
+}
+
+// =========================================================
+// EQUIPMENT — one simple prop per exercise category, built from
+// the same primitive language as the body. Purely set dressing;
+// none of it is rigged or animated.
+// =========================================================
+
+function BenchAndBar() {
+  return (
+    <group position={[0, 0.02, 0.05]}>
+      {/* bench pad */}
+      <RigPart args={[0.34, 0.09, 1.05]} position={[0, 0.32, 0]} color={PLATE} />
+      {/* legs */}
+      <RigPart args={[0.06, 0.32, 0.06]} position={[-0.13, 0.16, 0.42]} />
+      <RigPart args={[0.06, 0.32, 0.06]} position={[0.13, 0.16, 0.42]} />
+      <RigPart args={[0.06, 0.32, 0.06]} position={[-0.13, 0.16, -0.42]} />
+      <RigPart args={[0.06, 0.32, 0.06]} position={[0.13, 0.16, -0.42]} />
+      {/* uprights */}
+      <RigPart args={[0.07, 0.9, 0.07]} position={[-0.32, 0.45, -0.38]} />
+      <RigPart args={[0.07, 0.9, 0.07]} position={[0.32, 0.45, -0.38]} />
+      {/* bar resting in rack (start pose) */}
+      <RigPart
+        shape="cylinder"
+        radius={0.022}
+        length={1.3}
+        rotation={[0, 0, Math.PI / 2]}
+        position={[0, 0.86, -0.38]}
+        color="#3a3a3d"
+      />
+      <RigPart shape="cylinder" radius={0.09} length={0.08} position={[-0.58, 0.86, -0.38]} color={PLATE} />
+      <RigPart shape="cylinder" radius={0.09} length={0.08} position={[0.58, 0.86, -0.38]} color={PLATE} />
+    </group>
+  );
+}
+
+function CableTower() {
+  return (
+    <group position={[0, 0, -0.55]}>
+      {/* tower column */}
+      <RigPart args={[0.16, 2.0, 0.18]} position={[0, 1.0, 0]} color={RIG_MID} />
+      {/* pulley at top */}
+      <RigPart shape="cylinder" radius={0.05} length={0.14} rotation={[Math.PI / 2, 0, 0]} position={[0, 1.75, 0.1]} color="#3a3a3d" />
+      {/* weight stack */}
+      {[0, 1, 2, 3, 4].map((i) => (
+        <RigPart
+          key={i}
+          args={[0.22, 0.045, 0.32]}
+          position={[0, 0.35 + i * 0.06, 0.02]}
+          color={PLATE}
+        />
+      ))}
+      {/* base */}
+      <RigPart args={[0.4, 0.05, 0.5]} position={[0, 0.03, 0.2]} color={RIG_MID} />
+    </group>
+  );
+}
+
+function FloorBarbell() {
+  return (
+    <group position={[0, 0.09, 0.5]}>
+      <RigPart
+        shape="cylinder"
+        radius={0.022}
+        length={1.5}
+        rotation={[0, 0, Math.PI / 2]}
+        position={[0, 0, 0]}
+        color="#3a3a3d"
+      />
+      <RigPart shape="cylinder" radius={0.11} length={0.08} position={[-0.68, 0, 0]} color={PLATE} />
+      <RigPart shape="cylinder" radius={0.11} length={0.08} position={[0.68, 0, 0]} color={PLATE} />
+      <RigPart shape="cylinder" radius={0.09} length={0.06} position={[-0.6, 0, 0]} color={PLATE} />
+      <RigPart shape="cylinder" radius={0.09} length={0.06} position={[0.6, 0, 0]} color={PLATE} />
+    </group>
+  );
+}
+
+function TreadmillDeck() {
+  return (
+    <group position={[0, 0.02, 0]}>
+      <RigPart args={[0.5, 0.05, 1.4]} position={[0, 0.03, 0]} color={RIG_MID} />
+      <RigPart args={[0.46, 0.02, 1.3]} position={[0, 0.06, 0]} color="#141014" />
+      <RigPart args={[0.05, 0.75, 0.05]} position={[-0.24, 0.4, -0.62]} />
+      <RigPart args={[0.05, 0.75, 0.05]} position={[0.24, 0.4, -0.62]} />
+      <RigPart args={[0.5, 0.05, 0.12]} position={[0, 0.78, -0.62]} color={RIG_MID} />
+    </group>
+  );
+}
+
+// Maps the exercise's `muscle` category (see EXERCISES in App.jsx)
+// to a piece of equipment. Falls back to no prop for anything
+// unmapped rather than guessing.
+function Equipment({ category }) {
+  switch (category) {
+    case "Chest":
+      return <BenchAndBar />;
+    case "Back":
+    case "Shoulders":
+    case "Arms & Abs":
+      return <CableTower />;
+    case "Legs":
+      return <FloorBarbell />;
+    case "Cardio":
+      return <TreadmillDeck />;
+    default:
+      return null;
+  }
+}
+
 // =========================================================
 // BODY PARTS
-// -----------------------------------------------------------
-// Grouped so each rotating joint (shoulder/elbow/hip/knee) is
-// a <group> whose ref gets its rotation.x set every frame by
-// the animator below — mutating refs directly (not React
-// state) keeps this cheap enough to run several instances of
-// at once (one per visible exercise card).
 // =========================================================
 
 function Torso({ highlight }) {
@@ -160,9 +279,7 @@ function LegRig({ side, hipRef, kneeRef, highlight }) {
 }
 
 // =========================================================
-// RIG — takes an anglesRef (mutable, updated per-frame by
-// whoever drives the animation) and applies it to the four
-// pivot pairs every frame.
+// RIG
 // =========================================================
 
 function RiggedBody({ highlight = [], anglesRef }) {
@@ -203,10 +320,7 @@ function RiggedBody({ highlight = [], anglesRef }) {
 }
 
 // =========================================================
-// ANIMATOR — ping-pongs between pose.start and pose.end,
-// writing into a ref every frame (no React state in the hot
-// path). Calls onCycle() once per completed start->end->start
-// loop, used for the little "N reps" counter.
+// ANIMATOR
 // =========================================================
 
 function usePoseAnimator(pose, playing) {
@@ -262,9 +376,10 @@ function AnimatedHumanoid({ pose, highlight, playing, onCycle }) {
 }
 
 // =========================================================
-// SCENE — shared lights/ground for every canvas instance.
-// orbit=true adds drag-to-rotate (no auto-spin, no zoom/pan —
-// per spec this is drag-only).
+// CAMERA AIM — a camera's position and where it points are two
+// separate things in three.js. OrbitControls auto-aims at its
+// target, but when orbit is off nothing else does, so every
+// non-orbit view needs this to actually frame the figure.
 // =========================================================
 
 function CameraAim({ target = [0, 1, 0] }) {
@@ -275,14 +390,31 @@ function CameraAim({ target = [0, 1, 0] }) {
   return null;
 }
 
+// =========================================================
+// SCENE — studio 3-point lighting (key + fill + rim) plus a low
+// red ambient glow behind the subject, echoing the reference's
+// look. orbit=true adds drag-to-rotate (no auto-spin, no zoom/pan).
+// =========================================================
+
 function Scene({ children, orbit = false }) {
   return (
     <>
-      <ambientLight intensity={0.65} />
-      <directionalLight position={[2, 4, 3]} intensity={0.9} castShadow />
-      <directionalLight position={[-3, 2, -2]} intensity={0.35} color="#ffdcdc" />
+      {/* soft overall fill so shadows never go fully black */}
+      <ambientLight intensity={0.35} />
+
+      {/* key light — main modeling light, warm-white, front-right-high */}
+      <directionalLight position={[2.2, 4, 3]} intensity={1.1} castShadow color="#fff6f2" />
+
+      {/* fill light — softer, opposite side, keeps shadow side readable */}
+      <directionalLight position={[-2.5, 1.5, 2]} intensity={0.4} color="#ffe6e6" />
+
+      {/* rim/back light — the red glow-edge from the reference image */}
+      <pointLight position={[0, 1.6, -2.2]} intensity={1.4} color="#c9314f" distance={6} decay={2} />
+
       {children}
-      <ContactShadows position={[0, 0, 0]} opacity={0.35} blur={2} scale={3} far={2} />
+
+      <ContactShadows position={[0, 0, 0]} opacity={0.4} blur={2.2} scale={3.4} far={2} />
+
       {orbit ? (
         <OrbitControls
           target={[0, 1, 0]}
@@ -303,9 +435,9 @@ function Scene({ children, orbit = false }) {
 // EXPORTED COMPONENTS
 // =========================================================
 
-// Small static single-pose figure — used for the step-by-step
-// "SETUP / EXECUTE / CONTROL" mini illustrations. No animation,
-// no drag; renders once on demand to stay cheap.
+// Small static single-pose figure — SETUP / EXECUTE / CONTROL mini
+// illustrations. No animation, no drag, no equipment (too small to
+// read); renders once on demand to stay cheap.
 export function ExerciseFigure3D({
   highlight = [],
   arm = 8,
@@ -333,11 +465,12 @@ export function ExerciseFigure3D({
   );
 }
 
-// Small looping thumbnail used in the exercise grid cards.
-// Lazy-mounts its WebGL canvas only while scrolled into view
-// (28 of these exist at once — always-on would be very heavy).
+// Looping thumbnail used in the exercise grid cards. Lazy-mounts its
+// WebGL canvas only while scrolled into view, and now fills its
+// parent card slot instead of a fixed 72px box, so the card's own
+// CSS controls the actual on-screen size.
 export function ExercisePosePair3D({ exercise, size = 72 }) {
-  const { pose, highlight = [], title } = exercise;
+  const { pose, highlight = [], title, muscle } = exercise;
   const containerRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const [playing, setPlaying] = useState(true);
@@ -361,12 +494,12 @@ export function ExercisePosePair3D({ exercise, size = 72 }) {
     <div
       ref={containerRef}
       className="exerciseFigurePair"
-      style={{ width: size, height: size, position: "relative" }}
+      style={{ width: "100%", height: "100%", minHeight: size, position: "relative" }}
     >
       {visible ? (
         <Canvas
           dpr={[1, 1.5]}
-          camera={{ position: [0, 1.25, 3.1], fov: 34 }}
+          camera={{ position: [0, 1.3, 3.4], fov: 34 }}
           gl={{ alpha: true }}
         >
           <Scene>
@@ -376,6 +509,7 @@ export function ExercisePosePair3D({ exercise, size = 72 }) {
               playing={playing}
               onCycle={() => setReps((r) => r + 1)}
             />
+            <Equipment category={muscle} />
           </Scene>
         </Canvas>
       ) : (
@@ -407,10 +541,10 @@ export function ExercisePosePair3D({ exercise, size = 72 }) {
 }
 
 // Big interactive viewer — drag to orbit 360°, animation loops
-// continuously. This is the new piece: drop it into the
-// expanded exercise card for the full rotatable view.
+// continuously, equipment included. Drop into the expanded
+// exercise card for the full rotatable view.
 export function ExerciseFigure3DViewer({ exercise, size = 280 }) {
-  const { pose, highlight = [] } = exercise;
+  const { pose, highlight = [], muscle } = exercise;
   const [playing, setPlaying] = useState(true);
 
   return (
@@ -419,11 +553,12 @@ export function ExerciseFigure3DViewer({ exercise, size = 280 }) {
         <Canvas
           dpr={[1, 2]}
           shadows
-          camera={{ position: [0, 1.3, 3.4], fov: 34 }}
+          camera={{ position: [0, 1.35, 3.6], fov: 34 }}
           gl={{ alpha: true }}
         >
           <Scene orbit>
             <AnimatedHumanoid pose={pose} highlight={highlight} playing={playing} />
+            <Equipment category={muscle} />
           </Scene>
         </Canvas>
       </div>
