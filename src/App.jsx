@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
-import { ExerciseFigure3D, ExercisePosePair3D } from "./ExerciseFigure3D";
-
+import { ExerciseFigure3D, ExercisePosePair3D, ExerciseFigure3DViewer } from "./ExerciseFigure3D";
 const API_URL = "https://fitmealai-production.up.railway.app";
 
 // Free USDA FoodData Central key: https://api.data.gov/signup/
@@ -4147,6 +4146,11 @@ function App() {
                             : "OPEN FORM GUIDE ↓"}
                         </b>
                       </div>
+                      {open && (
+  <div onClick={(e) => e.stopPropagation()}>
+    <ExerciseFigure3DViewer exercise={exercise} size={280} />
+  </div>
+)}
 
                       {open && (
                         <div className="exerciseSteps">
