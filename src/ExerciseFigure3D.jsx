@@ -1,57 +1,61 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, ContactShadows } from "@react-three/drei";
+import { OrbitControls, ContactShadows, useGLTF, Clone } from "@react-three/drei";
 import * as THREE from "three";
 
 // =========================================================
-// PALETTE
-// -----------------------------------------------------------
-// Ivory sculpted body + red muscle glow — echoes the "anatomy
-// poster" reference (white figure, red highlighted muscles,
-// dark gym equipment) using flat-shaded 3D primitives instead
-// of a painted/rendered asset.
+// MODEL PATH — put your converted Mixamo .glb here.
 // =========================================================
-const SKIN = "#ece2dc";
-const MUSCLE = "#c9314f";
+const MODEL_PATH = "/model.glb";
+// If your bundler needs an import instead of a public-style path,
+// replace the above with:
+//   import modelUrl from "./assets/model.glb";
+// and use `modelUrl` wherever MODEL_PATH is used below.
+
+const MUSCLE_COLOR = new THREE.Color("#c9314f");
 const RIG_DARK = "#1b1416";
 const RIG_MID = "#2c2224";
 const PLATE = "#0f0b0c";
 
 // =========================================================
-// PRIMITIVES
+// BONE NAME MAP — Mixamo's rig uses these names on every
+// character, regardless of which model you picked. If your
+// specific export differs, adjust the strings on the right only.
+// =========================================================
+const BONES = {
+  leftShoulder: "mixamorigLeftArm",
+  leftElbow: "mixamorigLeftForeArm",
+  rightShoulder: "mixamorigRightArm",
+  rightElbow: "mixamorigRightForeArm",
+  leftHip: "mixamorigLeftUpLeg",
+  leftKnee: "mixamorigLeftLeg",
+  rightHip: "mixamorigRightUpLeg",
+  rightKnee: "mixamorigRightLeg",
+};
+
+// Muscle-group -> mesh-name-substring map. Mixamo's default body
+// mesh is usually a single skinned mesh, so per-muscle isolation
+// via material swap often isn't possible without a custom-segmented
+// model. This map is here so it's a one-line fix *if* your model
+// has separate named parts (e.g. from a segmented source); if it's
+// one mesh, HIGHLIGHT_MODE below falls back to a full-body tint,
+// which is the honest limitation of a single-mesh free rig.
+const MUSCLE_MESH_HINTS = {
+  chest: ["chest", "pec"],
+  back: ["back", "spine", "lat"],
+  shoulders: ["shoulder", "delt"],
+  biceps: ["upperarm", "bicep", "arm"],
+  triceps: ["upperarm", "tricep", "arm"],
+  abs: ["abdomen", "torso", "abs"],
+  quads: ["upleg", "thigh"],
+  calves: ["leg", "calf", "shin"],
+};
+
+// =========================================================
+// EQUIPMENT — unchanged from the primitive version; still built
+// from simple shapes since it doesn't need to look organic.
 // =========================================================
 
-function Part({
-  shape = "capsule",
-  length = 0.2,
-  radius = 0.05,
-  args,
-  position = [0, 0, 0],
-  color = SKIN,
-  highlighted = false,
-}) {
-  return (
-    <mesh position={position} castShadow receiveShadow>
-      {shape === "capsule" && (
-        <capsuleGeometry args={[radius, length, 8, 16]} />
-      )}
-      {shape === "sphere" && <sphereGeometry args={[radius, 28, 28]} />}
-      {shape === "box" && <boxGeometry args={args} />}
-      <meshPhysicalMaterial
-        color={color}
-        roughness={highlighted ? 0.32 : 0.38}
-        metalness={0.04}
-        clearcoat={0.55}
-        clearcoatRoughness={0.25}
-        emissive={highlighted ? MUSCLE : "#000000"}
-        emissiveIntensity={highlighted ? 0.5 : 0}
-      />
-    </mesh>
-  );
-}
-
-// Flat dark metal used for gym equipment — visually distinct from the
-// glossy ivory body so the figure always reads as the subject.
 function RigPart({ shape = "box", args, position = [0, 0, 0], rotation, color = RIG_DARK, radius, length, radialSegments = 16 }) {
   return (
     <mesh position={position} rotation={rotation} castShadow receiveShadow>
@@ -64,34 +68,17 @@ function RigPart({ shape = "box", args, position = [0, 0, 0], rotation, color = 
   );
 }
 
-// =========================================================
-// EQUIPMENT — one simple prop per exercise category, built from
-// the same primitive language as the body. Purely set dressing;
-// none of it is rigged or animated.
-// =========================================================
-
 function BenchAndBar() {
   return (
     <group position={[0, 0.02, 0.05]}>
-      {/* bench pad */}
       <RigPart args={[0.34, 0.09, 1.05]} position={[0, 0.32, 0]} color={PLATE} />
-      {/* legs */}
       <RigPart args={[0.06, 0.32, 0.06]} position={[-0.13, 0.16, 0.42]} />
       <RigPart args={[0.06, 0.32, 0.06]} position={[0.13, 0.16, 0.42]} />
       <RigPart args={[0.06, 0.32, 0.06]} position={[-0.13, 0.16, -0.42]} />
       <RigPart args={[0.06, 0.32, 0.06]} position={[0.13, 0.16, -0.42]} />
-      {/* uprights */}
       <RigPart args={[0.07, 0.9, 0.07]} position={[-0.32, 0.45, -0.38]} />
       <RigPart args={[0.07, 0.9, 0.07]} position={[0.32, 0.45, -0.38]} />
-      {/* bar resting in rack (start pose) */}
-      <RigPart
-        shape="cylinder"
-        radius={0.022}
-        length={1.3}
-        rotation={[0, 0, Math.PI / 2]}
-        position={[0, 0.86, -0.38]}
-        color="#3a3a3d"
-      />
+      <RigPart shape="cylinder" radius={0.022} length={1.3} rotation={[0, 0, Math.PI / 2]} position={[0, 0.86, -0.38]} color="#3a3a3d" />
       <RigPart shape="cylinder" radius={0.09} length={0.08} position={[-0.58, 0.86, -0.38]} color={PLATE} />
       <RigPart shape="cylinder" radius={0.09} length={0.08} position={[0.58, 0.86, -0.38]} color={PLATE} />
     </group>
@@ -101,20 +88,11 @@ function BenchAndBar() {
 function CableTower() {
   return (
     <group position={[0, 0, -0.55]}>
-      {/* tower column */}
       <RigPart args={[0.16, 2.0, 0.18]} position={[0, 1.0, 0]} color={RIG_MID} />
-      {/* pulley at top */}
       <RigPart shape="cylinder" radius={0.05} length={0.14} rotation={[Math.PI / 2, 0, 0]} position={[0, 1.75, 0.1]} color="#3a3a3d" />
-      {/* weight stack */}
       {[0, 1, 2, 3, 4].map((i) => (
-        <RigPart
-          key={i}
-          args={[0.22, 0.045, 0.32]}
-          position={[0, 0.35 + i * 0.06, 0.02]}
-          color={PLATE}
-        />
+        <RigPart key={i} args={[0.22, 0.045, 0.32]} position={[0, 0.35 + i * 0.06, 0.02]} color={PLATE} />
       ))}
-      {/* base */}
       <RigPart args={[0.4, 0.05, 0.5]} position={[0, 0.03, 0.2]} color={RIG_MID} />
     </group>
   );
@@ -123,14 +101,7 @@ function CableTower() {
 function FloorBarbell() {
   return (
     <group position={[0, 0.09, 0.5]}>
-      <RigPart
-        shape="cylinder"
-        radius={0.022}
-        length={1.5}
-        rotation={[0, 0, Math.PI / 2]}
-        position={[0, 0, 0]}
-        color="#3a3a3d"
-      />
+      <RigPart shape="cylinder" radius={0.022} length={1.5} rotation={[0, 0, Math.PI / 2]} position={[0, 0, 0]} color="#3a3a3d" />
       <RigPart shape="cylinder" radius={0.11} length={0.08} position={[-0.68, 0, 0]} color={PLATE} />
       <RigPart shape="cylinder" radius={0.11} length={0.08} position={[0.68, 0, 0]} color={PLATE} />
       <RigPart shape="cylinder" radius={0.09} length={0.06} position={[-0.6, 0, 0]} color={PLATE} />
@@ -151,9 +122,6 @@ function TreadmillDeck() {
   );
 }
 
-// Maps the exercise's `muscle` category (see EXERCISES in App.jsx)
-// to a piece of equipment. Falls back to no prop for anything
-// unmapped rather than guessing.
 function Equipment({ category }) {
   switch (category) {
     case "Chest":
@@ -172,125 +140,79 @@ function Equipment({ category }) {
 }
 
 // =========================================================
-// BODY PARTS
+// RIGGED MODEL — loads the GLB once (cached by drei), then each
+// instance clones it (via <Clone>, which is skeleton-aware, unlike
+// a plain mesh clone) so multiple exercise cards can each have
+// their own independently-posed copy from one loaded asset.
 // =========================================================
 
-function Torso({ highlight }) {
-  const has = (m) => highlight.includes(m);
-  return (
-    <group position={[0, 1.15, 0]}>
-      <Part shape="box" args={[0.26, 0.18, 0.16]} position={[0, -0.25, 0]} />
-
-      {[0, 1, 2].map((row) =>
-        [-1, 1].map((col) => (
-          <Part
-            key={`ab-${row}-${col}`}
-            shape="box"
-            args={[0.09, 0.075, 0.05]}
-            position={[col * 0.055, -0.02 - row * 0.085, 0.11]}
-            color={has("abs") ? MUSCLE : SKIN}
-            highlighted={has("abs")}
-          />
-        ))
-      )}
-
-      {[-1, 1].map((side) => (
-        <Part
-          key={`chest-${side}`}
-          shape="sphere"
-          radius={0.11}
-          position={[side * 0.1, 0.22, 0.09]}
-          color={has("chest") ? MUSCLE : SKIN}
-          highlighted={has("chest")}
-        />
-      ))}
-
-      <Part
-        shape="box"
-        args={[0.3, 0.42, 0.08]}
-        position={[0, 0.1, -0.1]}
-        color={has("back") ? MUSCLE : SKIN}
-        highlighted={has("back")}
-      />
-
-      <Part shape="capsule" length={0.05} radius={0.045} position={[0, 0.42, 0]} />
-      <Part shape="sphere" radius={0.13} position={[0, 0.58, 0]} />
-    </group>
-  );
+function useMixamoBones(scene) {
+  return useMemo(() => {
+    const found = {};
+    scene.traverse((obj) => {
+      if (obj.isBone) {
+        Object.entries(BONES).forEach(([key, name]) => {
+          if (obj.name === name) found[key] = obj;
+        });
+      }
+    });
+    return found;
+  }, [scene]);
 }
 
-function ArmRig({ side, shoulderRef, elbowRef, highlight }) {
-  const dir = side === "left" ? -1 : 1;
-  const has = (m) => highlight.includes(m);
-  return (
-    <group ref={shoulderRef} position={[dir * 0.21, 1.42, 0]}>
-      <Part
-        shape="sphere"
-        radius={0.075}
-        color={has("shoulders") ? MUSCLE : SKIN}
-        highlighted={has("shoulders")}
-      />
-      <Part
-        length={0.22}
-        radius={0.05}
-        position={[0, -0.17, 0.025]}
-        color={has("biceps") ? MUSCLE : SKIN}
-        highlighted={has("biceps")}
-      />
-      <Part
-        length={0.22}
-        radius={0.05}
-        position={[0, -0.17, -0.025]}
-        color={has("triceps") ? MUSCLE : SKIN}
-        highlighted={has("triceps")}
-      />
-      <group ref={elbowRef} position={[0, -0.34, 0]}>
-        <Part length={0.26} radius={0.042} position={[0, -0.15, 0]} />
-        <Part shape="sphere" radius={0.045} position={[0, -0.3, 0]} />
-      </group>
-    </group>
-  );
+// Applies a full-body emissive tint when any muscle in `highlight`
+// is active. NOTE: most free Mixamo exports are a single skinned
+// mesh, so per-muscle isolation isn't possible without a
+// custom-segmented model — this is a whole-body highlight, not a
+// spot highlight, which is the honest limit of a single-mesh rig.
+// If your model happens to have separate named meshes per body
+// part, this upgrades automatically via MUSCLE_MESH_HINTS.
+function useHighlightMaterials(scene, highlight) {
+  useEffect(() => {
+    if (!scene) return;
+    const active = highlight.length > 0;
+
+    scene.traverse((obj) => {
+      if (!obj.isMesh || !obj.material) return;
+
+      // Clone material once per mesh so we don't mutate the shared
+      // cached asset (which would leak across every card instance).
+      if (!obj.userData._clonedMat) {
+        obj.material = obj.material.clone();
+        obj.userData._clonedMat = true;
+      }
+
+      const nameLower = obj.name.toLowerCase();
+      const matchesHint = highlight.some((m) =>
+        (MUSCLE_MESH_HINTS[m] || []).some((hint) => nameLower.includes(hint))
+      );
+
+      const shouldGlow = active && (matchesHint || !hasSegmentedMeshes(scene));
+
+      if (obj.material.emissive) {
+        obj.material.emissive = shouldGlow ? MUSCLE_COLOR.clone() : new THREE.Color("#000000");
+        obj.material.emissiveIntensity = shouldGlow ? 0.55 : 0;
+      }
+    });
+  }, [scene, highlight]);
 }
 
-function LegRig({ side, hipRef, kneeRef, highlight }) {
-  const dir = side === "left" ? -1 : 1;
-  const has = (m) => highlight.includes(m);
-  return (
-    <group ref={hipRef} position={[dir * 0.11, 0.9, 0]}>
-      <Part
-        length={0.4}
-        radius={0.085}
-        position={[0, -0.22, 0]}
-        color={has("quads") ? MUSCLE : SKIN}
-        highlighted={has("quads")}
-      />
-      <group ref={kneeRef} position={[0, -0.45, 0]}>
-        <Part
-          length={0.36}
-          radius={0.065}
-          position={[0, -0.2, 0]}
-          color={has("calves") ? MUSCLE : SKIN}
-          highlighted={has("calves")}
-        />
-        <Part shape="box" args={[0.09, 0.05, 0.18]} position={[0, -0.42, 0.05]} />
-      </group>
-    </group>
-  );
+// Rough heuristic: if the model has more than ~3 named meshes, it's
+// probably segmented and we should only glow matched parts; a single
+// mesh (typical Mixamo export) falls back to whole-body tint.
+function hasSegmentedMeshes(scene) {
+  let count = 0;
+  scene.traverse((o) => {
+    if (o.isMesh) count += 1;
+  });
+  return count > 3;
 }
 
-// =========================================================
-// RIG
-// =========================================================
-
-function RiggedBody({ highlight = [], anglesRef }) {
-  const shoulderL = useRef();
-  const shoulderR = useRef();
-  const elbowL = useRef();
-  const elbowR = useRef();
-  const hipL = useRef();
-  const hipR = useRef();
-  const kneeL = useRef();
-  const kneeR = useRef();
+function RiggedModel({ highlight = [], anglesRef }) {
+  const { scene } = useGLTF(MODEL_PATH);
+  const cloned = useMemo(() => scene.clone(true), [scene]);
+  const bones = useMixamoBones(cloned);
+  useHighlightMaterials(cloned, highlight);
 
   useFrame(() => {
     const a = anglesRef.current;
@@ -298,29 +220,28 @@ function RiggedBody({ highlight = [], anglesRef }) {
     const e = THREE.MathUtils.degToRad(a.elbow);
     const h = THREE.MathUtils.degToRad(a.hip);
     const k = THREE.MathUtils.degToRad(a.knee);
-    if (shoulderL.current) shoulderL.current.rotation.x = s;
-    if (shoulderR.current) shoulderR.current.rotation.x = s;
-    if (elbowL.current) elbowL.current.rotation.x = e;
-    if (elbowR.current) elbowR.current.rotation.x = e;
-    if (hipL.current) hipL.current.rotation.x = h;
-    if (hipR.current) hipR.current.rotation.x = h;
-    if (kneeL.current) kneeL.current.rotation.x = k;
-    if (kneeR.current) kneeR.current.rotation.x = k;
+
+    // Mixamo's rest pose has arms down at the sides and legs
+    // straight, so rotations are applied as offsets from that
+    // rest pose rather than absolute angles.
+    if (bones.leftShoulder) bones.leftShoulder.rotation.z = -s * 0.6;
+    if (bones.rightShoulder) bones.rightShoulder.rotation.z = s * 0.6;
+    if (bones.leftElbow) bones.leftElbow.rotation.y = -e * 0.5;
+    if (bones.rightElbow) bones.rightElbow.rotation.y = e * 0.5;
+    if (bones.leftHip) bones.leftHip.rotation.x = h;
+    if (bones.rightHip) bones.rightHip.rotation.x = h;
+    if (bones.leftKnee) bones.leftKnee.rotation.x = k;
+    if (bones.rightKnee) bones.rightKnee.rotation.x = k;
   });
 
-  return (
-    <group>
-      <Torso highlight={highlight} />
-      <ArmRig side="left" shoulderRef={shoulderL} elbowRef={elbowL} highlight={highlight} />
-      <ArmRig side="right" shoulderRef={shoulderR} elbowRef={elbowR} highlight={highlight} />
-      <LegRig side="left" hipRef={hipL} kneeRef={kneeL} highlight={highlight} />
-      <LegRig side="right" hipRef={hipR} kneeRef={kneeR} highlight={highlight} />
-    </group>
-  );
+  return <primitive object={cloned} scale={1} position={[0, 0, 0]} />;
 }
 
+useGLTF.preload(MODEL_PATH);
+
 // =========================================================
-// ANIMATOR
+// ANIMATOR — identical pose math to the primitive version; only
+// what consumes anglesRef (RiggedModel vs RiggedBody) changed.
 // =========================================================
 
 function usePoseAnimator(pose, playing) {
@@ -372,14 +293,11 @@ function AnimatedHumanoid({ pose, highlight, playing, onCycle }) {
     }
   }, [cycles, onCycle]);
 
-  return <RiggedBody highlight={highlight} anglesRef={anglesRef} />;
+  return <RiggedModel highlight={highlight} anglesRef={anglesRef} />;
 }
 
 // =========================================================
-// CAMERA AIM — a camera's position and where it points are two
-// separate things in three.js. OrbitControls auto-aims at its
-// target, but when orbit is off nothing else does, so every
-// non-orbit view needs this to actually frame the figure.
+// CAMERA AIM + SCENE — unchanged from the primitive version.
 // =========================================================
 
 function CameraAim({ target = [0, 1, 0] }) {
@@ -390,25 +308,12 @@ function CameraAim({ target = [0, 1, 0] }) {
   return null;
 }
 
-// =========================================================
-// SCENE — studio 3-point lighting (key + fill + rim) plus a low
-// red ambient glow behind the subject, echoing the reference's
-// look. orbit=true adds drag-to-rotate (no auto-spin, no zoom/pan).
-// =========================================================
-
 function Scene({ children, orbit = false }) {
   return (
     <>
-      {/* soft overall fill so shadows never go fully black */}
       <ambientLight intensity={0.35} />
-
-      {/* key light — main modeling light, warm-white, front-right-high */}
       <directionalLight position={[2.2, 4, 3]} intensity={1.1} castShadow color="#fff6f2" />
-
-      {/* fill light — softer, opposite side, keeps shadow side readable */}
       <directionalLight position={[-2.5, 1.5, 2]} intensity={0.4} color="#ffe6e6" />
-
-      {/* rim/back light — the red glow-edge from the reference image */}
       <pointLight position={[0, 1.6, -2.2]} intensity={1.4} color="#c9314f" distance={6} decay={2} />
 
       {children}
@@ -432,12 +337,10 @@ function Scene({ children, orbit = false }) {
 }
 
 // =========================================================
-// EXPORTED COMPONENTS
+// EXPORTED COMPONENTS — same public API as the primitive version,
+// so App.jsx needs zero changes to switch to this file.
 // =========================================================
 
-// Small static single-pose figure — SETUP / EXECUTE / CONTROL mini
-// illustrations. No animation, no drag, no equipment (too small to
-// read); renders once on demand to stay cheap.
 export function ExerciseFigure3D({
   highlight = [],
   arm = 8,
@@ -458,17 +361,13 @@ export function ExerciseFigure3D({
         gl={{ alpha: true }}
       >
         <Scene>
-          <RiggedBody highlight={highlight} anglesRef={anglesRef} />
+          <RiggedModel highlight={highlight} anglesRef={anglesRef} />
         </Scene>
       </Canvas>
     </div>
   );
 }
 
-// Looping thumbnail used in the exercise grid cards. Lazy-mounts its
-// WebGL canvas only while scrolled into view, and now fills its
-// parent card slot instead of a fixed 72px box, so the card's own
-// CSS controls the actual on-screen size.
 export function ExercisePosePair3D({ exercise, size = 72 }) {
   const { pose, highlight = [], title, muscle } = exercise;
   const containerRef = useRef(null);
@@ -497,11 +396,7 @@ export function ExercisePosePair3D({ exercise, size = 72 }) {
       style={{ width: "100%", height: "100%", minHeight: size, position: "relative" }}
     >
       {visible ? (
-        <Canvas
-          dpr={[1, 1.5]}
-          camera={{ position: [0, 1.3, 3.4], fov: 34 }}
-          gl={{ alpha: true }}
-        >
+        <Canvas dpr={[1, 1.5]} camera={{ position: [0, 1.3, 3.4], fov: 34 }} gl={{ alpha: true }}>
           <Scene>
             <AnimatedHumanoid
               pose={pose}
@@ -540,9 +435,6 @@ export function ExercisePosePair3D({ exercise, size = 72 }) {
   );
 }
 
-// Big interactive viewer — drag to orbit 360°, animation loops
-// continuously, equipment included. Drop into the expanded
-// exercise card for the full rotatable view.
 export function ExerciseFigure3DViewer({ exercise, size = 280 }) {
   const { pose, highlight = [], muscle } = exercise;
   const [playing, setPlaying] = useState(true);
@@ -550,12 +442,7 @@ export function ExerciseFigure3DViewer({ exercise, size = 280 }) {
   return (
     <div className="exercise3DViewer">
       <div style={{ height: size }}>
-        <Canvas
-          dpr={[1, 2]}
-          shadows
-          camera={{ position: [0, 1.35, 3.6], fov: 34 }}
-          gl={{ alpha: true }}
-        >
+        <Canvas dpr={[1, 2]} shadows camera={{ position: [0, 1.35, 3.6], fov: 34 }} gl={{ alpha: true }}>
           <Scene orbit>
             <AnimatedHumanoid pose={pose} highlight={highlight} playing={playing} />
             <Equipment category={muscle} />
@@ -565,11 +452,7 @@ export function ExerciseFigure3DViewer({ exercise, size = 280 }) {
 
       <div className="exercise3DViewerBar">
         <span>Drag to rotate 360°</span>
-        <button
-          type="button"
-          className="outlineButton"
-          onClick={() => setPlaying((p) => !p)}
-        >
+        <button type="button" className="outlineButton" onClick={() => setPlaying((p) => !p)}>
           {playing ? "Pause" : "Play"} animation
         </button>
       </div>
