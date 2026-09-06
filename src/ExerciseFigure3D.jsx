@@ -6,7 +6,7 @@ import * as THREE from "three";
 // =========================================================
 // MODEL PATH — put your converted Mixamo .glb here.
 // =========================================================
-const MODEL_PATH = "/model.glb";
+const MODEL_PATH = "/exercise-model.glb";
 // If your bundler needs an import instead of a public-style path,
 // replace the above with:
 //   import modelUrl from "./assets/model.glb";
@@ -354,16 +354,16 @@ export function ExerciseFigure3D({
 
   return (
     <div style={{ width: size, height: size }}>
-      <Canvas
-        frameloop="demand"
-        dpr={[1, 1.5]}
-        camera={{ position: [0, 1.25, 3.1], fov: 32 }}
-        gl={{ alpha: true }}
-      >
-        <Scene>
-          <RiggedModel highlight={highlight} anglesRef={anglesRef} />
-        </Scene>
-      </Canvas>
+     <img
+  src="/exercise.svg"
+  alt="Exercise figure"
+  style={{
+    width: size,
+    height: size,
+    objectFit: "contain",
+    display: "block",
+  }}
+/>
     </div>
   );
 }
