@@ -1,345 +1,449 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, ContactShadows, useGLTF, Clone } from "@react-three/drei";
-import * as THREE from "three";
+import React, { useEffect, useMemo, useState } from "react";
 
-// =========================================================
-// MODEL PATH — put your converted Mixamo .glb here.
-// =========================================================
-const MODEL_PATH = "/exercise-model.glb";
-// If your bundler needs an import instead of a public-style path,
-// replace the above with:
-//   import modelUrl from "./assets/model.glb";
-// and use `modelUrl` wherever MODEL_PATH is used below.
+/*
+  SVG EXERCISE FIGURES
+  ---------------------
+  No GLB.
+  No Three.js.
+  No WebGL.
+  Keeps the same exports used by App.jsx:
+    - ExerciseFigure3D
+    - ExercisePosePair3D
+    - ExerciseFigure3DViewer
+*/
 
-const MUSCLE_COLOR = new THREE.Color("#c9314f");
-const RIG_DARK = "#1b1416";
-const RIG_MID = "#2c2224";
-const PLATE = "#0f0b0c";
+const SKIN = "#c9c9cf";
+const SKIN_DARK = "#92929b";
+const MUSCLE = "#c42a44";
+const MUSCLE_SOFT = "#9f263b";
+const LINE = "#55555f";
+const EQUIPMENT = "#777780";
 
-// =========================================================
-// BONE NAME MAP — Mixamo's rig uses these names on every
-// character, regardless of which model you picked. If your
-// specific export differs, adjust the strings on the right only.
-// =========================================================
-const BONES = {
-  leftShoulder: "mixamorigLeftArm",
-  leftElbow: "mixamorigLeftForeArm",
-  rightShoulder: "mixamorigRightArm",
-  rightElbow: "mixamorigRightForeArm",
-  leftHip: "mixamorigLeftUpLeg",
-  leftKnee: "mixamorigLeftLeg",
-  rightHip: "mixamorigRightUpLeg",
-  rightKnee: "mixamorigRightLeg",
-};
-
-// Muscle-group -> mesh-name-substring map. Mixamo's default body
-// mesh is usually a single skinned mesh, so per-muscle isolation
-// via material swap often isn't possible without a custom-segmented
-// model. This map is here so it's a one-line fix *if* your model
-// has separate named parts (e.g. from a segmented source); if it's
-// one mesh, HIGHLIGHT_MODE below falls back to a full-body tint,
-// which is the honest limitation of a single-mesh free rig.
-const MUSCLE_MESH_HINTS = {
-  chest: ["chest", "pec"],
-  back: ["back", "spine", "lat"],
-  shoulders: ["shoulder", "delt"],
-  biceps: ["upperarm", "bicep", "arm"],
-  triceps: ["upperarm", "tricep", "arm"],
-  abs: ["abdomen", "torso", "abs"],
-  quads: ["upleg", "thigh"],
-  calves: ["leg", "calf", "shin"],
-};
-
-// =========================================================
-// EQUIPMENT — unchanged from the primitive version; still built
-// from simple shapes since it doesn't need to look organic.
-// =========================================================
-
-function RigPart({ shape = "box", args, position = [0, 0, 0], rotation, color = RIG_DARK, radius, length, radialSegments = 16 }) {
-  return (
-    <mesh position={position} rotation={rotation} castShadow receiveShadow>
-      {shape === "box" && <boxGeometry args={args} />}
-      {shape === "cylinder" && (
-        <cylinderGeometry args={[radius, radius, length, radialSegments]} />
-      )}
-      <meshStandardMaterial color={color} roughness={0.55} metalness={0.35} />
-    </mesh>
+function isHighlighted(highlight = [], names = []) {
+  return names.some((name) =>
+    highlight.some((h) => String(h).toLowerCase() === name.toLowerCase())
   );
 }
 
-function BenchAndBar() {
+function jointColor(highlight, names) {
+  return isHighlighted(highlight, names) ? MUSCLE : SKIN;
+}
+
+/* ---------------------------------------------------------
+   SVG MANNEQUIN
+--------------------------------------------------------- */
+
+function ExerciseSVG({
+  highlight = [],
+  arm = 8,
+  arm2 = 0,
+  leg = 4,
+  leg2 = 0,
+  animated = false,
+}) {
+  const armAngle = Number(arm) || 0;
+  const elbowAngle = Number(arm2) || 0;
+  const legAngle = Number(leg) || 0;
+  const kneeAngle = Number(leg2) || 0;
+
+  const shoulder = jointColor(highlight, ["shoulders", "shoulder"]);
+  const chest = jointColor(highlight, ["chest"]);
+  const back = jointColor(highlight, ["back", "lats"]);
+  const biceps = jointColor(highlight, ["biceps"]);
+  const triceps = jointColor(highlight, ["triceps"]);
+  const abs = jointColor(highlight, ["abs", "core"]);
+  const quads = jointColor(highlight, ["quads", "legs"]);
+  const calves = jointColor(highlight, ["calves"]);
+
   return (
-    <group position={[0, 0.02, 0.05]}>
-      <RigPart args={[0.34, 0.09, 1.05]} position={[0, 0.32, 0]} color={PLATE} />
-      <RigPart args={[0.06, 0.32, 0.06]} position={[-0.13, 0.16, 0.42]} />
-      <RigPart args={[0.06, 0.32, 0.06]} position={[0.13, 0.16, 0.42]} />
-      <RigPart args={[0.06, 0.32, 0.06]} position={[-0.13, 0.16, -0.42]} />
-      <RigPart args={[0.06, 0.32, 0.06]} position={[0.13, 0.16, -0.42]} />
-      <RigPart args={[0.07, 0.9, 0.07]} position={[-0.32, 0.45, -0.38]} />
-      <RigPart args={[0.07, 0.9, 0.07]} position={[0.32, 0.45, -0.38]} />
-      <RigPart shape="cylinder" radius={0.022} length={1.3} rotation={[0, 0, Math.PI / 2]} position={[0, 0.86, -0.38]} color="#3a3a3d" />
-      <RigPart shape="cylinder" radius={0.09} length={0.08} position={[-0.58, 0.86, -0.38]} color={PLATE} />
-      <RigPart shape="cylinder" radius={0.09} length={0.08} position={[0.58, 0.86, -0.38]} color={PLATE} />
-    </group>
+    <svg
+      viewBox="0 0 220 300"
+      className="exerciseFigureSvg"
+      role="img"
+      aria-label="Exercise anatomical figure"
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "block",
+        overflow: "visible",
+      }}
+    >
+      <defs>
+        <linearGradient id="figureBodyGradient" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#eeeeF2" />
+          <stop offset="55%" stopColor={SKIN} />
+          <stop offset="100%" stopColor={SKIN_DARK} />
+        </linearGradient>
+
+        <radialGradient id="figureMuscleGradient">
+          <stop offset="0%" stopColor="#e64a63" />
+          <stop offset="100%" stopColor={MUSCLE_SOFT} />
+        </radialGradient>
+      </defs>
+
+      <g
+        transform="translate(110 150)"
+        style={{
+          transformOrigin: "110px 150px",
+          transformBox: "fill-box",
+        }}
+      >
+        {/* HEAD */}
+        <circle
+          cx="0"
+          cy="-108"
+          r="25"
+          fill="url(#figureBodyGradient)"
+          stroke={LINE}
+          strokeWidth="3"
+        />
+
+        {/* NECK */}
+        <rect
+          x="-11"
+          y="-86"
+          width="22"
+          height="24"
+          rx="8"
+          fill={SKIN}
+          stroke={LINE}
+          strokeWidth="3"
+        />
+
+        {/* TORSO */}
+        <path
+          d="M-38-65
+             Q-18-78 0-72
+             Q18-78 38-65
+             L48-8
+             Q43 30 30 52
+             L-30 52
+             Q-43 30-48-8Z"
+          fill="url(#figureBodyGradient)"
+          stroke={LINE}
+          strokeWidth="3"
+        />
+
+        {/* CHEST */}
+        <path
+          d="M-39-54 Q-19-68 0-54 Q19-68 39-54 L34-28 Q15-20 0-31 Q-15-20-34-28Z"
+          fill={chest}
+          opacity="0.95"
+        />
+
+        {/* BACK / SIDE */}
+        <path
+          d="M-43-42 Q-54-22-39 5 L-30 34 L-22 12 L-28-18Z"
+          fill={back}
+          opacity="0.8"
+        />
+        <path
+          d="M43-42 Q54-22 39 5 L30 34 L22 12 L28-18Z"
+          fill={back}
+          opacity="0.8"
+        />
+
+        {/* ABS */}
+        <rect
+          x="-24"
+          y="-18"
+          width="48"
+          height="62"
+          rx="17"
+          fill={abs}
+          opacity="0.9"
+        />
+
+        <path d="M0-14V40" stroke={LINE} strokeWidth="2" opacity="0.45" />
+        <path d="M-21 0H21M-20 18H20M-18 35H18" stroke={LINE} strokeWidth="1.5" opacity="0.35" />
+
+        {/* LEFT ARM */}
+        <g
+          style={{
+            transformOrigin: "-39px -52px",
+            transform: `rotate(${armAngle}deg)`,
+            transition: animated ? "transform .25s ease" : undefined,
+          }}
+        >
+          <path
+            d="M-39-57 Q-53-62-62-48 L-82-3 Q-87 8-78 14 Q-69 18-63 7 L-42-31Z"
+            fill={shoulder}
+            stroke={LINE}
+            strokeWidth="3"
+          />
+
+          <g
+            style={{
+              transformOrigin: "-77px 10px",
+              transform: `rotate(${elbowAngle}deg)`,
+              transition: animated ? "transform .25s ease" : undefined,
+            }}
+          >
+            <path
+              d="M-78 7 Q-86 18-88 34 L-94 70 Q-95 82-84 84 Q-74 85-72 73 L-68 36 Q-66 23-69 13Z"
+              fill={biceps}
+              stroke={LINE}
+              strokeWidth="3"
+            />
+
+            <circle
+              cx="-78"
+              cy="10"
+              r="7"
+              fill={triceps}
+              stroke={LINE}
+              strokeWidth="2"
+            />
+
+            <circle
+              cx="-83"
+              cy="83"
+              r="7"
+              fill={SKIN}
+              stroke={LINE}
+              strokeWidth="2"
+            />
+          </g>
+        </g>
+
+        {/* RIGHT ARM */}
+        <g
+          style={{
+            transformOrigin: "39px -52px",
+            transform: `rotate(${-armAngle}deg)`,
+            transition: animated ? "transform .25s ease" : undefined,
+          }}
+        >
+          <path
+            d="M39-57 Q53-62 62-48 L82-3 Q87 8 78 14 Q69 18 63 7 L42-31Z"
+            fill={shoulder}
+            stroke={LINE}
+            strokeWidth="3"
+          />
+
+          <g
+            style={{
+              transformOrigin: "77px 10px",
+              transform: `rotate(${-elbowAngle}deg)`,
+              transition: animated ? "transform .25s ease" : undefined,
+            }}
+          >
+            <path
+              d="M78 7 Q86 18 88 34 L94 70 Q95 82 84 84 Q74 85 72 73 L68 36 Q66 23 69 13Z"
+              fill={biceps}
+              stroke={LINE}
+              strokeWidth="3"
+            />
+
+            <circle
+              cx="78"
+              cy="10"
+              r="7"
+              fill={triceps}
+              stroke={LINE}
+              strokeWidth="2"
+            />
+
+            <circle
+              cx="83"
+              cy="83"
+              r="7"
+              fill={SKIN}
+              stroke={LINE}
+              strokeWidth="2"
+            />
+          </g>
+        </g>
+
+        {/* LEFT LEG */}
+        <g
+          style={{
+            transformOrigin: "-20px 49px",
+            transform: `rotate(${legAngle}deg)`,
+            transition: animated ? "transform .25s ease" : undefined,
+          }}
+        >
+          <path
+            d="M-30 45 Q-18 39-7 45 L-10 108 Q-11 119-21 120 Q-31 120-32 109Z"
+            fill={quads}
+            stroke={LINE}
+            strokeWidth="3"
+          />
+
+          <g
+            style={{
+              transformOrigin: "-21px 116px",
+              transform: `rotate(${kneeAngle}deg)`,
+              transition: animated ? "transform .25s ease" : undefined,
+            }}
+          >
+            <circle
+              cx="-21"
+              cy="116"
+              r="8"
+              fill={SKIN}
+              stroke={LINE}
+              strokeWidth="2"
+            />
+
+            <path
+              d="M-29 121 Q-17 118-12 125 L-7 176 Q-6 188-17 189 Q-29 189-31 177Z"
+              fill={calves}
+              stroke={LINE}
+              strokeWidth="3"
+            />
+
+            <path
+              d="M-18 187 Q-5 185 5 192 Q8 199-2 201 L-31 200 Q-36 195-31 190Z"
+              fill={SKIN_DARK}
+              stroke={LINE}
+              strokeWidth="3"
+            />
+          </g>
+        </g>
+
+        {/* RIGHT LEG */}
+        <g
+          style={{
+            transformOrigin: "20px 49px",
+            transform: `rotate(${-legAngle}deg)`,
+            transition: animated ? "transform .25s ease" : undefined,
+          }}
+        >
+          <path
+            d="M30 45 Q18 39 7 45 L10 108 Q11 119 21 120 Q31 120 32 109Z"
+            fill={quads}
+            stroke={LINE}
+            strokeWidth="3"
+          />
+
+          <g
+            style={{
+              transformOrigin: "21px 116px",
+              transform: `rotate(${-kneeAngle}deg)`,
+              transition: animated ? "transform .25s ease" : undefined,
+            }}
+          >
+            <circle
+              cx="21"
+              cy="116"
+              r="8"
+              fill={SKIN}
+              stroke={LINE}
+              strokeWidth="2"
+            />
+
+            <path
+              d="M29 121 Q17 118 12 125 L7 176 Q6 188 17 189 Q29 189 31 177Z"
+              fill={calves}
+              stroke={LINE}
+              strokeWidth="3"
+            />
+
+            <path
+              d="M18 187 Q5 185-5 192 Q-8 199 2 201 L31 200 Q36 195 31 190Z"
+              fill={SKIN_DARK}
+              stroke={LINE}
+              strokeWidth="3"
+            />
+          </g>
+        </g>
+      </g>
+    </svg>
   );
 }
 
-function CableTower() {
-  return (
-    <group position={[0, 0, -0.55]}>
-      <RigPart args={[0.16, 2.0, 0.18]} position={[0, 1.0, 0]} color={RIG_MID} />
-      <RigPart shape="cylinder" radius={0.05} length={0.14} rotation={[Math.PI / 2, 0, 0]} position={[0, 1.75, 0.1]} color="#3a3a3d" />
-      {[0, 1, 2, 3, 4].map((i) => (
-        <RigPart key={i} args={[0.22, 0.045, 0.32]} position={[0, 0.35 + i * 0.06, 0.02]} color={PLATE} />
-      ))}
-      <RigPart args={[0.4, 0.05, 0.5]} position={[0, 0.03, 0.2]} color={RIG_MID} />
-    </group>
-  );
-}
-
-function FloorBarbell() {
-  return (
-    <group position={[0, 0.09, 0.5]}>
-      <RigPart shape="cylinder" radius={0.022} length={1.5} rotation={[0, 0, Math.PI / 2]} position={[0, 0, 0]} color="#3a3a3d" />
-      <RigPart shape="cylinder" radius={0.11} length={0.08} position={[-0.68, 0, 0]} color={PLATE} />
-      <RigPart shape="cylinder" radius={0.11} length={0.08} position={[0.68, 0, 0]} color={PLATE} />
-      <RigPart shape="cylinder" radius={0.09} length={0.06} position={[-0.6, 0, 0]} color={PLATE} />
-      <RigPart shape="cylinder" radius={0.09} length={0.06} position={[0.6, 0, 0]} color={PLATE} />
-    </group>
-  );
-}
-
-function TreadmillDeck() {
-  return (
-    <group position={[0, 0.02, 0]}>
-      <RigPart args={[0.5, 0.05, 1.4]} position={[0, 0.03, 0]} color={RIG_MID} />
-      <RigPart args={[0.46, 0.02, 1.3]} position={[0, 0.06, 0]} color="#141014" />
-      <RigPart args={[0.05, 0.75, 0.05]} position={[-0.24, 0.4, -0.62]} />
-      <RigPart args={[0.05, 0.75, 0.05]} position={[0.24, 0.4, -0.62]} />
-      <RigPart args={[0.5, 0.05, 0.12]} position={[0, 0.78, -0.62]} color={RIG_MID} />
-    </group>
-  );
-}
+/* ---------------------------------------------------------
+   EQUIPMENT
+--------------------------------------------------------- */
 
 function Equipment({ category }) {
-  switch (category) {
-    case "Chest":
-      return <BenchAndBar />;
-    case "Back":
-    case "Shoulders":
-    case "Arms & Abs":
-      return <CableTower />;
-    case "Legs":
-      return <FloorBarbell />;
-    case "Cardio":
-      return <TreadmillDeck />;
-    default:
-      return null;
+  const type = String(category || "").toLowerCase();
+
+  if (type.includes("chest")) {
+    return (
+      <svg className="exerciseEquipmentSvg" viewBox="0 0 220 100">
+        <rect x="35" y="68" width="150" height="8" rx="4" fill={EQUIPMENT} />
+        <rect x="70" y="42" width="80" height="10" rx="5" fill={EQUIPMENT} />
+        <rect x="88" y="20" width="44" height="8" rx="4" fill={EQUIPMENT} />
+        <path d="M90 48L65 68M130 48L155 68" stroke={EQUIPMENT} strokeWidth="7" />
+      </svg>
+    );
   }
-}
 
-// =========================================================
-// RIGGED MODEL — loads the GLB once (cached by drei), then each
-// instance clones it (via <Clone>, which is skeleton-aware, unlike
-// a plain mesh clone) so multiple exercise cards can each have
-// their own independently-posed copy from one loaded asset.
-// =========================================================
+  if (type.includes("legs")) {
+    return (
+      <svg className="exerciseEquipmentSvg" viewBox="0 0 220 100">
+        <rect x="45" y="68" width="130" height="8" rx="4" fill={EQUIPMENT} />
+        <rect x="70" y="42" width="80" height="9" rx="4" fill={EQUIPMENT} />
+        <circle cx="52" cy="73" r="12" fill="none" stroke={EQUIPMENT} strokeWidth="5" />
+        <circle cx="168" cy="73" r="12" fill="none" stroke={EQUIPMENT} strokeWidth="5" />
+      </svg>
+    );
+  }
 
-function useMixamoBones(scene) {
-  return useMemo(() => {
-    const found = {};
-    scene.traverse((obj) => {
-      if (obj.isBone) {
-        Object.entries(BONES).forEach(([key, name]) => {
-          if (obj.name === name) found[key] = obj;
-        });
-      }
-    });
-    return found;
-  }, [scene]);
-}
+  if (type.includes("back")) {
+    return (
+      <svg className="exerciseEquipmentSvg" viewBox="0 0 220 100">
+        <path
+          d="M65 78V25M155 78V25M65 30H155"
+          stroke={EQUIPMENT}
+          strokeWidth="7"
+          strokeLinecap="round"
+        />
+        <path d="M80 30L105 55M140 30L115 55" stroke={EQUIPMENT} strokeWidth="6" />
+      </svg>
+    );
+  }
 
-// Applies a full-body emissive tint when any muscle in `highlight`
-// is active. NOTE: most free Mixamo exports are a single skinned
-// mesh, so per-muscle isolation isn't possible without a
-// custom-segmented model — this is a whole-body highlight, not a
-// spot highlight, which is the honest limit of a single-mesh rig.
-// If your model happens to have separate named meshes per body
-// part, this upgrades automatically via MUSCLE_MESH_HINTS.
-function useHighlightMaterials(scene, highlight) {
-  useEffect(() => {
-    if (!scene) return;
-    const active = highlight.length > 0;
-
-    scene.traverse((obj) => {
-      if (!obj.isMesh || !obj.material) return;
-
-      // Clone material once per mesh so we don't mutate the shared
-      // cached asset (which would leak across every card instance).
-      if (!obj.userData._clonedMat) {
-        obj.material = obj.material.clone();
-        obj.userData._clonedMat = true;
-      }
-
-      const nameLower = obj.name.toLowerCase();
-      const matchesHint = highlight.some((m) =>
-        (MUSCLE_MESH_HINTS[m] || []).some((hint) => nameLower.includes(hint))
-      );
-
-      const shouldGlow = active && (matchesHint || !hasSegmentedMeshes(scene));
-
-      if (obj.material.emissive) {
-        obj.material.emissive = shouldGlow ? MUSCLE_COLOR.clone() : new THREE.Color("#000000");
-        obj.material.emissiveIntensity = shouldGlow ? 0.55 : 0;
-      }
-    });
-  }, [scene, highlight]);
-}
-
-// Rough heuristic: if the model has more than ~3 named meshes, it's
-// probably segmented and we should only glow matched parts; a single
-// mesh (typical Mixamo export) falls back to whole-body tint.
-function hasSegmentedMeshes(scene) {
-  let count = 0;
-  scene.traverse((o) => {
-    if (o.isMesh) count += 1;
-  });
-  return count > 3;
-}
-
-function RiggedModel({ highlight = [], anglesRef }) {
-  const { scene } = useGLTF(MODEL_PATH);
-  const cloned = useMemo(() => scene.clone(true), [scene]);
-  const bones = useMixamoBones(cloned);
-  useHighlightMaterials(cloned, highlight);
-
-  useFrame(() => {
-    const a = anglesRef.current;
-    const s = THREE.MathUtils.degToRad(a.shoulder);
-    const e = THREE.MathUtils.degToRad(a.elbow);
-    const h = THREE.MathUtils.degToRad(a.hip);
-    const k = THREE.MathUtils.degToRad(a.knee);
-
-    // Mixamo's rest pose has arms down at the sides and legs
-    // straight, so rotations are applied as offsets from that
-    // rest pose rather than absolute angles.
-    if (bones.leftShoulder) bones.leftShoulder.rotation.z = -s * 0.6;
-    if (bones.rightShoulder) bones.rightShoulder.rotation.z = s * 0.6;
-    if (bones.leftElbow) bones.leftElbow.rotation.y = -e * 0.5;
-    if (bones.rightElbow) bones.rightElbow.rotation.y = e * 0.5;
-    if (bones.leftHip) bones.leftHip.rotation.x = h;
-    if (bones.rightHip) bones.rightHip.rotation.x = h;
-    if (bones.leftKnee) bones.leftKnee.rotation.x = k;
-    if (bones.rightKnee) bones.rightKnee.rotation.x = k;
-  });
-
-  return <primitive object={cloned} scale={1} position={[0, 0, 0]} />;
-}
-
-useGLTF.preload(MODEL_PATH);
-
-// =========================================================
-// ANIMATOR — identical pose math to the primitive version; only
-// what consumes anglesRef (RiggedModel vs RiggedBody) changed.
-// =========================================================
-
-function usePoseAnimator(pose, playing) {
-  const start = pose?.start || {};
-  const end = pose?.end || {};
-
-  const anglesRef = useRef({
-    shoulder: start.arm ?? 8,
-    elbow: start.arm2 ?? 0,
-    hip: start.leg ?? 4,
-    knee: start.leg2 ?? 0,
-  });
-  const tRef = useRef(0);
-  const dirRef = useRef(1);
-  const [cycles, setCycles] = useState(0);
-
-  useFrame((_, delta) => {
-    if (!playing) return;
-    let t = tRef.current + dirRef.current * delta * 0.55;
-    if (t >= 1) {
-      t = 1;
-      dirRef.current = -1;
-    } else if (t <= 0) {
-      t = 0;
-      dirRef.current = 1;
-      setCycles((c) => c + 1);
-    }
-    tRef.current = t;
-
-    anglesRef.current = {
-      shoulder: THREE.MathUtils.lerp(start.arm ?? 8, end.arm ?? 8, t),
-      elbow: THREE.MathUtils.lerp(start.arm2 ?? 0, end.arm2 ?? 0, t),
-      hip: THREE.MathUtils.lerp(start.leg ?? 4, end.leg ?? 4, t),
-      knee: THREE.MathUtils.lerp(start.leg2 ?? 0, end.leg2 ?? 0, t),
-    };
-  });
-
-  return { anglesRef, cycles };
-}
-
-function AnimatedHumanoid({ pose, highlight, playing, onCycle }) {
-  const { anglesRef, cycles } = usePoseAnimator(pose, playing);
-  const lastCycle = useRef(0);
-
-  useEffect(() => {
-    if (cycles > lastCycle.current) {
-      lastCycle.current = cycles;
-      onCycle?.(cycles);
-    }
-  }, [cycles, onCycle]);
-
-  return <RiggedModel highlight={highlight} anglesRef={anglesRef} />;
-}
-
-// =========================================================
-// CAMERA AIM + SCENE — unchanged from the primitive version.
-// =========================================================
-
-function CameraAim({ target = [0, 1, 0] }) {
-  const { camera } = useThree();
-  useEffect(() => {
-    camera.lookAt(...target);
-  }, [camera, target]);
   return null;
 }
 
-function Scene({ children, orbit = false }) {
-  return (
-    <>
-      <ambientLight intensity={0.35} />
-      <directionalLight position={[2.2, 4, 3]} intensity={1.1} castShadow color="#fff6f2" />
-      <directionalLight position={[-2.5, 1.5, 2]} intensity={0.4} color="#ffe6e6" />
-      <pointLight position={[0, 1.6, -2.2]} intensity={1.4} color="#c9314f" distance={6} decay={2} />
+/* ---------------------------------------------------------
+   SIMPLE ANIMATION
+--------------------------------------------------------- */
 
-      {children}
+function usePoseAnimation(pose, playing) {
+  const start = pose?.start || {};
+  const end = pose?.end || {};
 
-      <ContactShadows position={[0, 0, 0]} opacity={0.4} blur={2.2} scale={3.4} far={2} />
+  const [phase, setPhase] = useState(0);
 
-      {orbit ? (
-        <OrbitControls
-          target={[0, 1, 0]}
-          enablePan={false}
-          enableZoom={false}
-          autoRotate={false}
-          minPolarAngle={Math.PI / 3}
-          maxPolarAngle={Math.PI / 1.7}
-        />
-      ) : (
-        <CameraAim target={[0, 1, 0]} />
-      )}
-    </>
-  );
+  useEffect(() => {
+    if (!playing) return undefined;
+
+    let frame;
+    let startTime = null;
+
+    const tick = (time) => {
+      if (startTime === null) startTime = time;
+
+      const elapsed = (time - startTime) / 1000;
+      const value = (Math.sin(elapsed * Math.PI * 1.2) + 1) / 2;
+
+      setPhase(value);
+      frame = requestAnimationFrame(tick);
+    };
+
+    frame = requestAnimationFrame(tick);
+
+    return () => cancelAnimationFrame(frame);
+  }, [playing]);
+
+  const lerp = (a, b) =>
+    Number(a ?? 0) + (Number(b ?? 0) - Number(a ?? 0)) * phase;
+
+  return {
+    arm: lerp(start.arm ?? 8, end.arm ?? 8),
+    arm2: lerp(start.arm2 ?? 0, end.arm2 ?? 0),
+    leg: lerp(start.leg ?? 4, end.leg ?? 4),
+    leg2: lerp(start.leg2 ?? 0, end.leg2 ?? 0),
+  };
 }
 
-// =========================================================
-// EXPORTED COMPONENTS — same public API as the primitive version,
-// so App.jsx needs zero changes to switch to this file.
-// =========================================================
+/* ---------------------------------------------------------
+   EXERCISE FIGURE
+--------------------------------------------------------- */
 
 export function ExerciseFigure3D({
   highlight = [],
@@ -349,113 +453,147 @@ export function ExerciseFigure3D({
   leg2 = 0,
   size = 60,
 }) {
-  const anglesRef = useRef({ shoulder: arm, elbow: arm2, hip: leg, knee: leg2 });
-  anglesRef.current = { shoulder: arm, elbow: arm2, hip: leg, knee: leg2 };
-
   return (
-    <div style={{ width: size, height: size }}>
-     <img
-  src="/exercise.svg"
-  alt="Exercise figure"
-  style={{
-    width: size,
-    height: size,
-    objectFit: "contain",
-    display: "block",
-  }}
-/>
+    <div
+      style={{
+        width: size,
+        height: size,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <ExerciseSVG
+        highlight={highlight}
+        arm={arm}
+        arm2={arm2}
+        leg={leg}
+        leg2={leg2}
+      />
     </div>
   );
 }
 
+/* ---------------------------------------------------------
+   EXERCISE CARD FIGURE + PLAY/PAUSE
+--------------------------------------------------------- */
+
 export function ExercisePosePair3D({ exercise, size = 72 }) {
-  const { pose, highlight = [], title, muscle } = exercise;
-  const containerRef = useRef(null);
-  const [visible, setVisible] = useState(false);
+  const {
+    pose = {},
+    highlight = [],
+    title = "Exercise",
+    muscle = "",
+  } = exercise || {};
+
   const [playing, setPlaying] = useState(true);
   const [reps, setReps] = useState(0);
 
+  const angles = usePoseAnimation(pose, playing);
+
   useEffect(() => {
-    const el = containerRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") {
-      setVisible(true);
-      return undefined;
-    }
-    const obs = new IntersectionObserver(
-      ([entry]) => setVisible(entry.isIntersecting),
-      { threshold: 0.15 }
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
+    if (!playing) return undefined;
+
+    const timer = setInterval(() => {
+      setReps((r) => r + 1);
+    }, 2200);
+
+    return () => clearInterval(timer);
+  }, [playing]);
 
   return (
     <div
-      ref={containerRef}
       className="exerciseFigurePair"
-      style={{ width: "100%", height: "100%", minHeight: size, position: "relative" }}
+      style={{
+        width: "100%",
+        height: "100%",
+        minHeight: size,
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
     >
-      {visible ? (
-        <Canvas dpr={[1, 1.5]} camera={{ position: [0, 1.3, 3.4], fov: 34 }} gl={{ alpha: true }}>
-          <Scene>
-            <AnimatedHumanoid
-              pose={pose}
-              highlight={highlight}
-              playing={playing}
-              onCycle={() => setReps((r) => r + 1)}
-            />
-            <Equipment category={muscle} />
-          </Scene>
-        </Canvas>
-      ) : (
-        <div className="skeleton skeletonCard" style={{ width: "100%", height: "100%" }} />
-      )}
+      <ExerciseSVG
+        highlight={highlight}
+        arm={angles.arm}
+        arm2={angles.arm2}
+        leg={angles.leg}
+        leg2={angles.leg2}
+        animated
+      />
 
-      {visible && (
-        <>
-          <button
-            type="button"
-            className={playing ? "poseAnimToggle poseAnimToggleOn" : "poseAnimToggle"}
-            onClick={(e) => {
-              e.stopPropagation();
-              setPlaying((p) => !p);
-            }}
-            aria-label={playing ? `Pause ${title} animation` : `Play ${title} animation`}
-          >
-            {playing ? "❚❚" : "▶"}
-          </button>
-          {reps > 0 && (
-            <span className="exerciseRepCounter">
-              {reps} rep{reps === 1 ? "" : "s"}
-            </span>
-          )}
-        </>
+      <Equipment category={muscle} />
+
+      <button
+        type="button"
+        className={playing ? "poseAnimToggle poseAnimToggleOn" : "poseAnimToggle"}
+        onClick={(e) => {
+          e.stopPropagation();
+          setPlaying((p) => !p);
+        }}
+        aria-label={playing ? `Pause ${title} animation` : `Play ${title} animation`}
+      >
+        {playing ? "❚❚" : "▶"}
+      </button>
+
+      {reps > 0 && (
+        <span className="exerciseRepCounter">
+          {reps} rep{reps === 1 ? "" : "s"}
+        </span>
       )}
     </div>
   );
 }
 
+/* ---------------------------------------------------------
+   LARGE FORM GUIDE VIEWER
+--------------------------------------------------------- */
+
 export function ExerciseFigure3DViewer({ exercise, size = 280 }) {
-  const { pose, highlight = [], muscle } = exercise;
+  const {
+    pose = {},
+    highlight = [],
+    muscle = "",
+  } = exercise || {};
+
   const [playing, setPlaying] = useState(true);
+
+  const angles = usePoseAnimation(pose, playing);
 
   return (
     <div className="exercise3DViewer">
-      <div style={{ height: size }}>
-        <Canvas dpr={[1, 2]} shadows camera={{ position: [0, 1.35, 3.6], fov: 34 }} gl={{ alpha: true }}>
-          <Scene orbit>
-            <AnimatedHumanoid pose={pose} highlight={highlight} playing={playing} />
-            <Equipment category={muscle} />
-          </Scene>
-        </Canvas>
-      </div>
+      <div
+        style={{
+          height: size,
+          position: "relative",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <ExerciseSVG
+          highlight={highlight}
+          arm={angles.arm}
+          arm2={angles.arm2}
+          leg={angles.leg}
+          leg2={angles.leg2}
+          animated
+        />
 
-      <div className="exercise3DViewerBar">
-        <span>Drag to rotate 360°</span>
-        <button type="button" className="outlineButton" onClick={() => setPlaying((p) => !p)}>
-          {playing ? "Pause" : "Play"} animation
+        <Equipment category={muscle} />
+
+        <button
+          type="button"
+          className={playing ? "poseAnimToggle poseAnimToggleOn" : "poseAnimToggle"}
+          onClick={() => setPlaying((p) => !p)}
+          aria-label={playing ? "Pause animation" : "Play animation"}
+        >
+          {playing ? "❚❚" : "▶"}
         </button>
       </div>
     </div>
   );
 }
+
+export default ExerciseFigure3D;
