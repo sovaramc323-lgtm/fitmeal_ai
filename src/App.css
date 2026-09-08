@@ -1,5 +1,20 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800;900&display=swap");
 
+/* =========================================================
+   READABILITY NOTES (v2)
+   -----------------------------------------------------------
+   - Minimum body/UI text raised from 7-11px to 12-15px.
+   - Eyebrow/label text raised from 7-10px to 11-13px, with
+     letter-spacing softened so it doesn't feel "shouty".
+   - Background lifted a touch off pure near-black and primary
+     text dimmed a touch off pure white to cut halation/glare
+     on OLED-style screens. Contrast still comfortably AA/AAA.
+   - Accent red desaturated slightly + glow radii/opacity
+     trimmed so accents read as "warm highlight", not glare.
+   - Borders given a bit more presence so layout edges are
+     legible without relying on shadow alone.
+   ========================================================= */
+
 * {
   box-sizing: border-box;
 }
@@ -56,12 +71,20 @@ p {
   line-height: 1.6;
 }
 
+/* Fixed tokens for panels that are intentionally always-dark
+   (hero, AI coach, meal planner) regardless of light/dark theme,
+   so their text never inherits the theme's flipped --text color. */
 :root {
   --spotlightText: #f7eef1;
   --spotlightMuted: #c3adb0;
   --ease: cubic-bezier(.16, 1, .3, 1);
   --easeSpring: cubic-bezier(.34, 1.56, .64, 1);
 }
+
+/* =========================================================
+   MOTION LIBRARY — reused across cards, rings and buttons
+   for the elevated / "extreme" visual pass.
+   ========================================================= */
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(14px); }
@@ -159,6 +182,10 @@ p {
   }
 }
 
+/* =========================================================
+   THEMES
+   ========================================================= */
+
 .appShell.dark,
 .setupScreen.dark {
   --bg: #050202;
@@ -203,6 +230,10 @@ p {
   --ringInner: var(--card);
 }
 
+/* =========================================================
+   GLOBAL BACKGROUND
+   ========================================================= */
+
 .appShell {
   min-height: 100vh;
   display: flex;
@@ -234,6 +265,8 @@ p {
 }
 
 .appShell.dark::after {
+  /* Fine film-grain texture over the whole shell — reads as material,
+     not flat digital black. Layered above the grid, below content. */
   content: "";
   position: fixed;
   inset: 0;
@@ -266,6 +299,10 @@ p {
   left: 240px;
   bottom: -240px;
 }
+
+/* =========================================================
+   SETUP / AUTH
+   ========================================================= */
 
 .setupScreen {
   min-height: 100vh;
@@ -667,6 +704,10 @@ p {
   accent-color: var(--redBright);
 }
 
+/* =========================================================
+   MOBILE TOPBAR + HAMBURGER
+   ========================================================= */
+
 .mobileTopbar {
   display: none;
 }
@@ -786,6 +827,10 @@ p {
 .sidebarCloseButton {
   display: none;
 }
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
 
 .sidebar {
   position: fixed;
@@ -999,6 +1044,10 @@ p {
   color: #d3a1a5 !important;
 }
 
+/* =========================================================
+   MAIN
+   ========================================================= */
+
 .main {
   position: relative;
   z-index: 1;
@@ -1104,6 +1153,10 @@ p {
   transform: scale(1.06);
   box-shadow: 0 8px 20px rgba(196, 42, 68, .3), 0 0 0 4px var(--redSoft);
 }
+
+/* =========================================================
+   HERO
+   ========================================================= */
 
 .hero {
   position: relative;
@@ -1318,6 +1371,10 @@ p {
   font-weight: 700;
   letter-spacing: 1px;
 }
+
+/* =========================================================
+   AI COACH
+   ========================================================= */
 
 .aiCoach {
   position: relative;
@@ -1649,6 +1706,10 @@ p {
   background: var(--red);
 }
 
+/* =========================================================
+   STATS
+   ========================================================= */
+
 .stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1713,6 +1774,10 @@ p {
   color: var(--muted);
   font-size: 12px;
 }
+
+/* =========================================================
+   PANELS
+   ========================================================= */
 
 .panel {
   position: relative;
@@ -1946,6 +2011,10 @@ p {
   transform: translateY(0);
 }
 
+/* =========================================================
+   LIVE FOOD / DRINK SEARCH
+   ========================================================= */
+
 .foodSearchWrap {
   position: relative;
 }
@@ -2052,6 +2121,10 @@ p {
   line-height: 1.6;
 }
 
+/* =========================================================
+   PAGE INTRO
+   ========================================================= */
+
 .pageIntro {
   margin-bottom: 24px;
 }
@@ -2066,6 +2139,10 @@ p {
   color: var(--muted);
   font-size: 14px;
 }
+
+/* =========================================================
+   WORKOUT
+   ========================================================= */
 
 .workoutSchedule {
   display: grid;
@@ -2157,6 +2234,10 @@ p {
   accent-color: var(--redBright);
 }
 
+/* =========================================================
+   NUTRITION
+   ========================================================= */
+
 .nutritionLarge {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -2233,6 +2314,10 @@ p {
 .nutritionCard small {
   font-size: 12px;
 }
+
+/* =========================================================
+   WEEKLY BREAKDOWN
+   ========================================================= */
 
 .weekPanel {
   margin-bottom: 15px;
@@ -2378,6 +2463,10 @@ p {
   background: rgba(220, 80, 80, .22);
   color: #ffc9c9;
 }
+
+/* =========================================================
+   PLANNER
+   ========================================================= */
 
 .plannerHero {
   display: flex;
@@ -2528,6 +2617,10 @@ p {
   color: var(--muted);
   font-size: 11px;
 }
+
+/* =========================================================
+   PROGRESS
+   ========================================================= */
 
 .progressHero {
   display: flex;
@@ -2681,6 +2774,10 @@ p {
   font-size: 12px;
   line-height: 1.55;
 }
+
+/* =========================================================
+   EXERCISES
+   ========================================================= */
 
 .exerciseAIBar {
   display: flex;
@@ -2872,6 +2969,10 @@ p {
   font-size: 12px;
   line-height: 1.55;
 }
+
+/* =========================================================
+   PROFILE
+   ========================================================= */
 
 .profileHero {
   display: flex;
@@ -3103,6 +3204,10 @@ p {
   font-size: 12px;
 }
 
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--redBright) transparent;
@@ -3129,6 +3234,10 @@ p {
 *::-webkit-scrollbar-thumb:hover {
   filter: brightness(1.15);
 }
+
+/* =========================================================
+   LEADERBOARD
+   ========================================================= */
 
 .friendRow,
 .leaderboardRow {
@@ -3205,6 +3314,10 @@ p {
 .tabToggle span {
   cursor: pointer;
 }
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
 
 @media (max-width: 1100px) {
   .main {
@@ -3525,6 +3638,18 @@ p {
   }
 }
 
+/* =========================================================
+   MISSING-PIECES PASS — components a real app needs that the
+   original sheet didn't have yet: feedback (toast), confirmation
+   (modal), micro-help (tooltip), loading (skeleton), form
+   validation states, and badge variants beyond the single
+   all-purpose accent badge. Built on the existing --token system
+   so they inherit the maroon/ember palette automatically instead
+   of introducing new one-off colors.
+   ========================================================= */
+
+/* ---------- Toasts ---------- */
+
 @keyframes toastIn {
   from { opacity: 0; transform: translateY(10px) scale(.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -3596,6 +3721,8 @@ p {
 }
 
 .toastClose:hover { color: var(--text); }
+
+/* ---------- Modal / confirmation dialog ---------- */
 
 .modalBackdrop {
   position: fixed;
@@ -3684,6 +3811,8 @@ p {
   background: linear-gradient(135deg, #9c2e42, #5c1420);
 }
 
+/* ---------- Tooltip ---------- */
+
 .tooltipWrap {
   position: relative;
   display: inline-flex;
@@ -3729,6 +3858,8 @@ p {
   opacity: 1;
   transform: translate(-50%, 0);
 }
+
+/* ---------- Skeleton loading states ---------- */
 
 @keyframes skeletonSheen {
   0% { background-position: -180% 0; }
@@ -3783,6 +3914,8 @@ p {
   }
 }
 
+/* ---------- Form validation states ---------- */
+
 .fieldError input,
 .fieldError select,
 input.inputError {
@@ -3828,6 +3961,8 @@ input.inputSuccess {
 
 .mainButton:disabled::after { display: none; }
 
+/* ---------- Badge variants ---------- */
+
 .badge.success {
   color: #6bc99a;
   border-color: rgba(47, 143, 95, .32);
@@ -3852,6 +3987,8 @@ input.inputSuccess {
   background: var(--card2);
 }
 
+/* ---------- Accessibility: skip link ---------- */
+
 .skipLink {
   position: fixed;
   top: -60px;
@@ -3870,6 +4007,8 @@ input.inputSuccess {
   top: 14px;
 }
 
+/* ---------- Brand mark ---------- */
+
 .flameMark {
   width: 58%;
   height: 58%;
@@ -3883,6 +4022,15 @@ input.inputSuccess {
   fill: url(#flameGradInner);
 }
 
+/* =========================================================
+   PREMIUM PASS — deeper blacks, jewel-tone maroon, warm gold
+   accents, and a handful of new components: a macro donut ring,
+   a streak flame, premium/achievement chips, and finishing
+   touches (vignette, dividers, refined selects) that push the
+   whole shell toward a "private club" feel rather than a
+   generic dark-mode dashboard.
+   ========================================================= */
+
 .appShell.dark {
   background:
     radial-gradient(ellipse 900px 500px at 82% -10%, rgba(196, 42, 68, .1), transparent 60%),
@@ -3890,6 +4038,8 @@ input.inputSuccess {
     var(--bg);
 }
 
+/* Soft vignette pulling the eye back toward center content on large
+   screens — a private, lamp-lit feeling rather than flat black. */
 .appShell.dark::after {
   box-shadow: inset 0 0 220px rgba(0, 0, 0, .55);
 }
@@ -3899,6 +4049,8 @@ input.inputSuccess {
   color: #fff;
 }
 
+/* A thin gold hairline divider for separating premium content
+   blocks without a full border. */
 .goldRule {
   height: 1px;
   margin: 16px 0;
@@ -3906,6 +4058,8 @@ input.inputSuccess {
   opacity: .5;
 }
 
+/* Premium select polish — replace the flat browser affordance with
+   something that matches the input styling used everywhere else. */
 select {
   appearance: none;
   -webkit-appearance: none;
@@ -3917,6 +4071,13 @@ select {
   color: var(--muted);
   padding-right: 34px !important;
 }
+
+/* =========================================================
+   MACRO RING — a small multi-segment donut (protein / carbs / fat)
+   built the same way as heroRing/progressBigRing (conic-gradient +
+   masked inner circle) so it inherits the existing visual language
+   instead of introducing a charting dependency.
+   ========================================================= */
 
 .macroRingRow {
   display: flex;
@@ -3998,6 +4159,12 @@ select {
   font-size: 11px;
 }
 
+/* =========================================================
+   STREAK — a small flame badge that turns "days logged in a row"
+   into something worth protecting, the same way a workout streak
+   does on a fitness tracker.
+   ========================================================= */
+
 .streakBadge {
   display: inline-flex;
   align-items: center;
@@ -4027,6 +4194,12 @@ select {
   filter: none;
   opacity: .5;
 }
+
+/* =========================================================
+   PREMIUM / ACHIEVEMENT CHIPS — a gold-bordered variant used for
+   "best in class" surfaces (top of leaderboard, hitting a goal)
+   so the palette has a second register beyond crimson alerts.
+   ========================================================= */
 
 .premiumChip {
   position: relative;
@@ -4062,11 +4235,19 @@ select {
   box-shadow: 0 6px 16px rgba(156, 90, 52, .26);
 }
 
+/* =========================================================
+   Small finishing touches
+   ========================================================= */
+
+/* A subtle inner glow on the currently-open exercise card so the
+   expanded state reads as "focused", not just "taller". */
 .exerciseCard:has(.exerciseSteps) {
   border-color: rgba(196, 42, 68, .42);
   box-shadow: 0 0 0 1px rgba(196, 42, 68, .12), 0 24px 55px var(--shadow);
 }
 
+/* Loading dots used inside buttons mid-request (e.g. logging stats)
+   so an async action never looks unresponsive. */
 @keyframes dotPulse {
   0%, 80%, 100% { opacity: .25; transform: scale(.85); }
   40% { opacity: 1; transform: scale(1); }
@@ -4101,6 +4282,18 @@ select {
   }
 }
 
+/* =========================================================
+   EXERCISE DUMMY FIGURES — anatomical start/end illustration
+   pairs used on the Exercise Library, matching the "muscle
+   chart" reference: a neutral gray silhouette with the
+   effective/trained muscle group filled in red.
+   ========================================================= */
+
+/* Tone variables for the mannequin's gradient fills — fed into the
+   linear/radial gradients defined inline in each <ExerciseFigure>
+   (gradient <stop> colors can't live in a CSS class since each SVG
+   instance needs its own gradient id, but the color values themselves
+   still come from the shared theme so dark/light mode both look right). */
 .appShell.dark {
   --figureSkinLight: #71535a;
   --figureSkinMid: #4c3138;
@@ -4117,6 +4310,10 @@ select {
   --figureJointColor: #a3898a;
 }
 
+/* NOTE: fill is intentionally NOT set here — every figure part fills
+   itself inline with its own gradient url(#skin-<uid>) / url(#muscle-<uid>)
+   so each SVG instance gets a correctly-scoped gradient. These classes
+   only add the stroke + glow. */
 .figureSkin,
 .figureTorso.figureSkin {
   stroke: var(--muted);
@@ -4174,6 +4371,13 @@ select {
   filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .3));
 }
 
+/* Every dummy — static or animated — stays flat, plain 2D. A full
+   360° spin was tried here and pulled back out: rotating a flat SVG
+   cutout on the Y axis inevitably goes edge-on to a paper-thin sliver
+   at 90°/270°, then flips to a mirrored view past that, which reads
+   as cheap/broken no matter how it's tuned. That needs an actual
+   volumetric model or hand-drawn multi-angle sprites to do properly,
+   not a CSS transform on a flat shape — so this stays 2D instead. */
 .exerciseFigureSvg {
   transform: none;
 }
@@ -4259,6 +4463,15 @@ select {
   background: var(--redBright);
   box-shadow: 0 0 5px rgba(196, 42, 68, .7);
 }
+
+/* =========================================================
+   DASHBOARD REDESIGN PASS — greeting header, today's progress
+   (calories/protein/water with real targets), a compact "start
+   workout" card, and a quick-actions row, all placed above the
+   existing hero/AI-coach sections so the most actionable info
+   is visible without scrolling on mobile. Also adds a mobile
+   bottom nav + floating quick-add button.
+   ========================================================= */
 
 .greetingBar {
   display: flex;
@@ -4382,6 +4595,8 @@ select {
   font-size: 19px;
 }
 
+/* ---------- Mobile bottom nav + floating quick-add button ---------- */
+
 .bottomNav {
   display: none;
 }
@@ -4463,6 +4678,14 @@ select {
   }
 }
 
+/* =========================================================
+   NEW-FEATURE PASS — styles for recent/"log again" meal chips,
+   inline exercise set-logging + PR display, the body-weight line
+   chart, the Progress-page PR grid, and the editable daily-target
+   inputs on Profile. Built on the same --token system as
+   everything above.
+   ========================================================= */
+
 .recentMealsRow {
   display: flex;
   flex-wrap: wrap;
@@ -4505,6 +4728,8 @@ select {
   line-height: 1.5;
   max-width: 480px;
 }
+
+/* ---------- Exercise set-logging + PR badge ---------- */
 
 .exerciseBestLift {
   display: inline-flex;
@@ -4564,6 +4789,8 @@ select {
   transform: translateY(-1px);
 }
 
+/* ---------- Weight trend chart ---------- */
+
 .weightChartWrap {
   display: flex;
   flex-direction: column;
@@ -4620,6 +4847,8 @@ select {
   font-size: 11px;
 }
 
+/* ---------- Progress-page PR grid ---------- */
+
 .prGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -4653,6 +4882,8 @@ select {
   font-family: "Space Grotesk", sans-serif;
   font-size: 18px;
 }
+
+/* ---------- Editable daily targets (Profile) ---------- */
 
 .targetInputs {
   display: grid;
@@ -4705,6 +4936,13 @@ select {
     gap: 16px;
   }
 }
+
+/* =========================================================
+   EXERCISE LIBRARY ENHANCEMENTS — filter/search bar, muscle-group
+   tabs, empty-state, per-exercise rest timer, recent-sets history
+   and personal notes. Purely additive: nothing above is touched,
+   this only adds the pieces the expanded library needed.
+   ========================================================= */
 
 .exerciseFilterBar {
   display: flex;
@@ -4767,6 +5005,8 @@ select {
   font-weight: 700;
   letter-spacing: .3px;
 }
+
+/* ---------- Extra detail block (rest timer / history / notes) ---------- */
 
 .exerciseDetailExtra {
   display: flex;
@@ -4958,6 +5198,15 @@ select {
   }
 }
 
+/* =========================================================
+   ENHANCEMENT PASS — custom water amount input, inline meal
+   editing (edit/save/cancel), workout-volume stat row, and the
+   Backup & Restore panel on Profile. Additive only, built on the
+   same --token system as everything above.
+   ========================================================= */
+
+/* ---------- Custom water amount (dashboard) ---------- */
+
 .waterCustomRow {
   display: flex;
   gap: 8px;
@@ -4998,6 +5247,8 @@ select {
   filter: brightness(1.1);
   transform: translateY(-1px);
 }
+
+/* ---------- Inline meal editing (Food Log) ---------- */
 
 .foodRowActions {
   display: flex;
@@ -5054,6 +5305,8 @@ select {
   filter: brightness(1.1);
 }
 
+/* ---------- Workout volume stat row (Progress page) ---------- */
+
 .volumeStatsRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -5088,6 +5341,8 @@ select {
   color: var(--muted);
   font-size: 11px;
 }
+
+/* ---------- Backup & Restore (Profile) ---------- */
 
 .backupNote {
   margin: 0 0 4px;
@@ -5129,6 +5384,21 @@ select {
     padding: 12px;
   }
 }
+
+/* =========================================================
+   MOTION + THEME PASS — animated exercise pose figures with a
+   play/pause control, and a proper animated dark/light mode
+   switch (sidebar + Profile), plus a soft cross-fade whenever the
+   theme flips instead of colors snapping instantly. Additive only.
+   ========================================================= */
+
+/* ---------- Animated pose figures ----------
+   The limb angles themselves are tweened frame-by-frame in JS (see
+   ExercisePosePair), not via a CSS transition on the SVG "transform"
+   attribute — CSS-transitioning that attribute fights the explicit
+   rotate(angle, cx, cy) pivot and makes limbs visibly detach from the
+   body mid-rotation. CSS here only adds the muscle glow pulse, which
+   is safe since it animates filter/opacity, not the rotation pivot. */
 
 .exerciseFigureAnimated .figureMuscle {
   animation: muscleWorkPulse 1.8s ease-in-out infinite;
@@ -5195,6 +5465,8 @@ select {
   box-shadow: 0 0 10px rgba(196, 42, 68, .3);
 }
 
+/* ---------- Sidebar mini theme switch ---------- */
+
 .themeSwitchRow {
   display: flex !important;
   align-items: center;
@@ -5243,6 +5515,8 @@ select {
   color: var(--amber);
 }
 
+/* ---------- Profile "Appearance" big theme toggle ---------- */
+
 .bigThemeToggle {
   position: relative;
   overflow: hidden;
@@ -5272,6 +5546,8 @@ select {
   z-index: 1;
 }
 
+/* ---------- Whole-shell cross-fade when the theme flips ---------- */
+
 .appShell.themeSwitching {
   animation: themeFlash .5s var(--ease);
 }
@@ -5292,6 +5568,11 @@ select {
     animation: none;
   }
 }
+
+/* =========================================================
+   REP COUNTER — small badge on each animating exercise pose
+   pair, ticking up once per completed start->end->start cycle.
+   ========================================================= */
 
 .exerciseRepCounter {
   position: absolute;
@@ -5339,38 +5620,4 @@ select {
 .exercise3DViewerBar .outlineButton {
   margin-top: 0;
   padding: 6px 10px;
-}
-
-/* =========================================================
-   EXERCISE STEP / COVER PHOTOS — new. Placeholder images added
-   on top of/next to the existing SVG pose figures, for every
-   exercise in the library (all 28), keyed automatically off
-   each exercise's title + step label via exerciseImageUrl() in
-   App.jsx. These are stand-ins (picsum.photos) until real
-   exercise photos/GIFs are wired in later.
-   ========================================================= */
-
-.exerciseCoverPhoto {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: .5;
-  z-index: 1;
-}
-
-.exerciseVisual > *:not(.exerciseCoverPhoto) {
-  position: relative;
-  z-index: 2;
-}
-
-.stepPhoto {
-  width: 46px;
-  height: 46px;
-  border-radius: 9px;
-  object-fit: cover;
-  flex-shrink: 0;
-  border: 1px solid var(--border);
-  background: var(--card);
 }
