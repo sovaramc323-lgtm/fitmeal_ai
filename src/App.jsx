@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import { ExerciseFigure3D, ExercisePosePair3D, ExerciseFigure3DViewer } from "./ExerciseFigure3D";
+import muscleChart from "./assets/muscle-chart.jpg";
 const API_URL = "https://fitmealai-production.up.railway.app";
 
 // Free USDA FoodData Central key: https://api.data.gov/signup/
@@ -3992,6 +3993,18 @@ function App() {
                 View Workout →
               </button>
             </div>
+
+            <section className="muscleChartPanel">
+              <div className="muscleChartHeader">
+                <span className="panelEyebrow">REFERENCE</span>
+                <h2>Full Body Muscle Map</h2>
+              </div>
+              <img
+                src={muscleChart}
+                alt="Full body muscle chart"
+                className="muscleChartImg"
+              />
+            </section>
 
             <div className="exerciseFilterBar">
               <input

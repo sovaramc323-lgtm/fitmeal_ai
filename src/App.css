@@ -5621,3 +5621,35 @@ select {
   margin-top: 0;
   padding: 6px 10px;
 }
+
+/* =========================================================
+   MUSCLE CHART PANEL — static reference poster (the uploaded
+   full-body muscle map image) shown at the top of the Exercise
+   Library. Purely additive; doesn't touch any existing rule.
+   ========================================================= */
+
+.muscleChartPanel {
+  padding: 22px;
+  margin-bottom: 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+  text-align: center;
+}
+
+.muscleChartHeader {
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.muscleChartHeader h2 {
+  margin: 4px 0 0;
+  font-size: 17px;
+}
+
+.muscleChartImg {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
