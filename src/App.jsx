@@ -1,11 +1,33 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
-import chestGuide from "./assets/chest-guide.jpg";
-import backGuide from "./assets/back-guide.jpg";
-import shouldersGuide from "./assets/shoulders-guide.jpg";
-import legsGuide from "./assets/legs-guide.jpg";
-import armsAbsGuide from "./assets/arms-abs-guide.jpg";
-import cardioGuide from "./assets/cardio-guide.jpg";
+import benchPress from "./assets/exercises/bench-press.jpg";
+import cableFly from "./assets/exercises/cable-fly.jpg";
+import inclineDumbbellPress from "./assets/exercises/incline-dumbbell-press.jpg";
+import pushUp from "./assets/exercises/push-up.jpg";
+import latPulldown from "./assets/exercises/lat-pulldown.jpg";
+import seatedRow from "./assets/exercises/seated-row.jpg";
+import deadlift from "./assets/exercises/deadlift.jpg";
+import pullUp from "./assets/exercises/pull-up.jpg";
+import lateralRaise from "./assets/exercises/lateral-raise.jpg";
+import shoulderPress from "./assets/exercises/shoulder-press.jpg";
+import frontRaise from "./assets/exercises/front-raise.jpg";
+import facePull from "./assets/exercises/face-pull.jpg";
+import legPress from "./assets/exercises/leg-press.jpg";
+import legExtension from "./assets/exercises/leg-extension.jpg";
+import squat from "./assets/exercises/squat.jpg";
+import lunges from "./assets/exercises/lunges.jpg";
+import calfRaise from "./assets/exercises/calf-raise.jpg";
+import bicepCurl from "./assets/exercises/bicep-curl.jpg";
+import tricepPushdown from "./assets/exercises/tricep-pushdown.jpg";
+import cableCrunch from "./assets/exercises/cable-crunch.jpg";
+import hammerCurl from "./assets/exercises/hammer-curl.jpg";
+import skullCrusher from "./assets/exercises/skull-crusher.jpg";
+import plank from "./assets/exercises/plank.jpg";
+import russianTwist from "./assets/exercises/russian-twist.jpg";
+import treadmill from "./assets/exercises/treadmill.jpg";
+import cycling from "./assets/exercises/cycling.jpg";
+import rowingMachine from "./assets/exercises/rowing-machine.jpg";
+import jumpRope from "./assets/exercises/jump-rope.jpg";
 const API_URL = "https://fitmealai-production.up.railway.app";
 
 // Free USDA FoodData Central key: https://api.data.gov/signup/
@@ -536,7 +558,36 @@ const MUSCLE_GUIDE_IMAGES = {
   Legs: legsGuide,
   Cardio: cardioGuide,
 };
-
+const EXERCISE_IMAGES = {
+  "Bench Press": benchPress,
+  "Cable Fly": cableFly,
+  "Incline Dumbbell Press": inclineDumbbellPress,
+  "Push-Up": pushUp,
+  "Lat Pulldown": latPulldown,
+  "Seated Row": seatedRow,
+  "Deadlift": deadlift,
+  "Pull-Up": pullUp,
+  "Lateral Raise": lateralRaise,
+  "Shoulder Press": shoulderPress,
+  "Front Raise": frontRaise,
+  "Face Pull": facePull,
+  "Leg Press": legPress,
+  "Leg Extension": legExtension,
+  "Squat": squat,
+  "Lunges": lunges,
+  "Calf Raise": calfRaise,
+  "Bicep Curl": bicepCurl,
+  "Tricep Pushdown": tricepPushdown,
+  "Cable Crunch": cableCrunch,
+  "Hammer Curl": hammerCurl,
+  "Skull Crusher": skullCrusher,
+  "Plank": plank,
+  "Russian Twist": russianTwist,
+  "Treadmill": treadmill,
+  "Cycling": cycling,
+  "Rowing Machine": rowingMachine,
+  "Jump Rope": jumpRope,
+};
 const MUSCLE_LABELS = {
   chest: "Chest",
   back: "Back / Lats",
@@ -4122,7 +4173,11 @@ function App() {
                             .join(" + ")}
                         </div>
 
-                       
+                       <img
+  src={EXERCISE_IMAGES[title]}
+  alt={`${title} form guide`}
+  className="exerciseVisualImg"
+/>
 
                         <div className="exerciseGridGlow" />
                       </div>
