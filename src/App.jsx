@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
-import { ExerciseFigure3D, ExercisePosePair3D, ExerciseFigure3DViewer } from "./ExerciseFigure3D";
-import muscleChart from "./assets/muscle-chart.jpg";
+import chestGuide from "./assets/chest-guide.jpg";
+import backGuide from "./assets/back-guide.jpg";
+import shouldersGuide from "./assets/shoulders-guide.jpg";
+import legsGuide from "./assets/legs-guide.jpg";
+import armsAbsGuide from "./assets/arms-abs-guide.jpg";
+import cardioGuide from "./assets/cardio-guide.jpg";
 const API_URL = "https://fitmealai-production.up.railway.app";
 
 // Free USDA FoodData Central key: https://api.data.gov/signup/
@@ -524,6 +528,14 @@ const EXERCISES = [
     },
   },
 ];
+const MUSCLE_GUIDE_IMAGES = {
+  Chest: chestGuide,
+  Back: backGuide,
+  Shoulders: shouldersGuide,
+  "Arms & Abs": armsAbsGuide,
+  Legs: legsGuide,
+  Cardio: cardioGuide,
+};
 
 const MUSCLE_LABELS = {
   chest: "Chest",
@@ -3995,16 +4007,36 @@ function App() {
             </div>
 
             <section className="muscleChartPanel">
-              <div className="muscleChartHeader">
-                <span className="panelEyebrow">REFERENCE</span>
-                <h2>Full Body Muscle Map</h2>
-              </div>
-              <img
-                src={muscleChart}
-                alt="Full body muscle chart"
-                className="muscleChartImg"
-              />
-            </section>
+  <div className="muscleChartHeader">
+    <span className="panelEyebrow">REFERENCE</span>
+    <h2>
+      {exerciseFilter === "All"
+        ? "Pick a muscle group for its full guide"
+        : `${exerciseFilter} — Exercise Guide`}
+    </h2>
+  </div>
+
+  {exerciseFilter === "All" ? (
+    <div className="muscleGuideGrid">
+      {Object.entries(MUSCLE_GUIDE_IMAGES).map(([group, src]) => (
+        <button
+          key={group}
+          className="muscleGuideThumb"
+          onClick={() => setExerciseFilter(group)}
+        >
+          <img src={src} alt={`${group} exercise guide`} />
+          <span>{group}</span>
+        </button>
+      ))}
+    </div>
+  ) : (
+    <img
+      src={MUSCLE_GUIDE_IMAGES[exerciseFilter]}
+      alt={`${exerciseFilter} exercise guide`}
+      className="muscleChartImg"
+    />
+  )}
+</section>
 
             <div className="exerciseFilterBar">
               <input
@@ -4090,10 +4122,7 @@ function App() {
                             .join(" + ")}
                         </div>
 
-                        <ExercisePosePair3D
-                          exercise={exercise}
-                          size={72}
-                        />
+                       
 
                         <div className="exerciseGridGlow" />
                       </div>
@@ -4159,87 +4188,7 @@ function App() {
                             : "OPEN FORM GUIDE ↓"}
                         </b>
                       </div>
-                      {open && (
-  <div onClick={(e) => e.stopPropagation()}>
-    <ExerciseFigure3DViewer exercise={exercise} size={280} />
-  </div>
-)}
-
-                      {open && (
-                        <div className="exerciseSteps">
-                          {[
-                            [
-                              "01",
-                              "SETUP",
-                              "Position yourself correctly and brace your body.",
-                              "start",
-                            ],
-                            [
-                              "02",
-                              "EXECUTE",
-                              description,
-                              "end",
-                            ],
-                            [
-                              "03",
-                              "CONTROL",
-                              "Return slowly and keep the movement controlled.",
-                              "start",
-                            ],
-                          ].map(
-                            ([
-                              number,
-                              label,
-                              text,
-                              frame,
-                            ]) => (
-                              <div
-                                className="stepItem"
-                                key={number}
-                              >
-                                <div className="stepFigure">
-                                  <ExerciseFigure3D
-                                    highlight={
-                                      highlight
-                                    }
-                                    arm={
-                                      pose[frame]
-                                        .arm ?? 8
-                                    }
-                                    arm2={
-                                      pose[frame]
-                                        .arm2 ?? 0
-                                    }
-                                    leg={
-                                      pose[frame]
-                                        .leg ?? 4
-                                    }
-                                    leg2={
-                                      pose[frame]
-                                        .leg2 ?? 0
-                                    }
-                                    size={38}
-                                  />
-                                </div>
-
-                                <div>
-                                  <span>
-                                    {number}
-                                  </span>
-
-                                  <b>
-                                    {label}
-                                  </b>
-
-                                  <p>
-                                    {text}
-                                  </p>
-                                </div>
-                              </div>
-                            )
-                          )}
-                        </div>
-                      )}
+                     
 
                       {open && (
                         <div
