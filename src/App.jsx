@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import chestGuide from "./assets/chest-guide.jpg";
 import backGuide from "./assets/back-guide.jpg";
+import shouldersGuide from "./assets/shoulders-guide.jpg";
 import benchPress from "./assets/exercises/bench-press.jpg";
 import cableFly from "./assets/exercises/cable-fly.jpg";
 import inclineDumbbellPress from "./assets/exercises/incline-dumbbell-press.jpg";
