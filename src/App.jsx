@@ -4,6 +4,7 @@ import chestGuide from "./assets/chest-guide.jpg";
 import backGuide from "./assets/back-guide.jpg";
 import shouldersGuide from "./assets/shoulders-guide.jpg";
 import armsAbsGuide from "./assets/arms-abs-guide.jpg";
+import cardioGuide from "./assets/cardio-guide.jpg";
 import legsGuide from "./assets/legs-guide.jpg";
 import benchPress from "./assets/exercises/bench-press.jpg";
 import cableFly from "./assets/exercises/cable-fly.jpg";
